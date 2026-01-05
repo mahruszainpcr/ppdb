@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\App\PsbWizardController;
 use App\Http\Controllers\Admin\RegistrationAdminController;
 use App\Http\Controllers\Admin\PeriodController;
+use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\UserAdminController;
 
 Route::get('/psb', fn() => view('public.psb.index'));
 Route::get('/psb/syarat', fn() => view('public.psb.syarat'));
@@ -22,16 +24,34 @@ Route::middleware(['auth', 'role:parent'])->prefix('app')->group(function () {
 });
 
 // Admin
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+Route::prefix('admin')->group(function () {
+    // login admin (guest)
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
+        Route::post('/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+    });
 
+    // admin area (auth + role)
+    Route::middleware(['auth', 'role:admin'])->group(function () {
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+        Route::get('/', fn() => view('admin.dashboard'))->name('admin.dashboard');
 
-    Route::get('/', fn() => view('admin.dashboard'))->name('admin.dashboard');
-    Route::resource('periods', PeriodController::class);
+        Route::get('/registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
+        Route::get('/registrations/{registration}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.show');
+        Route::post(
+            'registrations/{registration}/graduation',
+            [\App\Http\Controllers\Admin\RegistrationAdminController::class, 'setGraduation']
+        )->name('admin.registrations.graduation');
+        Route::get('/users', [UserAdminController::class, 'index'])
+            ->name('admin.users.index');
 
-    Route::get('registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
-    Route::get('registrations/{registration}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.show');
-    Route::post('registrations/{registration}/verify-doc', [RegistrationAdminController::class, 'verifyDoc'])->name('admin.registrations.verifyDoc');
-    Route::post('registrations/{registration}/graduation', [RegistrationAdminController::class, 'setGraduation'])->name('admin.registrations.graduation');
+        Route::post('/users/{user}/update', [UserAdminController::class, 'update'])
+            ->name('admin.users.update');
+
+        Route::post('/users/{user}/reset-password', [UserAdminController::class, 'resetPassword'])
+            ->name('admin.users.resetPassword');
+
+    });
 });
 
 Route::get('/', function () {

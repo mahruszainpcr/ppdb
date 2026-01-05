@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Registration;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class RegistrationAdminController extends Controller
 {
@@ -45,8 +46,35 @@ class RegistrationAdminController extends Controller
 
     public function show(Registration $registration)
     {
-        $registration->load(['user', 'studentProfile', 'parentProfile', 'documents', 'period', 'statement']);
+        $registration->load([
+            'user',
+            'period',
+            'studentProfile',
+            'parentProfile',
+            'statement',
+            'documents' => fn($q) => $q->orderBy('type'),
+        ]);
+
         return view('admin.registrations.show', compact('registration'));
+    }
+    public function setGraduation(Request $request, Registration $registration)
+    {
+        $data = $request->validate([
+            'graduation_status' => ['required', Rule::in(['pending', 'lulus', 'tidak_lulus', 'cadangan'])],
+            'admin_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $registration->update([
+            'graduation_status' => $data['graduation_status'],
+            'admin_note' => $data['admin_note'] ?? null,
+        ]);
+
+        // (opsional) jika mau otomatis update status dokumen/verifikasi
+        // if ($data['graduation_status'] !== 'pending') {
+        //     $registration->update(['status' => 'verified']);
+        // }
+
+        return back()->with('success', 'Kelulusan berhasil diperbarui.');
     }
 }
 
