@@ -6,7 +6,7 @@
                 class="rounded">
 
             <span class="navbar-brand mb-0 h6">
-                PSB Darussalam Al-Islami Palas
+                PSB Darussalam Al-Islami Palas Rumbai Pekanbaru Riau
             </span>
         </div>
 

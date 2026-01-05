@@ -787,7 +787,7 @@
                         </div>
                         <div>
                             <strong>Ma’had Darussalam Al-Islami</strong>
-                            <span>Rumbai • Pendidikan Islam Terpadu</span>
+                            <span>Palas • Rumbai • Pekanbaru • Riau</span>
                         </div>
                     </a>
 
@@ -1075,7 +1075,7 @@
                     </p>
                     <p style="margin-top:12px">
                         <strong>Alamat:</strong><br />
-                        Jl. Perjuangan, Kelurahan Palas, Kecamatan Rumbai
+                        Jl. Perjuangan, Kelurahan Palas, Kecamatan Rumbai, Pekanbaru, Riau
                     </p>
                     <p style="margin-top:10px">
                         <strong>Legalitas:</strong><br />
