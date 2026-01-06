@@ -93,7 +93,8 @@
                         <select name="father_education" class="form-select" required>
                             @php $fe = old('father_education', $pp->father_education ?? 'SMA Sederajat'); @endphp
                             @foreach (['SMP Sederajat', 'SMA Sederajat', 'S1', 'S2', 'S3', 'Other'] as $v)
-                                <option value="{{ $v }}" {{ $fe === $v ? 'selected' : '' }}>{{ $v }}
+                                <option value="{{ $v }}" {{ $fe === $v ? 'selected' : '' }}>
+                                    {{ $v }}
                                 </option>
                             @endforeach
                         </select>
@@ -104,7 +105,8 @@
                         <select name="father_job" class="form-select" required>
                             @php $fj = old('father_job', $pp->father_job ?? 'Karyawan Swasta'); @endphp
                             @foreach (['Pegawai Negeri Sipil', 'Perusahaan Nasional (BUMN, Perusahaan Besar)', 'Karyawan Swasta', 'WIRAUSAHA', 'Other'] as $v)
-                                <option value="{{ $v }}" {{ $fj === $v ? 'selected' : '' }}>{{ $v }}
+                                <option value="{{ $v }}" {{ $fj === $v ? 'selected' : '' }}>
+                                    {{ $v }}
                                 </option>
                             @endforeach
                         </select>
@@ -115,7 +117,8 @@
                         <select name="father_income" class="form-select" required>
                             @php $fi = old('father_income', $pp->father_income ?? '2 -5 Juta'); @endphp
                             @foreach (['Dibawah 2 Juta', '2 -5 Juta', 'Diatas 5 Juta', 'Other'] as $v)
-                                <option value="{{ $v }}" {{ $fi === $v ? 'selected' : '' }}>{{ $v }}
+                                <option value="{{ $v }}" {{ $fi === $v ? 'selected' : '' }}>
+                                    {{ $v }}
                                 </option>
                             @endforeach
                         </select>
@@ -186,7 +189,8 @@
                         <select name="mother_education" class="form-select" required>
                             @php $me = old('mother_education', $pp->mother_education ?? 'SMA Sederajat'); @endphp
                             @foreach (['SMP Sederajat', 'SMA Sederajat', 'S1', 'S2', 'S3', 'Other'] as $v)
-                                <option value="{{ $v }}" {{ $me === $v ? 'selected' : '' }}>{{ $v }}
+                                <option value="{{ $v }}" {{ $me === $v ? 'selected' : '' }}>
+                                    {{ $v }}
                                 </option>
                             @endforeach
                         </select>
@@ -197,7 +201,8 @@
                         <select name="mother_job" class="form-select" required>
                             @php $mj = old('mother_job', $pp->mother_job ?? 'Ibu Rumah Tangga'); @endphp
                             @foreach (['Pegawai Negeri Sipil', 'Perusahaan Nasional (BUMN, Perusahaan Besar)', 'Karyawan Swasta', 'WIRASWASTA', 'Ibu Rumah Tangga', 'Other'] as $v)
-                                <option value="{{ $v }}" {{ $mj === $v ? 'selected' : '' }}>{{ $v }}
+                                <option value="{{ $v }}" {{ $mj === $v ? 'selected' : '' }}>
+                                    {{ $v }}
                                 </option>
                             @endforeach
                         </select>
@@ -208,7 +213,8 @@
                         <select name="mother_income" class="form-select" required>
                             @php $mi = old('mother_income', $pp->mother_income ?? 'Tidak Bepenghasilan'); @endphp
                             @foreach (['Dibawah 2 Juta', '2 -5 Juta', 'Diatas 5 Juta', 'Tidak Bepenghasilan', 'Other'] as $v)
-                                <option value="{{ $v }}" {{ $mi === $v ? 'selected' : '' }}>{{ $v }}
+                                <option value="{{ $v }}" {{ $mi === $v ? 'selected' : '' }}>
+                                    {{ $v }}
                                 </option>
                             @endforeach
                         </select>
@@ -271,6 +277,17 @@
                         ketentuan.
                     </label>
                 </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox"  required>
+                    <label class="form-check-label" for="agree_rules">
+                        Bila diterima bersedia untuk menjaga nama baik Ma'had, menyelesaikan segala permasalahan Ma'had
+                        dengan kekeluargaan dan tidak melakukan penuntutan dan atau pengaduan kefihak diluar mahad, serta
+                        mendukung segala peraturan dan kegiatan mahad. Kritik dan saran disampaikan melalui saluran yang
+                        disediakan mahad.
+                    </label>
+                </div>
+
+
 
                 {{-- Accordion kesanggupan pembayaran --}}
                 <div class="accordion my-3" id="paymentAccordion">

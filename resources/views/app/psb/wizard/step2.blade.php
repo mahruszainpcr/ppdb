@@ -56,6 +56,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">NISN</label>
+                        <p class="text-muted mb-4">Lihat rapor atau ijazah/SKL.</p>
                         <input name="nisn" class="form-control" value="{{ old('nisn', $sp->nisn ?? '') }}">
                     </div>
                     <div class="col-md-6">
