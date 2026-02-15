@@ -37,6 +37,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/', fn() => view('admin.dashboard'))->name('admin.dashboard');
 
         Route::get('/registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
+        Route::get('/registrations/data', [RegistrationAdminController::class, 'data'])->name('admin.registrations.data');
         Route::get('/registrations/{registration}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.show');
         Route::post(
             'registrations/{registration}/graduation',
@@ -44,6 +45,8 @@ Route::prefix('admin')->group(function () {
         )->name('admin.registrations.graduation');
         Route::get('/users', [UserAdminController::class, 'index'])
             ->name('admin.users.index');
+        Route::get('/users/data', [UserAdminController::class, 'data'])
+            ->name('admin.users.data');
 
         Route::post('/users/{user}/update', [UserAdminController::class, 'update'])
             ->name('admin.users.update');

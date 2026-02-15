@@ -27,7 +27,7 @@
 
     <div class="card trezo-card mb-3">
         <div class="card-body">
-            <form class="row g-2">
+            <form class="row g-2" id="usersFilterForm">
                 <div class="col-md-4">
                     <input name="search" class="form-control" placeholder="Cari nama / no HP"
                         value="{{ request('search') }}">
@@ -45,7 +45,7 @@
     <div class="card trezo-card">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" id="usersTable">
                     <thead>
                         <tr>
                             <th>Nama</th>
@@ -54,93 +54,117 @@
                             <th class="text-end">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse($users as $u)
-                            <tr>
-                                <td>{{ $u->name }}</td>
-                                <td>{{ $u->phone }}</td>
-                                <td class="text-muted">{{ $u->created_at->format('d M Y') }}</td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                        data-bs-target="#editUser{{ $u->id }}">
-                                        Edit
-                                    </button>
-
-                                    <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal"
-                                        data-bs-target="#resetUser{{ $u->id }}">
-                                        Reset Password
-                                    </button>
-                                </td>
-                            </tr>
-
-                            {{-- MODAL EDIT --}}
-                            <div class="modal fade" id="editUser{{ $u->id }}" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content trezo-card">
-                                        <form method="POST" action="{{ route('admin.users.update', $u) }}">
-                                            @csrf
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Edit Akun Wali</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <label class="form-label">Nama</label>
-                                                <input name="name" class="form-control mb-2" value="{{ $u->name }}"
-                                                    required>
-
-                                                <label class="form-label">No WhatsApp</label>
-                                                <input name="phone" class="form-control" value="{{ $u->phone }}"
-                                                    required>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button class="btn btn-outline-light" data-bs-dismiss="modal">Batal</button>
-                                                <button class="btn btn-primary">Simpan</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- MODAL RESET --}}
-                            <div class="modal fade" id="resetUser{{ $u->id }}" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content trezo-card">
-                                        <form method="POST" action="{{ route('admin.users.resetPassword', $u) }}">
-                                            @csrf
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Reset Password</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Password akan di-set sama dengan nomor HP:</p>
-                                                <div class="fw-semibold">{{ $u->phone }}</div>
-                                                <div class="alert alert-warning mt-2 mb-0">
-                                                    Password lama akan diganti.
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button class="btn btn-outline-light" data-bs-dismiss="modal">Batal</button>
-                                                <button class="btn btn-warning">Reset</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                        @empty
-                            <tr>
-                                <td colspan="4" class="text-center text-muted p-4">
-                                    Belum ada akun wali.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <div class="mt-3">
-        {{ $users->links() }}
+    {{-- MODAL EDIT --}}
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content trezo-card">
+                <form method="POST" id="editUserForm">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Akun Wali</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label">Nama</label>
+                        <input name="name" class="form-control mb-2" id="editUserName" required>
+
+                        <label class="form-label">No WhatsApp</label>
+                        <input name="phone" class="form-control" id="editUserPhone" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-light" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL RESET --}}
+    <div class="modal fade" id="resetUserModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content trezo-card">
+                <form method="POST" id="resetUserForm">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reset Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Password akan di-set sama dengan nomor HP:</p>
+                        <div class="fw-semibold" id="resetUserPhone"></div>
+                        <div class="alert alert-warning mt-2 mb-0">
+                            Password lama akan diganti.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-light" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-warning">Reset</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 @endsection
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const updateUrlTemplate = @json(route('admin.users.update', ['user' => '__ID__']));
+            const resetUrlTemplate = @json(route('admin.users.resetPassword', ['user' => '__ID__']));
+
+            const table = $('#usersTable').DataTable({
+                processing: true,
+                serverSide: true,
+                searching: false,
+                lengthChange: true,
+                pageLength: 15,
+                ajax: {
+                    url: @json(route('admin.users.data')),
+                    data: function (d) {
+                        d.search = document.querySelector('#usersFilterForm input[name="search"]').value;
+                    }
+                },
+                columns: [
+                    { data: 'name' },
+                    { data: 'phone' },
+                    { data: 'created_at' },
+                    { data: 'actions', orderable: false, searchable: false, className: 'text-end' }
+                ]
+            });
+
+            document.getElementById('usersFilterForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                table.ajax.reload();
+            });
+
+            document.addEventListener('click', function (e) {
+                const editBtn = e.target.closest('.btn-edit-user');
+                if (editBtn) {
+                    document.getElementById('editUserName').value = editBtn.dataset.name || '';
+                    document.getElementById('editUserPhone').value = editBtn.dataset.phone || '';
+                    document.getElementById('editUserForm').action = updateUrlTemplate.replace('__ID__', editBtn.dataset.id);
+                }
+
+                const resetBtn = e.target.closest('.btn-reset-user');
+                if (resetBtn) {
+                    document.getElementById('resetUserPhone').textContent = resetBtn.dataset.phone || '-';
+                    document.getElementById('resetUserForm').action = resetUrlTemplate.replace('__ID__', resetBtn.dataset.id);
+                }
+            });
+        });
+    </script>
+@endpush

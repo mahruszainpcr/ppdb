@@ -12,36 +12,84 @@ class RegistrationAdminController extends Controller
 {
     public function index(Request $request)
     {
-        $q = Registration::query()
-            ->with(['user', 'studentProfile', 'period'])
-            ->latest();
+        return view('admin.registrations.index');
+    }
 
-        // search (nama santri / no pendaftaran / no WA)
-        if ($request->filled('search')) {
-            $s = trim($request->search);
-            $q->where('registration_no', 'like', "%{$s}%")
-                ->orWhereHas('studentProfile', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
-                ->orWhereHas('user', fn($qq) => $qq->where('phone', 'like', "%{$s}%"));
+    public function data(Request $request)
+    {
+        $baseQuery = Registration::query()->with(['user', 'studentProfile']);
+        $recordsTotal = (clone $baseQuery)->count();
+
+        $search = $request->input('search');
+        if (is_array($search)) {
+            $search = $search['value'] ?? null;
+        }
+        if ($search) {
+            $s = trim($search);
+            $baseQuery->where(function ($q) use ($s) {
+                $q->where('registration_no', 'like', "%{$s}%")
+                    ->orWhereHas('studentProfile', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
+                    ->orWhereHas('user', fn($qq) => $qq->where('phone', 'like', "%{$s}%"));
+            });
         }
 
-        // filter gelombang/periode
         if ($request->filled('period_id')) {
-            $q->where('period_id', $request->period_id);
+            $baseQuery->where('period_id', $request->period_id);
         }
-
-        // filter status
         if ($request->filled('status')) {
-            $q->where('status', $request->status);
+            $baseQuery->where('status', $request->status);
         }
-
-        // filter kelulusan
         if ($request->filled('graduation_status')) {
-            $q->where('graduation_status', $request->graduation_status);
+            $baseQuery->where('graduation_status', $request->graduation_status);
         }
 
-        $registrations = $q->paginate(15)->withQueryString();
+        $recordsFiltered = (clone $baseQuery)->count();
 
-        return view('admin.registrations.index', compact('registrations'));
+        $columns = [
+            0 => 'registration_no',
+            3 => 'education_level',
+            4 => 'status',
+            5 => 'graduation_status',
+        ];
+        $orderColumn = $columns[$request->input('order.0.column')] ?? 'created_at';
+        $orderDir = $request->input('order.0.dir') === 'asc' ? 'asc' : 'desc';
+
+        $start = (int) $request->input('start', 0);
+        $length = (int) $request->input('length', 15);
+        if ($length <= 0) {
+            $length = 15;
+        }
+
+        $registrations = $baseQuery
+            ->orderBy($orderColumn, $orderDir)
+            ->skip($start)
+            ->take($length)
+            ->get();
+
+        $data = $registrations->map(function (Registration $r) {
+            $studentName = e(optional($r->studentProfile)->full_name ?? '-');
+            $phone = e($r->user->phone ?? '-');
+            $status = e($r->status ?? '-');
+            $graduation = e($r->graduation_status ?? '-');
+            $detailUrl = route('admin.registrations.show', $r);
+
+            return [
+                'registration_no' => e($r->registration_no ?? '-'),
+                'student_name' => $studentName,
+                'phone' => $phone,
+                'education_level' => e($r->education_level ?? '-'),
+                'status' => '<span class="badge bg-secondary">' . $status . '</span>',
+                'graduation_status' => '<span class="badge bg-info">' . $graduation . '</span>',
+                'actions' => '<a class="btn btn-sm btn-outline-light" href="' . $detailUrl . '">Detail</a>',
+            ];
+        })->values();
+
+        return response()->json([
+            'draw' => (int) $request->input('draw', 1),
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
     }
 
     public function show(Registration $registration)
@@ -77,4 +125,3 @@ class RegistrationAdminController extends Controller
         return back()->with('success', 'Kelulusan berhasil diperbarui.');
     }
 }
-

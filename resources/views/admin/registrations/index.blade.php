@@ -11,7 +11,7 @@
 
     <div class="card trezo-card mb-3">
         <div class="card-body">
-            <form class="row g-2">
+            <form class="row g-2" id="registrationsFilterForm">
                 <div class="col-md-4">
                     <input name="search" class="form-control" placeholder="Cari: nama/no pendaftaran/no WA"
                         value="{{ request('search') }}">
@@ -45,7 +45,7 @@
     <div class="card trezo-card">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
+                <table class="table table-hover mb-0 align-middle" id="registrationsTable">
                     <thead>
                         <tr>
                             <th>No Daftar</th>
@@ -57,36 +57,53 @@
                             <th class="text-end">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse($registrations as $r)
-                            <tr>
-                                <td class="fw-semibold">{{ $r->registration_no }}</td>
-                                <td>{{ optional($r->studentProfile)->full_name ?? '-' }}</td>
-                                <td>{{ $r->user->phone ?? '-' }}</td>
-                                <td>{{ $r->education_level }}</td>
-                                <td><span class="badge bg-secondary">{{ $r->status }}</span></td>
-                                <td><span class="badge bg-info">{{ $r->graduation_status }}</span></td>
-                                <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-light"
-                                        href="{{ route('admin.registrations.show', $r) }}">
-                                        Detail
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center text-muted p-4">
-                                    Belum ada data pendaftar.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
     </div>
-
-    <div class="mt-3">
-        {{ $registrations->links() }}
-    </div>
 @endsection
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = $('#registrationsTable').DataTable({
+                processing: true,
+                serverSide: true,
+                searching: false,
+                lengthChange: true,
+                pageLength: 15,
+                ajax: {
+                    url: @json(route('admin.registrations.data')),
+                    data: function (d) {
+                        const form = document.getElementById('registrationsFilterForm');
+                        d.search = form.querySelector('input[name="search"]').value;
+                        d.status = form.querySelector('select[name="status"]').value;
+                        d.graduation_status = form.querySelector('select[name="graduation_status"]').value;
+                    }
+                },
+                columns: [
+                    { data: 'registration_no' },
+                    { data: 'student_name', orderable: false },
+                    { data: 'phone', orderable: false },
+                    { data: 'education_level' },
+                    { data: 'status', orderable: false, searchable: false },
+                    { data: 'graduation_status', orderable: false, searchable: false },
+                    { data: 'actions', orderable: false, searchable: false, className: 'text-end' }
+                ]
+            });
+
+            document.getElementById('registrationsFilterForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                table.ajax.reload();
+            });
+        });
+    </script>
+@endpush

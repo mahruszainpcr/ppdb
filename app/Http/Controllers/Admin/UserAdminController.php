@@ -11,21 +11,68 @@ class UserAdminController extends Controller
 {
     public function index(Request $request)
     {
-        $q = User::query()
-            ->where('role', 'parent')
-            ->orderBy('created_at', 'desc');
+        return view('admin.users.index');
+    }
 
-        if ($request->filled('search')) {
-            $s = trim($request->search);
-            $q->where(function ($qq) use ($s) {
+    public function data(Request $request)
+    {
+        $baseQuery = User::query()->where('role', 'parent');
+        $recordsTotal = (clone $baseQuery)->count();
+
+        $search = $request->input('search');
+        if (is_array($search)) {
+            $search = $search['value'] ?? null;
+        }
+        if ($search) {
+            $s = trim($search);
+            $baseQuery->where(function ($qq) use ($s) {
                 $qq->where('name', 'like', "%{$s}%")
                     ->orWhere('phone', 'like', "%{$s}%");
             });
         }
 
-        $users = $q->paginate(15)->withQueryString();
+        $recordsFiltered = (clone $baseQuery)->count();
 
-        return view('admin.users.index', compact('users'));
+        $columns = [
+            0 => 'name',
+            1 => 'phone',
+            2 => 'created_at',
+        ];
+        $orderColumn = $columns[$request->input('order.0.column')] ?? 'created_at';
+        $orderDir = $request->input('order.0.dir') === 'asc' ? 'asc' : 'desc';
+
+        $start = (int) $request->input('start', 0);
+        $length = (int) $request->input('length', 15);
+        if ($length <= 0) {
+            $length = 15;
+        }
+
+        $users = $baseQuery
+            ->orderBy($orderColumn, $orderDir)
+            ->skip($start)
+            ->take($length)
+            ->get();
+
+        $data = $users->map(function (User $u) {
+            $name = e($u->name ?? '-');
+            $phone = e($u->phone ?? '-');
+            $actions = '<button class="btn btn-sm btn-outline-primary btn-edit-user" data-id="' . $u->id . '" data-name="' . $name . '" data-phone="' . $phone . '" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit</button> ';
+            $actions .= '<button class="btn btn-sm btn-outline-warning btn-reset-user" data-id="' . $u->id . '" data-phone="' . $phone . '" data-bs-toggle="modal" data-bs-target="#resetUserModal">Reset Password</button>';
+
+            return [
+                'name' => $name,
+                'phone' => $phone,
+                'created_at' => $u->created_at ? $u->created_at->format('d M Y') : '-',
+                'actions' => $actions,
+            ];
+        })->values();
+
+        return response()->json([
+            'draw' => (int) $request->input('draw', 1),
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
     }
 
     public function update(Request $request, User $user)
