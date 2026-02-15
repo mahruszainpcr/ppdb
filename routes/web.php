@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\RegistrationAdminController;
 use App\Http\Controllers\Admin\PeriodController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\UserAdminController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 
 Route::get('/psb', fn() => view('public.psb.index'));
 Route::get('/psb/syarat', fn() => view('public.psb.syarat'));
@@ -34,10 +35,11 @@ Route::prefix('admin')->group(function () {
     // admin area (auth + role)
     Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-        Route::get('/', fn() => view('admin.dashboard'))->name('admin.dashboard');
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::get('/registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
         Route::get('/registrations/data', [RegistrationAdminController::class, 'data'])->name('admin.registrations.data');
+        Route::get('/registrations/export', [RegistrationAdminController::class, 'export'])->name('admin.registrations.export');
         Route::get('/registrations/{registration}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.show');
         Route::post(
             'registrations/{registration}/graduation',

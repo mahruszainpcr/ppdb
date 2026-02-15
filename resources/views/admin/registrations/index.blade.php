@@ -7,6 +7,11 @@
             <h4 class="mb-0">Data Pendaftar</h4>
             <div class="text-muted">Cari, filter, dan buka detail pendaftar.</div>
         </div>
+        <div>
+            <button class="btn btn-outline-light btn-sm" id="registrationsExportBtn">
+                Download Excel
+            </button>
+        </div>
     </div>
 
     <div class="card trezo-card mb-3">
@@ -103,6 +108,22 @@
             document.getElementById('registrationsFilterForm').addEventListener('submit', function (e) {
                 e.preventDefault();
                 table.ajax.reload();
+            });
+
+            document.getElementById('registrationsExportBtn').addEventListener('click', function () {
+                const form = document.getElementById('registrationsFilterForm');
+                const params = new URLSearchParams();
+                const searchValue = form.querySelector('input[name="search"]').value;
+                const statusValue = form.querySelector('select[name="status"]').value;
+                const graduationValue = form.querySelector('select[name="graduation_status"]').value;
+
+                if (searchValue) params.set('search', searchValue);
+                if (statusValue) params.set('status', statusValue);
+                if (graduationValue) params.set('graduation_status', graduationValue);
+
+                const baseUrl = @json(route('admin.registrations.export'));
+                const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+                window.location.href = url;
             });
         });
     </script>
