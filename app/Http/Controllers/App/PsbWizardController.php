@@ -74,6 +74,25 @@ class PsbWizardController extends Controller
         ));
     }
 
+    public function result(Request $request)
+    {
+        $activePeriod = \App\Models\Period::query()->active()->latest('id')->first();
+
+        $registration = \App\Models\Registration::query()
+            ->where('user_id', $request->user()->id)
+            ->latest('id')
+            ->with(['period', 'documents', 'studentProfile', 'parentProfile', 'statement'])
+            ->first();
+
+        if (!$registration) {
+            return redirect()->route('psb.wizard', ['step' => 1]);
+        }
+
+        $period = $registration->period ?? $activePeriod;
+
+        return view('app.result', compact('registration', 'activePeriod', 'period'));
+    }
+
     public function show(Request $request)
     {
         $step = (int) $request->query('step', 1);
