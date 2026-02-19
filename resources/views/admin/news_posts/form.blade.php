@@ -88,7 +88,8 @@
                         <label class="form-label">Publish</label>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="checkbox" name="is_published" value="1"
-                                id="isPublished" @checked(old('is_published', $post->is_published))>
+                                id="isPublished"
+                                @checked(old('is_published', $post->exists ? $post->is_published : true))>
                             <label class="form-check-label" for="isPublished">Tampilkan di landing</label>
                         </div>
 

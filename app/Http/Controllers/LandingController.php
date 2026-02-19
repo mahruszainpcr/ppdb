@@ -20,6 +20,14 @@ class LandingController extends Controller
             ->limit(3)
             ->get();
 
+        if ($newsPosts->isEmpty()) {
+            $newsPosts = NewsPost::query()
+                ->with('category')
+                ->orderByDesc('created_at')
+                ->limit(3)
+                ->get();
+        }
+
         return view('welcome', compact('newsPosts'));
     }
 }
