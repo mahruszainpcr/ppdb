@@ -15,7 +15,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
-        'role', // parent|admin
+        'role', // parent|admin|ustadz
     ];
 
     protected $hidden = [
@@ -47,5 +47,10 @@ class User extends Authenticatable
     public function scopeAdmin($query)
     {
         return $query->where('role', 'admin');
+    }
+
+    public function scopeUstadz($query)
+    {
+        return $query->where('role', 'ustadz');
     }
 }

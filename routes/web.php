@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\RegistrationAdminController;
 use App\Http\Controllers\Admin\PeriodController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\UserAdminController;
+use App\Http\Controllers\Admin\StaffAdminController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\NewsCategoryController;
 use App\Http\Controllers\Admin\NewsPostController;
@@ -38,7 +39,7 @@ Route::prefix('admin')->group(function () {
     });
 
     // admin area (auth + role)
-    Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::middleware(['auth', 'role:admin,ustadz'])->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -50,16 +51,26 @@ Route::prefix('admin')->group(function () {
             'registrations/{registration}/graduation',
             [\App\Http\Controllers\Admin\RegistrationAdminController::class, 'setGraduation']
         )->name('admin.registrations.graduation');
-        Route::get('/users', [UserAdminController::class, 'index'])
-            ->name('admin.users.index');
-        Route::get('/users/data', [UserAdminController::class, 'data'])
-            ->name('admin.users.data');
+        Route::middleware(['role:admin'])->group(function () {
+            Route::get('/users', [UserAdminController::class, 'index'])
+                ->name('admin.users.index');
+            Route::get('/users/data', [UserAdminController::class, 'data'])
+                ->name('admin.users.data');
 
-        Route::post('/users/{user}/update', [UserAdminController::class, 'update'])
-            ->name('admin.users.update');
+            Route::post('/users/{user}/update', [UserAdminController::class, 'update'])
+                ->name('admin.users.update');
 
-        Route::post('/users/{user}/reset-password', [UserAdminController::class, 'resetPassword'])
-            ->name('admin.users.resetPassword');
+            Route::post('/users/{user}/reset-password', [UserAdminController::class, 'resetPassword'])
+                ->name('admin.users.resetPassword');
+
+            Route::get('/staff', [StaffAdminController::class, 'index'])->name('admin.staff.index');
+            Route::get('/staff/data', [StaffAdminController::class, 'data'])->name('admin.staff.data');
+            Route::post('/staff', [StaffAdminController::class, 'store'])->name('admin.staff.store');
+            Route::post('/staff/{user}/update', [StaffAdminController::class, 'update'])->name('admin.staff.update');
+            Route::post('/staff/{user}/reset-password', [StaffAdminController::class, 'resetPassword'])
+                ->name('admin.staff.resetPassword');
+            Route::post('/staff/{user}/delete', [StaffAdminController::class, 'destroy'])->name('admin.staff.destroy');
+        });
 
         Route::get('/news-categories', [NewsCategoryController::class, 'index'])->name('admin.news-categories.index');
         Route::get('/news-categories/data', [NewsCategoryController::class, 'data'])->name('admin.news-categories.data');

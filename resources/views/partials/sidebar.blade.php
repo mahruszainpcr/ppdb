@@ -21,7 +21,7 @@
 
 
             {{-- ================= ADMIN ================= --}}
-            @if (auth()->check() && auth()->user()->role === 'admin')
+            @if (auth()->check() && in_array(auth()->user()->role, ['admin', 'ustadz']))
                 <li class="menu-item">
                     <a href="{{ route('admin.dashboard') }}"
                         class="menu-link {{ Request::is('admin') ? 'active' : '' }}">
@@ -29,13 +29,22 @@
                         <span class="title">Dashboard</span>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="{{ route('admin.users.index') }}"
-                        class="menu-link {{ Request::is('admin.users.index') ? 'active' : '' }}">
-                        <span class="material-symbols-outlined menu-icon">person</span>
-                        <span class="title">User</span>
-                    </a>
-                </li>
+                @if (auth()->user()->role === 'admin')
+                    <li class="menu-item">
+                        <a href="{{ route('admin.staff.index') }}"
+                            class="menu-link {{ Request::is('admin/staff*') ? 'active' : '' }}">
+                            <span class="material-symbols-outlined menu-icon">manage_accounts</span>
+                            <span class="title">Admin & Ustadz</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ route('admin.users.index') }}"
+                            class="menu-link {{ Request::is('admin.users.index') ? 'active' : '' }}">
+                            <span class="material-symbols-outlined menu-icon">person</span>
+                            <span class="title">User Wali</span>
+                        </a>
+                    </li>
+                @endif
 
                 <li class="menu-item">
                     <a href="{{ route('admin.registrations.index') }}"

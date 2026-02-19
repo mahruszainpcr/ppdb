@@ -32,10 +32,10 @@ class AdminAuthController extends Controller
             return back()->withErrors(['username' => 'Login gagal. Periksa username dan password.']);
         }
 
-        // pastikan role admin
-        if (Auth::user()->role !== 'admin') {
+        // pastikan role admin/ustadz
+        if (!in_array(Auth::user()->role, ['admin', 'ustadz'], true)) {
             Auth::logout();
-            return back()->withErrors(['username' => 'Akun ini bukan admin.']);
+            return back()->withErrors(['username' => 'Akun ini bukan admin/ustadz.']);
         }
 
         $request->session()->regenerate();
@@ -51,4 +51,3 @@ class AdminAuthController extends Controller
     }
 
 }
-
