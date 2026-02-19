@@ -787,7 +787,7 @@
                         Rumbai</div>
                     <h1>Belajar Ilmu, Menjadi Cahaya Dunia &amp; Akhirat</h1>
                     <p>
-                        Mencetak calon dai berakhlak mulia sesuai Al-Qur’an dan As-Sunnah dengan pemahaman Salafus
+                        Mencetak calon dai berAdab mulia sesuai Al-Qur’an dan As-Sunnah dengan pemahaman Salafus
                         Shalih,
                         dalam lingkungan yang beradab—aman, nyaman, dan mendidik.
                     </p>
@@ -834,17 +834,17 @@
             <div class="value-grid">
                 <div class="card">
                     <div class="icon">📖</div>
-                    <h3>Al-Qur’an</h3>
+                    <h3>Pilar 1 :Al-Qur’an</h3>
                     <p>Tahfidz bertahap dengan muraja’ah terjadwal sebagai pondasi iman dan amal.</p>
                 </div>
                 <div class="card">
                     <div class="icon">🗣️</div>
-                    <h3>Bahasa Arab</h3>
+                    <h3>Pilar 2 :Bahasa Arab</h3>
                     <p>Pembiasaan harian dan materi terstruktur: nahwu, sharaf, percakapan, dan khat.</p>
                 </div>
                 <div class="card">
                     <div class="icon">🤝</div>
-                    <h3>Akhlak</h3>
+                    <h3>Pilar 3 :Adab</h3>
                     <p>Pembinaan adab & karakter dengan nilai SAPA: Sahabat, Amanah, Saling hormat, Adil, Bertanggung
                         jawab.</p>
                 </div>
@@ -860,9 +860,9 @@
                         src="{{ url('assets/landing/image.png') }}" alt=""></div>
                 <div class="split-content">
                     <h3>Lingkungan Beradab — aman, nyaman, dan mendidik.</h3>
-                    <p><strong>Visi:</strong> Terwujudnya insan religius yang cerdas dan berakhlak mulia berdasarkan
+                    <p><strong>Visi:</strong> Terwujudnya insan religius yang cerdas dan berAdab mulia berdasarkan
                         Al-Qur’an dan As-Sunnah sesuai pemahaman Salafus Shalih.</p>
-                    <p><strong>Misi:</strong> Membekali aqidah, akhlak, dan keterampilan hidup; memberdayakan
+                    <p><strong>Misi:</strong> Membekali aqidah, Adab, dan keterampilan hidup; memberdayakan
                         yatim/piatu/fakir/miskin dengan pendidikan terjangkau; mengembangkan kepemimpinan & kemandirian
                         santri; peningkatan kompetensi tenaga pengajar; serta kolaborasi pendidikan nasional &
                         internasional.</p>
@@ -878,7 +878,7 @@
             <div class="section-title">
                 <div class="top">Program Pendidikan</div>
                 <h2>Madrasah, Tahfidz, dan Keterampilan Berbasis Karakter</h2>
-                <p>Program dirancang agar santri tumbuh seimbang: kuat aqidahnya, baik akhlaknya, dan siap mandiri.</p>
+                <p>Program dirancang agar santri tumbuh seimbang: kuat aqidahnya, baik Adabnya, dan siap mandiri.</p>
             </div>
 
             <div class="program-grid">
@@ -937,7 +937,7 @@
                 </div>
                 <div class="badge">
                     <div class="seal">A</div>
-                    <div><strong>Akhlak</strong><span>Adab & Karakter (SAPA)</span></div>
+                    <div><strong>Adab</strong><span>Adab & Karakter (SAPA)</span></div>
                 </div>
             </div>
         </div>
@@ -961,7 +961,7 @@
                 <a class="quick" href="#pilar">
                     <div class="mini">🏛️</div>
                     <strong>3 Pilar</strong>
-                    <span>Al-Qur’an, Bahasa Arab, Akhlak</span>
+                    <span>Al-Qur’an, Bahasa Arab, Adab</span>
                 </a>
                 <a class="quick" href="#program">
                     <div class="mini">📌</div>
