@@ -60,8 +60,8 @@
                         <input name="nisn" class="form-control" value="{{ old('nisn', $sp->nisn ?? '') }}">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">NIK (sesuai KK)</label>
-                        <input name="nik" class="form-control" value="{{ old('nik', $sp->nik ?? '') }}">
+                        <label class="form-label">NIK (sesuai KK) <span class="text-danger">*</span></label>
+                        <input name="nik" class="form-control" value="{{ old('nik', $sp->nik ?? '') }}" required>
                     </div>
 
                     <div class="col-md-6">

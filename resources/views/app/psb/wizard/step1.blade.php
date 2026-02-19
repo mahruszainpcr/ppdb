@@ -212,7 +212,8 @@
                             </div>
 
                             {{-- SKTM --}}
-                            <div class="col-12">
+                            <div class="col-12 {{ old('funding_type', $registration->funding_type) === 'beasiswa' ? '' : 'd-none' }}"
+                                id="sktmField">
                                 <div class="d-flex align-items-center justify-content-between gap-2">
                                     <label class="form-label mb-0">
                                         Surat Kurang Mampu RT/Lurah/Camat (khusus Beasiswa, bisa menyusul)
@@ -227,7 +228,8 @@
                             </div>
 
                             {{-- Good Behavior --}}
-                            <div class="col-12">
+                            @php $edu = old('education_level', $registration->education_level) ?? ''; @endphp
+                            <div class="col-12 {{ str_starts_with($edu, 'SMA') ? '' : 'd-none' }}" id="goodBehaviorField">
                                 <div class="d-flex align-items-center justify-content-between gap-2">
                                     <label class="form-label mb-0">
                                         Surat Keterangan Berkelakuan Baik (dari sekolah SMP)
@@ -310,4 +312,29 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fundingSelect = document.querySelector('select[name="funding_type"]');
+            const educationSelect = document.querySelector('select[name="education_level"]');
+            const sktmField = document.getElementById('sktmField');
+            const goodBehaviorField = document.getElementById('goodBehaviorField');
+
+            if (!fundingSelect || !educationSelect || !sktmField || !goodBehaviorField) {
+                return;
+            }
+
+            const updateDocVisibility = () => {
+                const funding = fundingSelect.value;
+                const education = educationSelect.value || '';
+
+                sktmField.classList.toggle('d-none', funding !== 'beasiswa');
+                goodBehaviorField.classList.toggle('d-none', !education.startsWith('SMA'));
+            };
+
+            fundingSelect.addEventListener('change', updateDocVisibility);
+            educationSelect.addEventListener('change', updateDocVisibility);
+            updateDocVisibility();
+        });
+    </script>
 @endsection

@@ -219,7 +219,7 @@ class PsbWizardController extends Controller
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'nisn' => ['nullable', 'string', 'max:30'],
-            'nik' => ['nullable', 'string', 'max:30'],
+            'nik' => ['required', 'string', 'max:30'],
 
             'birth_place' => ['required', 'string', 'max:120'],
             'birth_date' => ['required', 'date'],
@@ -254,6 +254,7 @@ class PsbWizardController extends Controller
             'program_choice' => ['required', Rule::in(['mahad', 'takhosus'])],
         ], [
             'full_name.required' => 'Nama lengkap wajib diisi.',
+            'nik.required' => 'NIK wajib diisi sesuai KK.',
             'birth_place.required' => 'Tempat lahir wajib diisi.',
             'birth_date.required' => 'Tanggal lahir wajib diisi.',
         ]);
