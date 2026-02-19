@@ -5,6 +5,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Ma’had Darussalam Al-Islami Rumbai</title>
+    <meta name="description"
+        content="Ma’had Darussalam Al-Islami Rumbai (Palas) — pendidikan beradab berbasis Al-Qur’an & As-Sunnah, program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter." />
+    <meta name="keywords"
+        content="mahad darussalam palas, darussalam al-islami rumbai, pondok pesantren palas, tahfidz, diniyah, bahasa arab, rumbai" />
+    <meta name="author" content="Ma’had Darussalam Al-Islami Rumbai" />
+    <link rel="canonical" href="{{ url('/') }}" />
+
+    <meta property="og:title" content="Ma’had Darussalam Al-Islami Rumbai" />
+    <meta property="og:description"
+        content="Pendidikan beradab berbasis Al-Qur’an & As-Sunnah. Program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ url('/') }}" />
+    <meta property="og:image" content="https://mahaddarussalampalas.ponpes.id/logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ma’had Darussalam Al-Islami Rumbai" />
+    <meta name="twitter:description"
+        content="Pendidikan beradab berbasis Al-Qur’an & As-Sunnah. Program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter." />
+    <meta name="twitter:image" content="https://mahaddarussalampalas.ponpes.id/logo.png" />
+
+    <meta name="robots" content="index, follow" />
+    <link rel="icon" href="https://mahaddarussalampalas.ponpes.id/logo.png" type="image/png" />
     <style>
         :root {
             --bg: #0b2f23;
@@ -1056,7 +1078,5 @@
 </body>
 
 </html>
-
-
 
 

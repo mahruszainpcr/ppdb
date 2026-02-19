@@ -45,6 +45,12 @@
                 <a href="#" aria-label="Facebook">Facebook</a>
             </div>
         </div>
+        <div style="margin-top:18px; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,.12);">
+            <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.6166114806542!2d101.394165!3d0.5761364999999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31d5ab240f6b157f%3A0xf5e9710e875dac85!2sPondok%20Pesantren%20Ma&#39;had%20Darussalam%20Al%20Islami!5e0!3m2!1sen!2sid!4v1771495130817!5m2!1sen!2sid"
+                width="100%" height="320" style="border:0;" allowfullscreen="" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
 
         <div class="footer-bottom">
             <span>© 2025 Ma'had Darussalam Al-Islami Rumbai. All rights reserved.</span>
@@ -52,3 +58,4 @@
         </div>
     </div>
 </footer>
+
