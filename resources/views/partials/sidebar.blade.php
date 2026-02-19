@@ -44,6 +44,20 @@
                         <span class="title">Data Pendaftar</span>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.news-categories.index') }}"
+                        class="menu-link {{ Request::is('admin/news-categories*') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined menu-icon">category</span>
+                        <span class="title">Kategori Berita</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.news-posts.index') }}"
+                        class="menu-link {{ Request::is('admin/news-posts*') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined menu-icon">article</span>
+                        <span class="title">Postingan Berita</span>
+                    </a>
+                </li>
 
                 {{-- <li class="menu-item">
                     <a href="{{ route('periods.index') }}"

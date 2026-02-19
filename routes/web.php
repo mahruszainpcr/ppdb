@@ -8,6 +8,11 @@ use App\Http\Controllers\Admin\PeriodController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\NewsCategoryController;
+use App\Http\Controllers\Admin\NewsPostController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\Auth\ParentAuthController;
 
 Route::get('/psb', fn() => view('public.psb.index'));
 Route::get('/psb/syarat', fn() => view('public.psb.syarat'));
@@ -56,13 +61,26 @@ Route::prefix('admin')->group(function () {
         Route::post('/users/{user}/reset-password', [UserAdminController::class, 'resetPassword'])
             ->name('admin.users.resetPassword');
 
+        Route::get('/news-categories', [NewsCategoryController::class, 'index'])->name('admin.news-categories.index');
+        Route::get('/news-categories/data', [NewsCategoryController::class, 'data'])->name('admin.news-categories.data');
+        Route::get('/news-categories/create', [NewsCategoryController::class, 'create'])->name('admin.news-categories.create');
+        Route::post('/news-categories', [NewsCategoryController::class, 'store'])->name('admin.news-categories.store');
+        Route::get('/news-categories/{newsCategory}/edit', [NewsCategoryController::class, 'edit'])->name('admin.news-categories.edit');
+        Route::put('/news-categories/{newsCategory}', [NewsCategoryController::class, 'update'])->name('admin.news-categories.update');
+        Route::delete('/news-categories/{newsCategory}', [NewsCategoryController::class, 'destroy'])->name('admin.news-categories.destroy');
+
+        Route::get('/news-posts', [NewsPostController::class, 'index'])->name('admin.news-posts.index');
+        Route::get('/news-posts/data', [NewsPostController::class, 'data'])->name('admin.news-posts.data');
+        Route::get('/news-posts/create', [NewsPostController::class, 'create'])->name('admin.news-posts.create');
+        Route::post('/news-posts', [NewsPostController::class, 'store'])->name('admin.news-posts.store');
+        Route::get('/news-posts/{newsPost}/edit', [NewsPostController::class, 'edit'])->name('admin.news-posts.edit');
+        Route::put('/news-posts/{newsPost}', [NewsPostController::class, 'update'])->name('admin.news-posts.update');
+        Route::delete('/news-posts/{newsPost}', [NewsPostController::class, 'destroy'])->name('admin.news-posts.destroy');
     });
 });
 
-Route::get('/', function () {
-    return view('welcome');
-});
-use App\Http\Controllers\Auth\ParentAuthController;
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show');
 
 Route::get('/register', [ParentAuthController::class, 'showRegister'])->name('parent.register');
 Route::post('/register', [ParentAuthController::class, 'register'])->name('parent.register.store');

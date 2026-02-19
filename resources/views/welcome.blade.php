@@ -1013,46 +1013,67 @@
             </div>
 
             <div class="news-grid" style="margin-top:18px;">
-                <article class="news-card">
-                    <div class="thumb"></div>
-                    <div class="news-body">
-                        <span class="tag">INFO</span>
-                        <h4>Program Tahfidz 6+1 Tahun</h4>
-                        <p>Enam tahun pendidikan dengan satu tahun pendalaman untuk memperkuat hafalan dan pembinaan.
-                        </p>
-                    </div>
-                    <div class="news-foot">
-                        <span>Tahun Ajaran 2026–2027</span>
-                        <span>Selengkapnya →</span>
-                    </div>
-                </article>
+                @if (!empty($newsPosts) && $newsPosts->count())
+                    @foreach ($newsPosts as $post)
+                        <article class="news-card">
+                            <div class="thumb"
+                                style="background-image: url('{{ $post->thumbnail_url ?? 'https://images.unsplash.com/photo-1519455953755-af066f52f1a6?auto=format&fit=crop&w=1400&q=60' }}');">
+                            </div>
+                            <div class="news-body">
+                                <span class="tag">{{ $post->category->name ?? 'INFO' }}</span>
+                                <h4>{{ $post->title }}</h4>
+                                <p>
+                                    {{ $post->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($post->content), 120) }}
+                                </p>
+                            </div>
+                            <div class="news-foot">
+                                <span>{{ optional($post->published_at ?? $post->created_at)->format('d M Y') }}</span>
+                                <a href="{{ route('news.show', $post->slug) }}">Selengkapnya →</a>
+                            </div>
+                        </article>
+                    @endforeach
+                @else
+                    <article class="news-card">
+                        <div class="thumb"></div>
+                        <div class="news-body">
+                            <span class="tag">INFO</span>
+                            <h4>Program Tahfidz 6+1 Tahun</h4>
+                            <p>Enam tahun pendidikan dengan satu tahun pendalaman untuk memperkuat hafalan dan pembinaan.
+                            </p>
+                        </div>
+                        <div class="news-foot">
+                            <span>Tahun Ajaran 2026–2027</span>
+                            <span>Selengkapnya →</span>
+                        </div>
+                    </article>
 
-                <article class="news-card">
-                    <div class="thumb"></div>
-                    <div class="news-body">
-                        <span class="tag">LINGKUNGAN</span>
-                        <h4>Zero Bullying &amp; Pendampingan</h4>
-                        <p>Kebijakan tegas untuk menjaga keamanan dan kenyamanan belajar santri setiap hari.</p>
-                    </div>
-                    <div class="news-foot">
-                        <span>Beradab &amp; Aman</span>
-                        <span>Selengkapnya →</span>
-                    </div>
-                </article>
+                    <article class="news-card">
+                        <div class="thumb"></div>
+                        <div class="news-body">
+                            <span class="tag">LINGKUNGAN</span>
+                            <h4>Zero Bullying &amp; Pendampingan</h4>
+                            <p>Kebijakan tegas untuk menjaga keamanan dan kenyamanan belajar santri setiap hari.</p>
+                        </div>
+                        <div class="news-foot">
+                            <span>Beradab &amp; Aman</span>
+                            <span>Selengkapnya →</span>
+                        </div>
+                    </article>
 
-                <article class="news-card">
-                    <div class="thumb"></div>
-                    <div class="news-body">
-                        <span class="tag">BAHASA</span>
-                        <h4>Bahasa Arab Harian</h4>
-                        <p>Percakapan dan materi terstruktur (nahwu, sharaf, khat) untuk membangun kompetensi bahasa.
-                        </p>
-                    </div>
-                    <div class="news-foot">
-                        <span>Program Inti</span>
-                        <span>Selengkapnya →</span>
-                    </div>
-                </article>
+                    <article class="news-card">
+                        <div class="thumb"></div>
+                        <div class="news-body">
+                            <span class="tag">BAHASA</span>
+                            <h4>Bahasa Arab Harian</h4>
+                            <p>Percakapan dan materi terstruktur (nahwu, sharaf, khat) untuk membangun kompetensi bahasa.
+                            </p>
+                        </div>
+                        <div class="news-foot">
+                            <span>Program Inti</span>
+                            <span>Selengkapnya →</span>
+                        </div>
+                    </article>
+                @endif
             </div>
         </div>
     </section>
@@ -1117,3 +1138,4 @@
 </body>
 
 </html>
+
