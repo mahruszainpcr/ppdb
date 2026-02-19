@@ -322,19 +322,20 @@ class PsbWizardController extends Controller
         ]);
 
         // Pernyataan
+        // Pernyataan
         $validatedStatement = $request->validate([
             'willing_to_serve' => ['required', Rule::in(['yes', 'no'])],
             'agree_morality' => ['accepted'],
             'agree_rules' => ['accepted'],
+            'agree_integrity' => ['accepted'],
             'agree_payment' => ['accepted'],
         ], [
             'willing_to_serve.required' => 'Pilih jawaban kesediaan mengabdi.',
             'agree_morality.accepted' => 'Anda harus menyetujui pernyataan akhlak & larangan.',
             'agree_rules.accepted' => 'Anda harus menyetujui tata tertib dan ketentuan ma’had.',
+            'agree_integrity.accepted' => 'Anda harus menyetujui pernyataan menjaga nama baik dan menyelesaikan masalah secara kekeluargaan.',
             'agree_payment.accepted' => 'Anda harus menyetujui kesanggupan pembayaran.',
-        ]);
-
-        // Jika tidak bersedia mengabdi -> stop
+        ]);// Jika tidak bersedia mengabdi -> stop
         if ($validatedStatement['willing_to_serve'] === 'no') {
             return back()->withErrors([
                 'willing_to_serve' => 'Jika tidak bersedia mengabdi, pendaftaran tidak akan diproses.',
@@ -443,3 +444,4 @@ class PsbWizardController extends Controller
         ]);
     }
 }
+

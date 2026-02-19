@@ -94,17 +94,21 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Provinsi <span class="text-danger">*</span></label>
-                        <input name="province" class="form-control" value="{{ old('province', $sp->province ?? '') }}"
-                            required>
+                        <select name="province" id="provinceSelect" class="form-select" required>
+                            <option value="" disabled selected>Memuat...</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Kabupaten/Kota <span class="text-danger">*</span></label>
-                        <input name="city" class="form-control" value="{{ old('city', $sp->city ?? '') }}" required>
+                        <select name="city" id="regencySelect" class="form-select" required disabled>
+                            <option value="" disabled selected>Pilih provinsi dulu</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Kecamatan <span class="text-danger">*</span></label>
-                        <input name="district" class="form-control" value="{{ old('district', $sp->district ?? '') }}"
-                            required>
+                        <select name="district" id="districtSelect" class="form-select" required disabled>
+                            <option value="" disabled selected>Pilih kabupaten/kota dulu</option>
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Kode Pos</label>
@@ -247,4 +251,221 @@
         </div>
 
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const provinceSelect = document.getElementById('provinceSelect');
+            const regencySelect = document.getElementById('regencySelect');
+            const districtSelect = document.getElementById('districtSelect');
+
+            const state = {
+                provinceName: @json(old('province', $sp->province ?? '')),
+                regencyName: @json(old('city', $sp->city ?? '')),
+                districtName: @json(old('district', $sp->district ?? '')),
+                provinceCode: '',
+                regencyCode: '',
+            };
+
+            const setSelectOptions = (selectEl, items, placeholder) => {
+                selectEl.innerHTML = '';
+                const ph = document.createElement('option');
+                ph.value = '';
+                ph.disabled = true;
+                ph.selected = true;
+                ph.textContent = placeholder;
+                selectEl.appendChild(ph);
+
+                items.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.name;
+                    opt.textContent = item.name;
+                    opt.dataset.code = item.code;
+                    selectEl.appendChild(opt);
+                });
+            };
+
+            const setLoading = (selectEl, text) => {
+                selectEl.innerHTML = '';
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.disabled = true;
+                opt.selected = true;
+                opt.textContent = text;
+                selectEl.appendChild(opt);
+            };
+
+            const fetchJson = async (url) => {
+                const res = await fetch(url);
+                if (!res.ok) {
+                    throw new Error('Gagal memuat data wilayah.');
+                }
+                return res.json();
+            };
+
+            const providers = [
+                {
+                    name: 'emsifa',
+                    provinces: () => 'https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json',
+                    regencies: (provinceCode) =>
+                        `https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${provinceCode}.json`,
+                    districts: (regencyCode) =>
+                        `https://emsifa.github.io/api-wilayah-indonesia/api/districts/${regencyCode}.json`,
+                    mapList: (data) => (Array.isArray(data) ? data : []).map((item) => ({
+                        code: item.id,
+                        name: item.name,
+                    })),
+                },
+                {
+                    name: 'wilayah.web.id',
+                    provinces: () => 'https://wilayah.web.id/api/provinces?limit=1000',
+                    regencies: (provinceCode) => `https://wilayah.web.id/api/regencies/${provinceCode}?limit=1000`,
+                    districts: (regencyCode) => `https://wilayah.web.id/api/districts/${regencyCode}?limit=1000`,
+                    mapList: (data) => (data?.data || []).map((item) => ({
+                        code: item.code,
+                        name: item.name,
+                    })),
+                },
+                {
+                    name: 'wilayah.id',
+                    provinces: () => 'https://wilayah.id/api/provinces.json',
+                    regencies: (provinceCode) => `https://wilayah.id/api/regencies/${provinceCode}.json`,
+                    districts: (regencyCode) => `https://wilayah.id/api/districts/${regencyCode}.json`,
+                    mapList: (data) => (data?.data || []).map((item) => ({
+                        code: item.code,
+                        name: item.name,
+                    })),
+                },
+                {
+                    name: 'api.datawilayah.com',
+                    provinces: () => 'https://api.datawilayah.com/api/provinsi.json',
+                    regencies: (provinceCode) => `https://api.datawilayah.com/api/kabupaten_kota/${provinceCode}.json`,
+                    districts: (regencyCode) => `https://api.datawilayah.com/api/kecamatan/${regencyCode}.json`,
+                    mapList: (data) => (data?.data || []).map((item) => ({
+                        code: item.kode_wilayah,
+                        name: item.nama_wilayah,
+                    })),
+                },
+            ];
+
+            const fetchFromProviders = async (buildUrl) => {
+                let lastError = null;
+                for (const provider of providers) {
+                    try {
+                        const url = buildUrl(provider);
+                        const raw = await fetchJson(url);
+                        const items = provider.mapList(raw);
+                        if (items.length > 0) {
+                            return items;
+                        }
+                    } catch (err) {
+                        lastError = err;
+                    }
+                }
+                throw lastError || new Error('Gagal memuat data wilayah.');
+            };
+
+            const findCodeByName = (items, name) => {
+                if (!name) return '';
+                const found = items.find(i => i.name === name);
+                return found ? found.code : '';
+            };
+
+            const selectByName = (selectEl, name) => {
+                if (!name) return;
+                const opt = Array.from(selectEl.options).find(o => o.value === name);
+                if (opt) {
+                    opt.selected = true;
+                }
+            };
+
+            const loadProvinces = async () => {
+                try {
+                    setLoading(provinceSelect, 'Memuat provinsi...');
+                    const items = await fetchFromProviders((p) => p.provinces());
+                    setSelectOptions(provinceSelect, items, 'Pilih provinsi...');
+                    provinceSelect.disabled = false;
+                    selectByName(provinceSelect, state.provinceName);
+                    state.provinceCode = findCodeByName(items, state.provinceName);
+                    if (state.provinceCode) {
+                        await loadRegencies(state.provinceCode);
+                    }
+                } catch (err) {
+                    setLoading(provinceSelect, 'Gagal memuat provinsi');
+                    provinceSelect.disabled = true;
+                }
+            };
+
+            const loadRegencies = async (provinceCode) => {
+                if (!provinceCode) {
+                    setSelectOptions(regencySelect, [], 'Pilih provinsi dulu');
+                    regencySelect.disabled = true;
+                    setSelectOptions(districtSelect, [], 'Pilih kabupaten/kota dulu');
+                    districtSelect.disabled = true;
+                    return;
+                }
+                try {
+                    setLoading(regencySelect, 'Memuat kabupaten/kota...');
+                    regencySelect.disabled = true;
+                    const items = await fetchFromProviders((p) => p.regencies(provinceCode));
+                    setSelectOptions(regencySelect, items, 'Pilih kabupaten/kota...');
+                    regencySelect.disabled = false;
+                    selectByName(regencySelect, state.regencyName);
+                    state.regencyCode = findCodeByName(items, state.regencyName);
+                    if (state.regencyCode) {
+                        await loadDistricts(state.regencyCode);
+                    } else {
+                        setSelectOptions(districtSelect, [], 'Pilih kabupaten/kota dulu');
+                        districtSelect.disabled = true;
+                    }
+                } catch (err) {
+                    setLoading(regencySelect, 'Gagal memuat kabupaten/kota');
+                    regencySelect.disabled = true;
+                }
+            };
+
+            const loadDistricts = async (regencyCode) => {
+                if (!regencyCode) {
+                    setSelectOptions(districtSelect, [], 'Pilih kabupaten/kota dulu');
+                    districtSelect.disabled = true;
+                    return;
+                }
+                try {
+                    setLoading(districtSelect, 'Memuat kecamatan...');
+                    districtSelect.disabled = true;
+                    const items = await fetchFromProviders((p) => p.districts(regencyCode));
+                    setSelectOptions(districtSelect, items, 'Pilih kecamatan...');
+                    districtSelect.disabled = false;
+                    selectByName(districtSelect, state.districtName);
+                } catch (err) {
+                    setLoading(districtSelect, 'Gagal memuat kecamatan');
+                    districtSelect.disabled = true;
+                }
+            };
+
+            provinceSelect.addEventListener('change', async (e) => {
+                const selected = e.target.selectedOptions[0];
+                state.provinceName = selected ? selected.value : '';
+                state.provinceCode = selected ? selected.dataset.code : '';
+                state.regencyName = '';
+                state.regencyCode = '';
+                state.districtName = '';
+                await loadRegencies(state.provinceCode);
+            });
+
+            regencySelect.addEventListener('change', async (e) => {
+                const selected = e.target.selectedOptions[0];
+                state.regencyName = selected ? selected.value : '';
+                state.regencyCode = selected ? selected.dataset.code : '';
+                state.districtName = '';
+                await loadDistricts(state.regencyCode);
+            });
+
+            districtSelect.addEventListener('change', (e) => {
+                const selected = e.target.selectedOptions[0];
+                state.districtName = selected ? selected.value : '';
+            });
+
+            loadProvinces();
+        });
+    </script>
 @endsection

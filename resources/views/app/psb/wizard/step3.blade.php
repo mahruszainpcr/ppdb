@@ -131,13 +131,15 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Kota/Kabupaten <span class="text-danger">*</span></label>
-                        <input name="father_city" class="form-control"
-                            value="{{ old('father_city', $pp->father_city ?? '') }}" required>
+                        <select name="father_city" id="fatherRegencySelect" class="form-select" required>
+                            <option value="" disabled selected>Memuat...</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Kecamatan <span class="text-danger">*</span></label>
-                        <input name="father_district" class="form-control"
-                            value="{{ old('father_district', $pp->father_district ?? '') }}" required>
+                        <select name="father_district" id="fatherDistrictSelect" class="form-select" required disabled>
+                            <option value="" disabled selected>Pilih kota/kabupaten dulu</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Kode Pos</label>
@@ -260,63 +262,97 @@
                     @enderror
                 </div>
 
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" name="agree_morality" value="1"
-                        id="agree_morality" {{ old('agree_morality') ? 'checked' : '' }} required>
-                    <label class="form-check-label" for="agree_morality">
+                <div class="mb-3">
+                    <label class="form-label d-block">
                         Saya tidak terlibat penyalahgunaan narkoba, merokok, LGBT, pergaulan bebas, dan pelanggaran moral
                         lain. Jika melanggar bersedia dikeluarkan dan infak tidak bisa diminta kembali.
+                        <span class="text-danger">*</span>
                     </label>
+                    @php $am = old('agree_morality'); @endphp
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="agree_morality" value="yes"
+                            id="agree_morality_yes" {{ $am === 'yes' ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="agree_morality_yes">Iya</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="agree_morality" value="no"
+                            id="agree_morality_no" {{ $am === 'no' ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="agree_morality_no">Tidak</label>
+                    </div>
+                    @error('agree_morality')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" name="agree_rules" value="1" id="agree_rules"
-                        {{ old('agree_rules') ? 'checked' : '' }} required>
-                    <label class="form-check-label" for="agree_rules">
-                        Saya telah memahami visi misi & tata tertib Mahad Darussalam Yayasan Al-Marwa dan bersedia mematuhi
-                        ketentuan.
+                <div class="mb-3">
+                    <label class="form-label d-block">
+                        Saya telah memahami visi misi & tata tertib Mahad Darussalam Yayasan Al-Marwa dan bersedia memenuhi
+                        peraturan yang ada di mahad.
+                        <span class="text-danger">*</span>
                     </label>
+                    @php $ar = old('agree_rules'); @endphp
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="agree_rules" value="yes"
+                            id="agree_rules_yes" {{ $ar === 'yes' ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="agree_rules_yes">Iya</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="agree_rules" value="no"
+                            id="agree_rules_no" {{ $ar === 'no' ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="agree_rules_no">Tidak</label>
+                    </div>
+                    @error('agree_rules')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox"  required>
-                    <label class="form-check-label" for="agree_rules">
+
+                <div class="mb-3">
+                    <label class="form-label d-block">
                         Bila diterima bersedia untuk menjaga nama baik Ma'had, menyelesaikan segala permasalahan Ma'had
                         dengan kekeluargaan dan tidak melakukan penuntutan dan atau pengaduan kefihak diluar mahad, serta
                         mendukung segala peraturan dan kegiatan mahad. Kritik dan saran disampaikan melalui saluran yang
                         disediakan mahad.
+                        <span class="text-danger">*</span>
                     </label>
-                </div>
-
-
-
-                {{-- Accordion kesanggupan pembayaran --}}
-                <div class="accordion my-3" id="paymentAccordion">
-                    <div class="accordion-item bg-transparent border border-opacity-25">
-                        <h2 class="accordion-header" id="headingPay">
-                            <button class="accordion-button collapsed bg-transparent text-light" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#collapsePay">
-                                Pernyataan Kesanggupan Pembayaran (baca dulu)
-                            </button>
-                        </h2>
-                        <div id="collapsePay" class="accordion-collapse collapse" data-bs-parent="#paymentAccordion">
-                            <div class="accordion-body text-muted small">
-                                {{-- Tempel teks panjang kesanggupan pembayaran kamu di sini (ringkas / full) --}}
-                                <div class="mb-2">Saya bersedia memenuhi kewajiban pembayaran biaya pendidikan sesuai
-                                    waktu yang ditentukan, termasuk ketentuan tanda jadi, infak, dan aturan pengembalian
-                                    dana.</div>
-                                <div class="mb-2">Dengan mencentang, berarti saya telah membaca dan menyetujui seluruh
-                                    ketentuan.</div>
-                            </div>
-                        </div>
+                    @php $ai = old('agree_integrity'); @endphp
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="agree_integrity" value="yes"
+                            id="agree_integrity_yes" {{ $ai === 'yes' ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="agree_integrity_yes">Iya</label>
                     </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="agree_integrity" value="no"
+                            id="agree_integrity_no" {{ $ai === 'no' ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="agree_integrity_no">Tidak</label>
+                    </div>
+                    @error('agree_integrity')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" name="agree_payment" value="1"
-                        id="agree_payment" {{ old('agree_payment') ? 'checked' : '' }} required>
-                    <label class="form-check-label" for="agree_payment">
-                        Saya menyetujui Pernyataan Kesanggupan Pembayaran dan seluruh ketentuan tambahan.
+
+
+                <div class="mb-3">
+                    <label class="form-label d-block">
+                        Saya bersedia memenuhi kewajiban pembayaran biaya pendidikan sesuai waktu yang ditentukan, termasuk ketentuan tanda jadi, infak, dan aturan pengembalian dana.
+Dengan mencentang, berarti saya telah membaca dan menyetujui seluruh ketentuan. <br>
+Saya menyetujui Pernyataan Kesanggupan Pembayaran dengan ketentuan SPP di bayarkan sebelum tanggal 10 setiap bulannya, uang masuk dibayarkan 50% setelah dinyatakan diterima dan dilunasi paling lambat bulan April 2027 serta buku dan seragam dilunasi bulan januari 2027 dan juga bersedia memenuhi seluruh ketentuan tambahan yang belum tercantum dalam form ini.
+                        <span class="text-danger">*</span>
                     </label>
+                    @php $ap = old('agree_payment'); @endphp
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="agree_payment" value="yes"
+                            id="agree_payment_yes" {{ $ap === 'yes' ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="agree_payment_yes">Iya</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="agree_payment" value="no"
+                            id="agree_payment_no" {{ $ap === 'no' ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="agree_payment_no">Tidak</label>
+                    </div>
+                    @error('agree_payment')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <hr class="border-opacity-25">
@@ -329,4 +365,122 @@
         </div>
 
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const API_BASE = 'https://emsifa.github.io/api-wilayah-indonesia/api';
+            const regencySelect = document.getElementById('fatherRegencySelect');
+            const districtSelect = document.getElementById('fatherDistrictSelect');
+
+            const state = {
+                regencyName: @json(old('father_city', $pp->father_city ?? '')),
+                districtName: @json(old('father_district', $pp->father_district ?? '')),
+                regencyId: '',
+            };
+
+            const setSelectOptions = (selectEl, items, placeholder) => {
+                selectEl.innerHTML = '';
+                const ph = document.createElement('option');
+                ph.value = '';
+                ph.disabled = true;
+                ph.selected = true;
+                ph.textContent = placeholder;
+                selectEl.appendChild(ph);
+
+                items.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.name;
+                    opt.textContent = item.name;
+                    opt.dataset.id = item.id;
+                    selectEl.appendChild(opt);
+                });
+            };
+
+            const setLoading = (selectEl, text) => {
+                selectEl.innerHTML = '';
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.disabled = true;
+                opt.selected = true;
+                opt.textContent = text;
+                selectEl.appendChild(opt);
+            };
+
+            const fetchJson = async (url) => {
+                const res = await fetch(url);
+                if (!res.ok) {
+                    throw new Error('Gagal memuat data wilayah.');
+                }
+                return res.json();
+            };
+
+            const findIdByName = (items, name) => {
+                if (!name) return '';
+                const found = items.find(i => i.name === name);
+                return found ? found.id : '';
+            };
+
+            const selectByName = (selectEl, name) => {
+                if (!name) return;
+                const opt = Array.from(selectEl.options).find(o => o.value === name);
+                if (opt) {
+                    opt.selected = true;
+                }
+            };
+
+            const loadRegencies = async () => {
+                try {
+                    setLoading(regencySelect, 'Memuat kota/kabupaten...');
+                    const items = await fetchJson(`${API_BASE}/regencies.json`);
+                    setSelectOptions(regencySelect, items, 'Pilih kota/kabupaten...');
+                    regencySelect.disabled = false;
+                    selectByName(regencySelect, state.regencyName);
+                    state.regencyId = findIdByName(items, state.regencyName);
+                    if (state.regencyId) {
+                        await loadDistricts(state.regencyId);
+                    } else {
+                        setSelectOptions(districtSelect, [], 'Pilih kota/kabupaten dulu');
+                        districtSelect.disabled = true;
+                    }
+                } catch (err) {
+                    setLoading(regencySelect, 'Gagal memuat kota/kabupaten');
+                    regencySelect.disabled = true;
+                }
+            };
+
+            const loadDistricts = async (regencyId) => {
+                if (!regencyId) {
+                    setSelectOptions(districtSelect, [], 'Pilih kota/kabupaten dulu');
+                    districtSelect.disabled = true;
+                    return;
+                }
+                try {
+                    setLoading(districtSelect, 'Memuat kecamatan...');
+                    districtSelect.disabled = true;
+                    const items = await fetchJson(`${API_BASE}/districts/${regencyId}.json`);
+                    setSelectOptions(districtSelect, items, 'Pilih kecamatan...');
+                    districtSelect.disabled = false;
+                    selectByName(districtSelect, state.districtName);
+                } catch (err) {
+                    setLoading(districtSelect, 'Gagal memuat kecamatan');
+                    districtSelect.disabled = true;
+                }
+            };
+
+            regencySelect.addEventListener('change', async (e) => {
+                const selected = e.target.selectedOptions[0];
+                state.regencyName = selected ? selected.value : '';
+                state.regencyId = selected ? selected.dataset.id : '';
+                state.districtName = '';
+                await loadDistricts(state.regencyId);
+            });
+
+            districtSelect.addEventListener('change', (e) => {
+                const selected = e.target.selectedOptions[0];
+                state.districtName = selected ? selected.value : '';
+            });
+
+            loadRegencies();
+        });
+    </script>
 @endsection
