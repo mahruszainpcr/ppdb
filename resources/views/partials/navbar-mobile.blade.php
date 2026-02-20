@@ -1,17 +1,24 @@
-<nav class="navbar navbar-dark bg-dark sticky-top">
-    <div class="container-fluid">
+<nav class="navbar navbar-dark navbar-mobile sticky-top">
+    <div class="container-fluid navbar-mobile-inner">
+        <button class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1 mobile-menu-btn"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#mobileMenu"
+            aria-controls="mobileMenu">
+            <span class="material-symbols-outlined" style="font-size:18px;">menu</span>
+            Menu
+        </button>
 
-        <div class="d-flex align-items-center gap-2">
+        <div class="navbar-brand-wrap">
             <img src="https://mahaddarussalampalas.ponpes.id/logo.png" width="40" alt="Logo Darussalam" height="32"
                 class="rounded">
-
-            <span class="navbar-brand mb-0 h6">
+            <span class="navbar-brand-text">
                 PSB Darussalam Al-Islami Palas Rumbai Pekanbaru Riau
             </span>
         </div>
 
         {{-- USER MENU --}}
-        <div class="dropdown ms-auto">
+        <div class="dropdown ms-auto mobile-user-menu">
             <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
                 {{ auth()->user()->name }}
             </button>

@@ -35,12 +35,78 @@
             .sidebar-desktop {
                 display: none;
             }
+
+            .offcanvas-body {
+                overflow-y: auto;
+            }
+
+            .offcanvas-body .sidebar-area {
+                position: relative;
+                top: 0;
+                left: 0;
+                width: 100%;
+                min-height: 100%;
+                height: auto;
+            }
+
+            .offcanvas-body .layout-menu {
+                max-height: none;
+            }
+
+            .offcanvas-header,
+            .offcanvas-body {
+                background: linear-gradient(180deg, #0f3a2b, #0b2f23);
+                color: #fff;
+            }
         }
 
         .sidebar-area {
             background: linear-gradient(180deg, #0f3a2b, #0b2f23);
             color: #fff;
             min-height: 100vh;
+        }
+
+        .navbar-mobile {
+            background: linear-gradient(90deg, #0f3a2b, #0b2f23);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .navbar-mobile .navbar-mobile-inner {
+            position: relative;
+            min-height: 56px;
+        }
+
+        .navbar-mobile .navbar-brand-wrap {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+            max-width: 62%;
+        }
+
+        .navbar-mobile .navbar-brand-text {
+            font-size: 13px;
+            line-height: 1.2;
+            color: #fff;
+        }
+
+        .navbar-mobile .mobile-menu-btn,
+        .navbar-mobile .mobile-user-menu {
+            z-index: 2;
+        }
+
+        @media (max-width: 575.98px) {
+            .navbar-mobile .navbar-brand-wrap {
+                max-width: 56%;
+            }
+
+            .navbar-mobile .navbar-brand-text {
+                font-size: 12px;
+            }
         }
 
         .sidebar-top {
@@ -102,10 +168,16 @@
 
         .layout-menu .menu-title-text {
             color: rgba(255, 255, 255, 0.65);
+            font-size: 11px;
+            letter-spacing: 0.08em;
         }
 
         .layout-menu .menu-link {
             color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
         }
 
         .layout-menu .menu-link.active,
@@ -116,6 +188,7 @@
         .layout-menu .menu-link.active {
             background: rgba(255, 255, 255, 0.08);
             border-left: 3px solid #C9A24D;
+            box-shadow: inset 0 0 0 1px rgba(201, 162, 77, 0.18);
         }
 
         .layout-menu .menu-item > .menu-link {
@@ -129,10 +202,14 @@
 
         .layout-menu .menu-sub {
             padding-left: 12px;
+            margin-top: 4px;
+            border-left: 1px dashed rgba(255, 255, 255, 0.12);
         }
 
         .layout-menu .menu-sub .menu-link {
             font-size: 12px;
+            padding: 8px 12px 8px 28px;
+            color: rgba(255, 255, 255, 0.75);
         }
 
         .layout-menu .menu-sub {
@@ -167,6 +244,26 @@
             color: #f5d58a;
             border: 1px solid rgba(201, 162, 77, 0.35);
         }
+
+        .layout-menu .menu-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .layout-menu .menu-link.active .menu-icon {
+            background: rgba(201, 162, 77, 0.2);
+            color: #f5d58a;
+        }
+
+        .layout-menu .menu-inner {
+            padding-bottom: 24px;
+        }
     </style>
 </head>
 
@@ -184,14 +281,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body p-0">
-            @include('partials.sidebar')
+            @include('partials.sidebar', ['menuId' => 'layout-menu-mobile'])
         </div>
     </div>
 
     <div class="app-wrapper">
         {{-- SIDEBAR DESKTOP ONLY --}}
         <aside class="sidebar-desktop d-none d-lg-block">
-            @include('partials.sidebar')
+            @include('partials.sidebar', ['menuId' => 'layout-menu-desktop'])
         </aside>
 
         {{-- CONTENT --}}
@@ -207,17 +304,16 @@
     @stack('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const menu = document.getElementById('layout-menu');
-            if (!menu) return;
-
-            menu.querySelectorAll('.menu-toggle').forEach((toggle) => {
-                toggle.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    const item = toggle.closest('.menu-item');
-                    if (!item) return;
-                    const isOpen = item.classList.contains('open');
-                    item.classList.toggle('open', !isOpen);
-                    toggle.setAttribute('aria-expanded', String(!isOpen));
+            document.querySelectorAll('.layout-menu').forEach((menu) => {
+                menu.querySelectorAll('.menu-toggle').forEach((toggle) => {
+                    toggle.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const item = toggle.closest('.menu-item');
+                        if (!item) return;
+                        const isOpen = item.classList.contains('open');
+                        item.classList.toggle('open', !isOpen);
+                        toggle.setAttribute('aria-expanded', String(!isOpen));
+                    });
                 });
             });
         });

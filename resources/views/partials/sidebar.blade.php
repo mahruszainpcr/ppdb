@@ -1,4 +1,7 @@
-<div class="sidebar-area" id="sidebar-area">
+@php
+    $menuId = $menuId ?? 'layout-menu';
+@endphp
+<div class="sidebar-area">
     <div class="logo position-relative sidebar-top">
         <a href="{{ url('/') }}" class="brand-top">
             <img src="https://mahaddarussalampalas.ponpes.id/logo.png" alt="logo-icon" class="brand-logo">
@@ -30,13 +33,12 @@
             @endif
         </div>
         <button
-            class="sidebar-burger-menu bg-transparent p-0 border-0 opacity-0 z-n1 position-absolute top-50 end-0 translate-middle-y"
-            id="sidebar-burger-menu">
+            class="sidebar-burger-menu bg-transparent p-0 border-0 opacity-0 z-n1 position-absolute top-50 end-0 translate-middle-y">
             <i data-feather="x"></i>
         </button>
     </div>
 
-    <aside id="layout-menu" class="layout-menu menu-vertical menu active" data-simplebar>
+    <aside id="{{ $menuId }}" class="layout-menu menu-vertical menu active" data-simplebar>
         <ul class="menu-inner">
 
             {{-- ================= ADMIN ================= --}}
