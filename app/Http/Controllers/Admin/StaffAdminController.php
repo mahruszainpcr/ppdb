@@ -190,11 +190,11 @@ class StaffAdminController extends Controller
     {
         $p = preg_replace('/[^0-9+]/', '', $phone) ?? $phone;
 
-        if (str_starts_with($p, '08')) {
-            $p = '62' . substr($p, 1);
-        }
         if (str_starts_with($p, '+62')) {
-            $p = substr($p, 1);
+            $p = '0' . substr($p, 3);
+        }
+        if (str_starts_with($p, '62')) {
+            $p = '0' . substr($p, 2);
         }
         return $p;
     }

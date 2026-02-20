@@ -76,13 +76,13 @@ class ParentAuthController extends Controller
     private function normalizePhone(string $phone): string
     {
         $phone = preg_replace('/[^0-9+]/', '', $phone);
-        // 08xxxx -> 628xxxx
-        if (str_starts_with($phone, '08')) {
-            $phone = '62' . substr($phone, 1);
-        }
-        // +62xxxx -> 62xxxx
+        // +62xxxx -> 08xxxx
         if (str_starts_with($phone, '+62')) {
-            $phone = '62' . substr($phone, 3);
+            $phone = '0' . substr($phone, 3);
+        }
+        // 62xxxx -> 08xxxx
+        if (str_starts_with($phone, '62')) {
+            $phone = '0' . substr($phone, 2);
         }
         return $phone;
     }

@@ -31,7 +31,7 @@
                     <label class="form-label">Nomor WhatsApp <span class="text-danger">*</span></label>
                     <input name="phone" class="form-control" placeholder="contoh: 08xxxxxxxxxx"
                         value="{{ old('phone') }}" required>
-                    <div class="form-text">Nomor akan disimpan sebagai 62xxxxxxxxxxx.</div>
+                    <div class="form-text">Nomor akan disimpan dengan format 08xxxxxxxxxx.</div>
                 </div>
 
                 <div class="mb-3">
