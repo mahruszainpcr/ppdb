@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\NewsPostController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\ParentAuthController;
+use App\Http\Controllers\Auth\PasswordController;
 
 Route::get('/psb', fn() => view('public.psb.index'));
 Route::get('/psb/syarat', fn() => view('public.psb.syarat'));
@@ -100,6 +101,14 @@ Route::get('/login', [ParentAuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [ParentAuthController::class, 'login'])->name('parent.login.store');
 
 Route::post('/logout', [ParentAuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/change-password', function () {
+        return view('auth.change-password');
+    })->name('password.change');
+    Route::post('/change-password', [PasswordController::class, 'update'])
+        ->name('password.update.self');
+});
 // Route::get('/app', fn() => view('app.dashboard'))->middleware(['auth', 'role:parent'])->name('app.dashboard');
 
 // Route::get('/dashboard', function () {

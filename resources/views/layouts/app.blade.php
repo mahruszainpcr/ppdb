@@ -36,6 +36,137 @@
                 display: none;
             }
         }
+
+        .sidebar-area {
+            background: linear-gradient(180deg, #0f3a2b, #0b2f23);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .sidebar-top {
+            padding: 16px 16px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .brand-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px;
+        }
+
+        .brand-text strong {
+            display: block;
+            font-size: 14px;
+            line-height: 1.1;
+        }
+
+        .brand-text span {
+            display: block;
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .top-action-btn {
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .top-action-btn.danger {
+            background: rgba(239, 68, 68, 0.18);
+            border-color: rgba(239, 68, 68, 0.35);
+        }
+
+        .layout-menu .menu-title-text {
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        .layout-menu .menu-link {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .layout-menu .menu-link.active,
+        .layout-menu .menu-link:hover {
+            color: #fff;
+        }
+
+        .layout-menu .menu-link.active {
+            background: rgba(255, 255, 255, 0.08);
+            border-left: 3px solid #C9A24D;
+        }
+
+        .layout-menu .menu-item > .menu-link {
+            border-radius: 8px;
+        }
+
+        .layout-menu .menu-link.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .layout-menu .menu-sub {
+            padding-left: 12px;
+        }
+
+        .layout-menu .menu-sub .menu-link {
+            font-size: 12px;
+        }
+
+        .layout-menu .menu-sub {
+            display: none;
+        }
+
+        .layout-menu .menu-item.open > .menu-sub {
+            display: block;
+        }
+
+        .menu-chevron {
+            margin-left: auto;
+            font-size: 18px;
+            transition: transform 0.2s ease;
+            opacity: 0.7;
+        }
+
+        .menu-item.open > .menu-link .menu-chevron,
+        .menu-link[aria-expanded="true"] .menu-chevron {
+            transform: rotate(180deg);
+        }
+
+        .badge-soon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 8px;
+            font-size: 10px;
+            border-radius: 999px;
+            margin-left: 8px;
+            background: rgba(201, 162, 77, 0.18);
+            color: #f5d58a;
+            border: 1px solid rgba(201, 162, 77, 0.35);
+        }
     </style>
 </head>
 
@@ -74,6 +205,23 @@
 
     @include('partials.scripts')
     @stack('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menu = document.getElementById('layout-menu');
+            if (!menu) return;
+
+            menu.querySelectorAll('.menu-toggle').forEach((toggle) => {
+                toggle.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const item = toggle.closest('.menu-item');
+                    if (!item) return;
+                    const isOpen = item.classList.contains('open');
+                    item.classList.toggle('open', !isOpen);
+                    toggle.setAttribute('aria-expanded', String(!isOpen));
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
