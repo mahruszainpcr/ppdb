@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\NewsCategoryController;
 use App\Http\Controllers\Admin\NewsPostController;
 use App\Http\Controllers\Admin\AcademicYearController;
+use App\Http\Controllers\Admin\ClassLevelController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\ParentAuthController;
@@ -87,6 +88,21 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.academic-years.destroy');
             Route::patch('/academic-years/{academicYear}/toggle', [AcademicYearController::class, 'toggle'])
                 ->name('admin.academic-years.toggle');
+
+            Route::get('/class-levels', [ClassLevelController::class, 'index'])
+                ->name('admin.class-levels.index');
+            Route::get('/class-levels/create', [ClassLevelController::class, 'create'])
+                ->name('admin.class-levels.create');
+            Route::post('/class-levels', [ClassLevelController::class, 'store'])
+                ->name('admin.class-levels.store');
+            Route::get('/class-levels/{classLevel}/edit', [ClassLevelController::class, 'edit'])
+                ->name('admin.class-levels.edit');
+            Route::put('/class-levels/{classLevel}', [ClassLevelController::class, 'update'])
+                ->name('admin.class-levels.update');
+            Route::delete('/class-levels/{classLevel}', [ClassLevelController::class, 'destroy'])
+                ->name('admin.class-levels.destroy');
+            Route::patch('/class-levels/{classLevel}/toggle', [ClassLevelController::class, 'toggle'])
+                ->name('admin.class-levels.toggle');
         });
 
         Route::get('/news-categories', [NewsCategoryController::class, 'index'])->name('admin.news-categories.index');

@@ -181,7 +181,14 @@
                             </li>
                         @endif
                         <li class="menu-item"><a class="menu-link disabled" href="#">Master Semester <span class="badge-soon">Soon</span></a></li>
-                        <li class="menu-item"><a class="menu-link disabled" href="#">Master Kelas/Tingkatan <span class="badge-soon">Soon</span></a></li>
+                        @if (auth()->user()->role === 'admin')
+                            <li class="menu-item">
+                                <a href="{{ route('admin.class-levels.index') }}"
+                                    class="menu-link {{ Request::is('admin/class-levels*') ? 'active' : '' }}">
+                                    Master Kelas/Tingkatan
+                                </a>
+                            </li>
+                        @endif
                         <li class="menu-item"><a class="menu-link disabled" href="#">Master Mapel/Kitab <span class="badge-soon">Soon</span></a></li>
                         <li class="menu-item"><a class="menu-link disabled" href="#">Ustadz Pengampu <span class="badge-soon">Soon</span></a></li>
                         <li class="menu-item"><a class="menu-link disabled" href="#">Susun Jadwal Akademik <span class="badge-soon">Soon</span></a></li>
