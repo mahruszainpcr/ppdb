@@ -20,8 +20,23 @@
                 <a href="{{ url('/#kontak') }}">Kontak</a>
             </nav>
             <div class="cta">
-                <a class="btn btn-ghost" href="{{ route('login') }}">Login</a>
-                <a class="btn btn-primary" href="{{ route('parent.register') }}">Daftar Santri Baru</a>
+                @auth
+                    @php $role = auth()->user()->role ?? null; @endphp
+                    @if (in_array($role, ['admin', 'ustadz']))
+                        <a class="btn btn-primary" href="{{ url('/admin') }}">Dashboard Admin</a>
+                    @elseif ($role === 'parent')
+                        <a class="btn btn-primary" href="{{ route('app.dashboard') }}">Dashboard</a>
+                    @else
+                        <a class="btn btn-primary" href="{{ route('login') }}">Login</a>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                        @csrf
+                        <button class="btn btn-ghost" type="submit">Logout</button>
+                    </form>
+                @else
+                    <a class="btn btn-ghost" href="{{ route('login') }}">Login</a>
+                    <a class="btn btn-primary" href="{{ route('parent.register') }}">Daftar Santri Baru</a>
+                @endauth
             </div>
         </div>
         <div id="landingMobileMenu" class="mobile-menu" hidden>
@@ -34,8 +49,23 @@
                 <a href="{{ url('/#kontak') }}">Kontak</a>
             </nav>
             <div class="mobile-cta">
-                <a class="btn btn-ghost" href="{{ route('login') }}">Login</a>
-                <a class="btn btn-primary" href="{{ route('parent.register') }}">Daftar Santri Baru</a>
+                @auth
+                    @php $role = auth()->user()->role ?? null; @endphp
+                    @if (in_array($role, ['admin', 'ustadz']))
+                        <a class="btn btn-primary" href="{{ url('/admin') }}">Dashboard Admin</a>
+                    @elseif ($role === 'parent')
+                        <a class="btn btn-primary" href="{{ route('app.dashboard') }}">Dashboard</a>
+                    @else
+                        <a class="btn btn-primary" href="{{ route('login') }}">Login</a>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                        @csrf
+                        <button class="btn btn-ghost" type="submit">Logout</button>
+                    </form>
+                @else
+                    <a class="btn btn-ghost" href="{{ route('login') }}">Login</a>
+                    <a class="btn btn-primary" href="{{ route('parent.register') }}">Daftar Santri Baru</a>
+                @endauth
             </div>
         </div>
     </div>
