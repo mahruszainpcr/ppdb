@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
-    <title>Ma’had Darussalam Al-Islami Rumbai</title>
+    <title>@yield('title', 'Ma’had Darussalam Al-Islami Rumbai')</title>
     <meta name="description"
         content="Ma’had Darussalam Al-Islami Rumbai (Palas) — pendidikan beradab berbasis Al-Qur’an & As-Sunnah, program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter." />
     <meta name="keywords"
@@ -649,9 +649,16 @@
             max-width: 70ch
         }
 
-        .news-grid {
+        .news-grid-top {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 2.1fr 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .news-grid-bottom {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
             gap: 16px;
             margin-top: 16px;
         }
@@ -662,13 +669,16 @@
             border: 1px solid var(--line);
             background: #fff;
             box-shadow: var(--shadow);
-            display: block;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
             color: inherit;
             text-decoration: none;
+            position: relative;
         }
 
         .thumb {
-            height: 150px;
+            aspect-ratio: 16 / 9;
             background:
                 linear-gradient(120deg, rgba(30, 127, 92, .18), rgba(201, 162, 77, .14)),
                 url("https://images.unsplash.com/photo-1519455953755-af066f52f1a6?auto=format&fit=crop&w=1400&q=60");
@@ -678,21 +688,59 @@
 
         .thumb.embed {
             position: relative;
+            aspect-ratio: auto;
             height: auto;
             padding-top: 56.25%;
             background: #000;
         }
 
-        .thumb.embed iframe {
+        .thumb.embed iframe,
+        .thumb.embed blockquote {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             border: 0;
+            margin: 0;
+        }
+
+        .news-card.featured {
+            min-height: 320px;
+            color: #fff;
+        }
+
+        .news-card.featured .thumb {
+            position: absolute;
+            inset: 0;
+            height: 100%;
+            aspect-ratio: auto;
+        }
+
+        .news-card.featured .thumb.embed {
+            position: relative;
+            height: auto;
+        }
+
+        .news-card.featured .news-body {
+            position: relative;
+            margin-top: auto;
+            padding: 18px;
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0) 0%, rgba(2, 6, 23, .75) 65%, rgba(2, 6, 23, .88) 100%);
+        }
+
+        .news-card.featured .news-body h4 {
+            font-size: 22px;
+            line-height: 1.2;
+            margin: 10px 0 6px;
+        }
+
+        .news-card.featured .news-body p {
+            color: rgba(255, 255, 255, .85);
+            font-size: 12px;
         }
 
         .news-body {
-            padding: 14px
+            padding: 14px;
         }
 
         .tag {
@@ -706,6 +754,12 @@
             padding: 6px 10px;
             border-radius: 999px;
             border: 1px solid rgba(30, 127, 92, .16);
+        }
+
+        .news-card.featured .tag {
+            background: rgba(255, 255, 255, .18);
+            color: #fff;
+            border-color: rgba(255, 255, 255, .22);
         }
 
         .news-body h4 {
@@ -727,6 +781,34 @@
             justify-content: space-between;
             color: var(--muted);
             font-size: 12px;
+        }
+
+        .news-card.featured .news-foot {
+            padding: 0;
+            margin-top: 6px;
+            color: rgba(255, 255, 255, .85);
+        }
+
+        .news-card.small .thumb {
+            aspect-ratio: 4 / 3;
+        }
+
+        .news-card.small .news-body h4 {
+            font-size: 12px;
+        }
+
+        .news-card.small .news-foot {
+            padding: 0 12px 12px;
+            font-size: 10px;
+        }
+
+        .news-card.more {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--green);
+            font-weight: 700;
+            border-style: dashed;
         }
 
         /* FOOTER */
@@ -793,9 +875,21 @@
             }
 
             .value-grid,
-            .program-grid,
-            .news-grid {
+            .program-grid {
                 grid-template-columns: 1fr 1fr
+            }
+
+            .news-grid-top {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .news-card.featured {
+                grid-column: 1 / -1;
+                min-height: 260px;
+            }
+
+            .news-grid-bottom {
+                grid-template-columns: repeat(3, 1fr);
             }
 
             .quick-grid {
@@ -822,9 +916,16 @@
             }
 
             .value-grid,
-            .program-grid,
-            .news-grid {
+            .program-grid {
                 grid-template-columns: 1fr
+            }
+
+            .news-grid-top {
+                grid-template-columns: 1fr;
+            }
+
+            .news-grid-bottom {
+                grid-template-columns: repeat(2, 1fr);
             }
 
             .split-wrap {
@@ -871,9 +972,11 @@
             /* sesuaikan tinggi navbar */
         }
     </style>
+    @stack('styles')
 </head>
 
 <body>
+    @section('content')
 
     <!-- HERO -->
     <header class="hero" id="home">
@@ -1083,11 +1186,51 @@
                 </div>
             </div>
 
-            @php $hasInstagramEmbed = false; @endphp
-            <div class="news-grid" style="margin-top:18px;">
-                @if (!empty($newsPosts) && $newsPosts->count())
-                    @foreach ($newsPosts as $post)
-                        <a class="news-card" href="{{ route('news.show', $post->slug) }}">
+            @php
+                $hasInstagramEmbed = false;
+                $posts = !empty($newsPosts) ? $newsPosts : collect();
+                $featuredPost = $posts->first();
+                $mediumPosts = $posts->slice(1, 2);
+                $smallPosts = $posts->slice(3, 5);
+            @endphp
+            @if ($posts->count())
+                <div class="news-grid-top" style="margin-top:18px;">
+                    @if ($featuredPost)
+                        <a class="news-card featured" href="{{ route('news.show', $featuredPost->slug) }}">
+                            @if (($featuredPost->media_type ?? 'image') === 'instagram' && !empty($featuredPost->embed_url))
+                                @php $hasInstagramEmbed = true; @endphp
+                                <div class="thumb embed">
+                                    <blockquote class="instagram-media"
+                                        data-instgrm-permalink="{{ $featuredPost->embed_url }}"
+                                        data-instgrm-version="14"
+                                        style="background:#FFF; border:0; border-radius:0; margin:0; padding:0; width:100%;">
+                                    </blockquote>
+                                </div>
+                            @elseif (($featuredPost->media_type ?? 'image') !== 'image' && !empty($featuredPost->embed_url))
+                                <div class="thumb embed">
+                                    <iframe src="{{ $featuredPost->embed_url }}" title="{{ $featuredPost->title }}"
+                                        loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                                </div>
+                            @else
+                                <div class="thumb"
+                                    style="background-image: url('{{ $featuredPost->thumbnail_url ?? 'https://images.unsplash.com/photo-1519455953755-af066f52f1a6?auto=format&fit=crop&w=1400&q=60' }}');">
+                                </div>
+                            @endif
+                            <div class="news-body">
+                                <span class="tag">{{ $featuredPost->category->name ?? 'INFO' }}</span>
+                                <h4>{{ $featuredPost->title }}</h4>
+                                <p>
+                                    {{ $featuredPost->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($featuredPost->content), 140) }}
+                                </p>
+                                <div class="news-foot">
+                                    <span>{{ optional($featuredPost->published_at ?? $featuredPost->created_at)->format('d M Y') }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    @endif
+
+                    @foreach ($mediumPosts as $post)
+                        <a class="news-card medium" href="{{ route('news.show', $post->slug) }}">
                             @if (($post->media_type ?? 'image') === 'instagram' && !empty($post->embed_url))
                                 @php $hasInstagramEmbed = true; @endphp
                                 <div class="thumb embed">
@@ -1109,72 +1252,158 @@
                             <div class="news-body">
                                 <span class="tag">{{ $post->category->name ?? 'INFO' }}</span>
                                 <h4>{{ $post->title }}</h4>
-                                <p>
-                                    {{ $post->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($post->content), 120) }}
-                                </p>
                             </div>
                             <div class="news-foot">
                                 <span>{{ optional($post->published_at ?? $post->created_at)->format('d M Y') }}</span>
                             </div>
                         </a>
                     @endforeach
-                @else
-                    <article class="news-card">
+                </div>
+
+                <div class="news-grid-bottom">
+                    @foreach ($smallPosts as $post)
+                        <a class="news-card small" href="{{ route('news.show', $post->slug) }}">
+                            @if (($post->media_type ?? 'image') === 'instagram' && !empty($post->embed_url))
+                                @php $hasInstagramEmbed = true; @endphp
+                                <div class="thumb embed">
+                                    <blockquote class="instagram-media"
+                                        data-instgrm-permalink="{{ $post->embed_url }}" data-instgrm-version="14"
+                                        style="background:#FFF; border:0; border-radius:0; margin:0; padding:0; width:100%;">
+                                    </blockquote>
+                                </div>
+                            @elseif (($post->media_type ?? 'image') !== 'image' && !empty($post->embed_url))
+                                <div class="thumb embed">
+                                    <iframe src="{{ $post->embed_url }}" title="{{ $post->title }}" loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                                </div>
+                            @else
+                                <div class="thumb"
+                                    style="background-image: url('{{ $post->thumbnail_url ?? 'https://images.unsplash.com/photo-1519455953755-af066f52f1a6?auto=format&fit=crop&w=1400&q=60' }}');">
+                                </div>
+                            @endif
+                            <div class="news-body">
+                                <h4>{{ $post->title }}</h4>
+                            </div>
+                            <div class="news-foot">
+                                <span>{{ optional($post->published_at ?? $post->created_at)->format('d M Y') }}</span>
+                            </div>
+                        </a>
+                    @endforeach
+
+                    <a class="news-card more" href="{{ route('news.index') }}">
+                        <span>Lihat Berita Lainnya</span>
+                    </a>
+                </div>
+            @else
+                <div class="news-grid-top" style="margin-top:18px;">
+                    <article class="news-card featured">
                         <div class="thumb"></div>
                         <div class="news-body">
-                            <span class="tag">INFO</span>
+                            <span class="tag">LIPUTAN UTAMA</span>
                             <h4>Program Tahfidz 6+1 Tahun</h4>
-                            <p>Enam tahun pendidikan dengan satu tahun pendalaman untuk memperkuat hafalan dan pembinaan.
-                            </p>
-                        </div>
-                        <div class="news-foot">
-                            <span>Tahun Ajaran 2026–2027</span>
-                            <span>Selengkapnya →</span>
+                            <p>Enam tahun pendidikan dengan satu tahun pendalaman untuk memperkuat hafalan dan pembinaan.</p>
+                            <div class="news-foot">
+                                <span>Tahun Ajaran 2026–2027</span>
+                            </div>
                         </div>
                     </article>
 
-                    <article class="news-card">
+                    <article class="news-card medium">
                         <div class="thumb"></div>
                         <div class="news-body">
                             <span class="tag">LINGKUNGAN</span>
                             <h4>Zero Bullying &amp; Pendampingan</h4>
-                            <p>Kebijakan tegas untuk menjaga keamanan dan kenyamanan belajar santri setiap hari.</p>
                         </div>
                         <div class="news-foot">
                             <span>Beradab &amp; Aman</span>
-                            <span>Selengkapnya →</span>
                         </div>
                     </article>
 
-                    <article class="news-card">
+                    <article class="news-card medium">
                         <div class="thumb"></div>
                         <div class="news-body">
                             <span class="tag">BAHASA</span>
                             <h4>Bahasa Arab Harian</h4>
-                            <p>Percakapan dan materi terstruktur (nahwu, sharaf, khat) untuk membangun kompetensi bahasa.
-                            </p>
                         </div>
                         <div class="news-foot">
                             <span>Program Inti</span>
-                            <span>Selengkapnya →</span>
                         </div>
                     </article>
-                @endif
-            </div>
+                </div>
+
+                <div class="news-grid-bottom">
+                    <article class="news-card small">
+                        <div class="thumb"></div>
+                        <div class="news-body">
+                            <h4>Pengajar Bersanad</h4>
+                        </div>
+                        <div class="news-foot">
+                            <span>Februari 2026</span>
+                        </div>
+                    </article>
+
+                    <article class="news-card small">
+                        <div class="thumb"></div>
+                        <div class="news-body">
+                            <h4>Kegiatan Santri</h4>
+                        </div>
+                        <div class="news-foot">
+                            <span>Februari 2026</span>
+                        </div>
+                    </article>
+
+                    <article class="news-card small">
+                        <div class="thumb"></div>
+                        <div class="news-body">
+                            <h4>Bahasa Arab Harian</h4>
+                        </div>
+                        <div class="news-foot">
+                            <span>Februari 2026</span>
+                        </div>
+                    </article>
+
+                    <article class="news-card small">
+                        <div class="thumb"></div>
+                        <div class="news-body">
+                            <h4>Program Diniyah</h4>
+                        </div>
+                        <div class="news-foot">
+                            <span>Februari 2026</span>
+                        </div>
+                    </article>
+
+                    <article class="news-card small">
+                        <div class="thumb"></div>
+                        <div class="news-body">
+                            <h4>Agenda Pekanan</h4>
+                        </div>
+                        <div class="news-foot">
+                            <span>Februari 2026</span>
+                        </div>
+                    </article>
+
+                    <a class="news-card more" href="{{ route('news.index') }}">
+                        <span>Lihat Berita Lainnya</span>
+                    </a>
+                </div>
+            @endif
         </div>
     </section>
 
-        <x-landing-footer />
+    <x-landing-footer />
 
-        @if ($hasInstagramEmbed)
+    @if ($hasInstagramEmbed)
+        @push('scripts')
             <script async src="https://www.instagram.com/embed.js"></script>
-        @endif
+        @endpush
+    @endif
 
+    @show
+
+    @stack('scripts')
 </body>
 
 </html>
-
-
 
 
 

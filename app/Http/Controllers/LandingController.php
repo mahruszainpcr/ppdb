@@ -17,14 +17,14 @@ class LandingController extends Controller
             })
             ->orderByDesc('published_at')
             ->orderByDesc('created_at')
-            ->limit(3)
+            ->limit(8)
             ->get();
 
         if ($newsPosts->isEmpty()) {
             $newsPosts = NewsPost::query()
                 ->with('category')
                 ->orderByDesc('created_at')
-                ->limit(3)
+                ->limit(8)
                 ->get();
         }
 

@@ -92,6 +92,7 @@ Route::prefix('admin')->group(function () {
 });
 
 Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/informasi', [NewsController::class, 'index'])->name('news.index');
 Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show');
 
 Route::get('/register', [ParentAuthController::class, 'showRegister'])->name('parent.register');
