@@ -249,8 +249,9 @@
                 <div class="video-list">
                     @foreach ($sideVideos as $video)
                         <a class="video-item" href="{{ route('news.show', $video->slug) }}">
-                            <div class="video-thumb"
-                                style="background-image: url('{{ $video->thumbnail_url ?? 'https://images.unsplash.com/photo-1519455953755-af066f52f1a6?auto=format&fit=crop&w=800&q=60' }}');">
+                            <div class="video-embed">
+                                <iframe src="{{ $video->embed_url }}" title="{{ $video->title }}" loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
                             </div>
                             <div>
                                 <div class="video-meta">

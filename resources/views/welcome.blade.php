@@ -4,7 +4,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
     <title>@yield('title', 'Ma’had Darussalam Al-Islami Rumbai')</title>
     <meta name="description"
         content="Ma’had Darussalam Al-Islami Rumbai (Palas) — pendidikan beradab berbasis Al-Qur’an & As-Sunnah, program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter." />
@@ -55,7 +60,7 @@
 
         body {
             margin: 0;
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue";
+            font-family: "Public Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue";
             color: var(--text);
             background: #fff;
             line-height: 1.5;
@@ -1404,6 +1409,5 @@
 </body>
 
 </html>
-
 
 
