@@ -5,7 +5,7 @@
                 <div class="brand" style="margin-bottom:10px">
                     <div class="logo"><img src="https://mahaddarussalampalas.ponpes.id/logo.png" alt=""></div>
                     <div>
-                        <strong>Darussalam Al-Islami</strong>
+                        <strong>Ma'had Darussalam Al-Islami</strong>
                         <span>Rumbai</span>
                     </div>
                 </div>

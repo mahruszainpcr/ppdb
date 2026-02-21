@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
     <title>{{ $post->title }} - Ma'had Darussalam Al-Islami</title>
     <style>
         :root {
@@ -125,6 +126,58 @@
             gap: 10px;
         }
 
+        .nav-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .25);
+            background: rgba(255, 255, 255, .10);
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .nav-toggle .material-symbols-outlined {
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .mobile-menu {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(15, 58, 43, 0.98);
+            border: 1px solid rgba(255, 255, 255, .12);
+        }
+
+        .mobile-menu.open {
+            display: block;
+        }
+
+        .mobile-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .mobile-links a {
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .06);
+            color: rgba(255, 255, 255, .95);
+        }
+
+        .mobile-cta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
         .btn {
             display: inline-flex;
             align-items: center;
@@ -233,8 +286,13 @@
         }
 
         @media (max-width: 980px) {
-            .menu {
+            .menu,
+            .cta {
                 display: none
+            }
+
+            .nav-toggle {
+                display: inline-flex
             }
 
             .footer-grid {
@@ -280,6 +338,9 @@
 </body>
 
 </html>
+
+
+
 
 
 

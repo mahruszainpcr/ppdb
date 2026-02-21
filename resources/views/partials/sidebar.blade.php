@@ -6,7 +6,7 @@
         <a href="{{ url('/') }}" class="brand-top">
             <img src="https://mahaddarussalampalas.ponpes.id/logo.png" alt="logo-icon" class="brand-logo">
             <div class="brand-text">
-                <strong>Darussalam Al-Islami</strong>
+                <strong>Ma'had Darussalam Al-Islami</strong>
                 <span>Palas • Rumbai</span>
             </div>
         </a>
