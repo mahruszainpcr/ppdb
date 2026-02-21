@@ -1,14 +1,14 @@
 @extends('layouts.app')
-@section('title', 'Master Mapel/Kitab')
+@section('title', 'Ustadz Pengampu')
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h4 class="mb-0">Master Mapel/Kitab</h4>
-            <div class="text-muted">Kelola daftar mapel dan kitab.</div>
+            <h4 class="mb-0">Ustadz Pengampu</h4>
+            <div class="text-muted">Kelola pengampu mapel/kitab per kelas, semester, dan tahun ajaran.</div>
         </div>
         <div>
-            <a class="btn btn-primary btn-sm" href="{{ route('admin.subjects.create') }}">Tambah Mapel/Kitab</a>
+            <a class="btn btn-primary btn-sm" href="{{ route('admin.teaching-assignments.create') }}">Tambah Pengampu</a>
         </div>
     </div>
 
@@ -23,13 +23,14 @@
     <div class="card trezo-card">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle" id="subjectsTable">
+                <table class="table table-hover mb-0 align-middle" id="teachingAssignmentsTable">
                     <thead>
                         <tr>
-                            <th>Nama</th>
-                            <th>Jenis</th>
-                            <th>Kode</th>
-                            <th>Urutan</th>
+                            <th>Ustadz</th>
+                            <th>Mapel/Kitab</th>
+                            <th>Kelas/Tingkatan</th>
+                            <th>Semester</th>
+                            <th>Tahun Ajaran</th>
                             <th>Status</th>
                             <th>Dibuat</th>
                             <th class="text-end">Aksi</th>
@@ -42,26 +43,31 @@
     </div>
 @endsection
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const table = $('#subjectsTable').DataTable({
+            const table = $('#teachingAssignmentsTable').DataTable({
                 processing: true,
                 serverSide: true,
                 searching: true,
                 lengthChange: true,
                 pageLength: 15,
                 ajax: {
-                    url: @json(route('admin.subjects.data'))
+                    url: @json(route('admin.teaching-assignments.data'))
                 },
                 columns: [
-                    { data: 'name' },
-                    { data: 'type' },
-                    { data: 'code' },
-                    { data: 'sort_order' },
+                    { data: 'ustadz' },
+                    { data: 'subject' },
+                    { data: 'class_level' },
+                    { data: 'semester' },
+                    { data: 'academic_year' },
                     { data: 'status', orderable: false, searchable: false },
                     { data: 'created_at' },
                     { data: 'actions', orderable: false, searchable: false, className: 'text-end' }
@@ -82,8 +88,4 @@
             });
         });
     </script>
-@endpush
-
-@push('styles')
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 @endpush

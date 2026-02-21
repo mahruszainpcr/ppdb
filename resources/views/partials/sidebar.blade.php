@@ -204,7 +204,14 @@
                                 </a>
                             </li>
                         @endif
-                        <li class="menu-item"><a class="menu-link disabled" href="#">Ustadz Pengampu <span class="badge-soon">Soon</span></a></li>
+                        @if (auth()->user()->role === 'admin')
+                            <li class="menu-item">
+                                <a href="{{ route('admin.teaching-assignments.index') }}"
+                                    class="menu-link {{ Request::is('admin/teaching-assignments*') ? 'active' : '' }}">
+                                    Ustadz Pengampu
+                                </a>
+                            </li>
+                        @endif
                         <li class="menu-item"><a class="menu-link disabled" href="#">Susun Jadwal Akademik <span class="badge-soon">Soon</span></a></li>
                         <li class="menu-item"><a class="menu-link disabled" href="#">Kalender Akademik <span class="badge-soon">Soon</span></a></li>
                         <li class="menu-item"><a class="menu-link disabled" href="#">Input Tagihan <span class="badge-soon">Soon</span></a></li>

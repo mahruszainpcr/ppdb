@@ -11,13 +11,81 @@ class AcademicYearController extends Controller
 {
     public function index()
     {
-        $academicYears = AcademicYear::query()
-            ->orderByDesc('is_active')
-            ->orderByDesc('start_date')
-            ->orderByDesc('id')
+        return view('admin.academic_years.index');
+    }
+
+    public function data(Request $request)
+    {
+        $baseQuery = AcademicYear::query();
+        $recordsTotal = (clone $baseQuery)->count();
+
+        $search = $request->input('search');
+        if (is_array($search)) {
+            $search = $search['value'] ?? null;
+        }
+        if ($search) {
+            $s = trim($search);
+            $baseQuery->where('name', 'like', "%{$s}%");
+        }
+
+        $recordsFiltered = (clone $baseQuery)->count();
+
+        $columns = [
+            0 => 'name',
+            1 => 'start_date',
+            2 => 'is_active',
+            3 => 'created_at',
+        ];
+        $orderColumn = $columns[$request->input('order.0.column')] ?? 'created_at';
+        $orderDir = $request->input('order.0.dir') === 'asc' ? 'asc' : 'desc';
+
+        $start = (int) $request->input('start', 0);
+        $length = (int) $request->input('length', 15);
+        if ($length <= 0) {
+            $length = 15;
+        }
+
+        $academicYears = $baseQuery
+            ->orderBy($orderColumn, $orderDir)
+            ->skip($start)
+            ->take($length)
             ->get();
 
-        return view('admin.academic_years.index', compact('academicYears'));
+        $data = $academicYears->map(function (AcademicYear $year) {
+            $toggleUrl = route('admin.academic-years.toggle', $year);
+            $editUrl = route('admin.academic-years.edit', $year);
+            $deleteUrl = route('admin.academic-years.destroy', $year);
+
+            $start = optional($year->start_date)->format('d M Y');
+            $end = optional($year->end_date)->format('d M Y');
+            $range = ($start || $end) ? ($start ?: '-') . ' - ' . ($end ?: '-') : '-';
+
+            $status = $year->is_active ? 'Aktif' : 'Nonaktif';
+
+            return [
+                'name' => e($year->name),
+                'range' => e($range),
+                'status' => '<div class="d-flex align-items-center gap-2">'
+                    . '<span class="badge ' . ($year->is_active ? 'bg-success' : 'bg-secondary') . '">' . $status . '</span>'
+                    . '<form method="POST" action="' . $toggleUrl . '">'
+                    . csrf_field() . method_field('PATCH')
+                    . '<div class="form-check form-switch m-0">'
+                    . '<input class="form-check-input js-toggle-active" type="checkbox" role="switch" ' . ($year->is_active ? 'checked' : '') . '>'
+                    . '</div></form></div>',
+                'created_at' => optional($year->created_at)->format('Y-m-d'),
+                'actions' => '<a class="btn btn-sm btn-outline-light me-1" href="' . $editUrl . '">Edit</a>'
+                    . '<form method="POST" action="' . $deleteUrl . '" class="d-inline" onsubmit="return confirm(\'Hapus tahun ajaran ini?\')">'
+                    . csrf_field() . method_field('DELETE')
+                    . '<button class="btn btn-sm btn-outline-danger">Hapus</button></form>',
+            ];
+        })->values();
+
+        return response()->json([
+            'draw' => (int) $request->input('draw', 1),
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
     }
 
     public function create()

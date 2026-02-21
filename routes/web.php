@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AcademicYearController;
 use App\Http\Controllers\Admin\ClassLevelController;
 use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\TeachingAssignmentController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\ParentAuthController;
@@ -78,6 +79,8 @@ Route::prefix('admin')->group(function () {
 
             Route::get('/academic-years', [AcademicYearController::class, 'index'])
                 ->name('admin.academic-years.index');
+            Route::get('/academic-years/data', [AcademicYearController::class, 'data'])
+                ->name('admin.academic-years.data');
             Route::get('/academic-years/create', [AcademicYearController::class, 'create'])
                 ->name('admin.academic-years.create');
             Route::post('/academic-years', [AcademicYearController::class, 'store'])
@@ -93,6 +96,8 @@ Route::prefix('admin')->group(function () {
 
             Route::get('/class-levels', [ClassLevelController::class, 'index'])
                 ->name('admin.class-levels.index');
+            Route::get('/class-levels/data', [ClassLevelController::class, 'data'])
+                ->name('admin.class-levels.data');
             Route::get('/class-levels/create', [ClassLevelController::class, 'create'])
                 ->name('admin.class-levels.create');
             Route::post('/class-levels', [ClassLevelController::class, 'store'])
@@ -108,6 +113,8 @@ Route::prefix('admin')->group(function () {
 
             Route::get('/semesters', [SemesterController::class, 'index'])
                 ->name('admin.semesters.index');
+            Route::get('/semesters/data', [SemesterController::class, 'data'])
+                ->name('admin.semesters.data');
             Route::get('/semesters/create', [SemesterController::class, 'create'])
                 ->name('admin.semesters.create');
             Route::post('/semesters', [SemesterController::class, 'store'])
@@ -123,6 +130,8 @@ Route::prefix('admin')->group(function () {
 
             Route::get('/subjects', [SubjectController::class, 'index'])
                 ->name('admin.subjects.index');
+            Route::get('/subjects/data', [SubjectController::class, 'data'])
+                ->name('admin.subjects.data');
             Route::get('/subjects/create', [SubjectController::class, 'create'])
                 ->name('admin.subjects.create');
             Route::post('/subjects', [SubjectController::class, 'store'])
@@ -135,6 +144,23 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.subjects.destroy');
             Route::patch('/subjects/{subject}/toggle', [SubjectController::class, 'toggle'])
                 ->name('admin.subjects.toggle');
+
+            Route::get('/teaching-assignments', [TeachingAssignmentController::class, 'index'])
+                ->name('admin.teaching-assignments.index');
+            Route::get('/teaching-assignments/data', [TeachingAssignmentController::class, 'data'])
+                ->name('admin.teaching-assignments.data');
+            Route::get('/teaching-assignments/create', [TeachingAssignmentController::class, 'create'])
+                ->name('admin.teaching-assignments.create');
+            Route::post('/teaching-assignments', [TeachingAssignmentController::class, 'store'])
+                ->name('admin.teaching-assignments.store');
+            Route::get('/teaching-assignments/{teachingAssignment}/edit', [TeachingAssignmentController::class, 'edit'])
+                ->name('admin.teaching-assignments.edit');
+            Route::put('/teaching-assignments/{teachingAssignment}', [TeachingAssignmentController::class, 'update'])
+                ->name('admin.teaching-assignments.update');
+            Route::delete('/teaching-assignments/{teachingAssignment}', [TeachingAssignmentController::class, 'destroy'])
+                ->name('admin.teaching-assignments.destroy');
+            Route::patch('/teaching-assignments/{teachingAssignment}/toggle', [TeachingAssignmentController::class, 'toggle'])
+                ->name('admin.teaching-assignments.toggle');
         });
 
         Route::get('/news-categories', [NewsCategoryController::class, 'index'])->name('admin.news-categories.index');

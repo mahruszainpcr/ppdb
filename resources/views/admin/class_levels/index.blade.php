@@ -23,7 +23,7 @@
     <div class="card trezo-card">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
+                <table class="table table-hover mb-0 align-middle" id="classLevelsTable">
                     <thead>
                         <tr>
                             <th>Nama</th>
@@ -34,45 +34,7 @@
                             <th class="text-end">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse ($classLevels as $level)
-                            <tr>
-                                <td class="fw-semibold">{{ $level->name }}</td>
-                                <td>{{ $level->code ?: '-' }}</td>
-                                <td>{{ $level->sort_order }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="badge {{ $level->is_active ? 'bg-success' : 'bg-secondary' }}">
-                                            {{ $level->is_active ? 'Aktif' : 'Nonaktif' }}
-                                        </span>
-                                        <form method="POST" action="{{ route('admin.class-levels.toggle', $level) }}">
-                                            @csrf
-                                            @method('PATCH')
-                                            <div class="form-check form-switch m-0">
-                                                <input class="form-check-input js-toggle-active" type="checkbox"
-                                                    role="switch" @checked($level->is_active)>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </td>
-                                <td>{{ optional($level->created_at)->format('Y-m-d') }}</td>
-                                <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-light me-1"
-                                        href="{{ route('admin.class-levels.edit', $level) }}">Edit</a>
-                                    <form method="POST" action="{{ route('admin.class-levels.destroy', $level) }}"
-                                        class="d-inline" onsubmit="return confirm('Hapus kelas/tingkatan ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">Belum ada data kelas/tingkatan.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -80,16 +42,46 @@
 @endsection
 
 @push('scripts')
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.js-toggle-active').forEach((toggle) => {
-                toggle.addEventListener('change', function () {
-                    const form = this.closest('form');
-                    if (form) {
-                        form.submit();
-                    }
-                });
+            const table = $('#classLevelsTable').DataTable({
+                processing: true,
+                serverSide: true,
+                searching: true,
+                lengthChange: true,
+                pageLength: 15,
+                ajax: {
+                    url: @json(route('admin.class-levels.data'))
+                },
+                columns: [
+                    { data: 'name' },
+                    { data: 'code' },
+                    { data: 'sort_order' },
+                    { data: 'status', orderable: false, searchable: false },
+                    { data: 'created_at' },
+                    { data: 'actions', orderable: false, searchable: false, className: 'text-end' }
+                ]
+            });
+
+            document.addEventListener('change', function (e) {
+                const toggle = e.target.closest('.js-toggle-active');
+                if (!toggle) return;
+                const form = toggle.closest('form');
+                if (form) {
+                    form.submit();
+                }
+            });
+
+            table.on('draw', function () {
+                // keep event delegation active for toggles after redraw
             });
         });
     </script>
+@endpush
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 @endpush
