@@ -80,6 +80,10 @@
         .video-body h4 {
             margin: 0;
             font-size: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .video-body span {
@@ -126,6 +130,10 @@
         .video-item h5 {
             margin: 0;
             font-size: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .ig-grid,
@@ -177,6 +185,10 @@
         .category-body h4 {
             margin: 0;
             font-size: 13px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .ig-body span,

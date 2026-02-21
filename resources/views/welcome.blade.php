@@ -770,7 +770,11 @@
         .news-body h4 {
             margin: 10px 0 6px;
             font-size: 14px;
-            letter-spacing: -.2px
+            letter-spacing: -.2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .news-body p {
@@ -800,6 +804,10 @@
 
         .news-card.small .news-body h4 {
             font-size: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .news-card.small .news-foot {
@@ -1409,5 +1417,3 @@
 </body>
 
 </html>
-
-
