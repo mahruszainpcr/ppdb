@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\StaffAdminController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\NewsCategoryController;
 use App\Http\Controllers\Admin\NewsPostController;
+use App\Http\Controllers\Admin\AcademicYearController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\ParentAuthController;
@@ -71,6 +72,21 @@ Route::prefix('admin')->group(function () {
             Route::post('/staff/{user}/reset-password', [StaffAdminController::class, 'resetPassword'])
                 ->name('admin.staff.resetPassword');
             Route::post('/staff/{user}/delete', [StaffAdminController::class, 'destroy'])->name('admin.staff.destroy');
+
+            Route::get('/academic-years', [AcademicYearController::class, 'index'])
+                ->name('admin.academic-years.index');
+            Route::get('/academic-years/create', [AcademicYearController::class, 'create'])
+                ->name('admin.academic-years.create');
+            Route::post('/academic-years', [AcademicYearController::class, 'store'])
+                ->name('admin.academic-years.store');
+            Route::get('/academic-years/{academicYear}/edit', [AcademicYearController::class, 'edit'])
+                ->name('admin.academic-years.edit');
+            Route::put('/academic-years/{academicYear}', [AcademicYearController::class, 'update'])
+                ->name('admin.academic-years.update');
+            Route::delete('/academic-years/{academicYear}', [AcademicYearController::class, 'destroy'])
+                ->name('admin.academic-years.destroy');
+            Route::patch('/academic-years/{academicYear}/toggle', [AcademicYearController::class, 'toggle'])
+                ->name('admin.academic-years.toggle');
         });
 
         Route::get('/news-categories', [NewsCategoryController::class, 'index'])->name('admin.news-categories.index');

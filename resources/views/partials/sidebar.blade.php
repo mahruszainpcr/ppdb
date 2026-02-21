@@ -172,7 +172,14 @@
                     <ul class="menu-sub">
                         <li class="menu-item"><a class="menu-link disabled" href="#">Manajemen Pengguna <span class="badge-soon">Soon</span></a></li>
                         <li class="menu-item"><a class="menu-link disabled" href="#">Impor Massal (Excel) <span class="badge-soon">Soon</span></a></li>
-                        <li class="menu-item"><a class="menu-link disabled" href="#">Master Tahun Ajaran <span class="badge-soon">Soon</span></a></li>
+                        @if (auth()->user()->role === 'admin')
+                            <li class="menu-item">
+                                <a href="{{ route('admin.academic-years.index') }}"
+                                    class="menu-link {{ Request::is('admin/academic-years*') ? 'active' : '' }}">
+                                    Master Tahun Ajaran
+                                </a>
+                            </li>
+                        @endif
                         <li class="menu-item"><a class="menu-link disabled" href="#">Master Semester <span class="badge-soon">Soon</span></a></li>
                         <li class="menu-item"><a class="menu-link disabled" href="#">Master Kelas/Tingkatan <span class="badge-soon">Soon</span></a></li>
                         <li class="menu-item"><a class="menu-link disabled" href="#">Master Mapel/Kitab <span class="badge-soon">Soon</span></a></li>
