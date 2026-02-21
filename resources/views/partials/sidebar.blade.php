@@ -180,7 +180,14 @@
                                 </a>
                             </li>
                         @endif
-                        <li class="menu-item"><a class="menu-link disabled" href="#">Master Semester <span class="badge-soon">Soon</span></a></li>
+                        @if (auth()->user()->role === 'admin')
+                            <li class="menu-item">
+                                <a href="{{ route('admin.semesters.index') }}"
+                                    class="menu-link {{ Request::is('admin/semesters*') ? 'active' : '' }}">
+                                    Master Semester
+                                </a>
+                            </li>
+                        @endif
                         @if (auth()->user()->role === 'admin')
                             <li class="menu-item">
                                 <a href="{{ route('admin.class-levels.index') }}"

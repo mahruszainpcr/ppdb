@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\NewsCategoryController;
 use App\Http\Controllers\Admin\NewsPostController;
 use App\Http\Controllers\Admin\AcademicYearController;
 use App\Http\Controllers\Admin\ClassLevelController;
+use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\ParentAuthController;
@@ -103,6 +104,21 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.class-levels.destroy');
             Route::patch('/class-levels/{classLevel}/toggle', [ClassLevelController::class, 'toggle'])
                 ->name('admin.class-levels.toggle');
+
+            Route::get('/semesters', [SemesterController::class, 'index'])
+                ->name('admin.semesters.index');
+            Route::get('/semesters/create', [SemesterController::class, 'create'])
+                ->name('admin.semesters.create');
+            Route::post('/semesters', [SemesterController::class, 'store'])
+                ->name('admin.semesters.store');
+            Route::get('/semesters/{semester}/edit', [SemesterController::class, 'edit'])
+                ->name('admin.semesters.edit');
+            Route::put('/semesters/{semester}', [SemesterController::class, 'update'])
+                ->name('admin.semesters.update');
+            Route::delete('/semesters/{semester}', [SemesterController::class, 'destroy'])
+                ->name('admin.semesters.destroy');
+            Route::patch('/semesters/{semester}/toggle', [SemesterController::class, 'toggle'])
+                ->name('admin.semesters.toggle');
         });
 
         Route::get('/news-categories', [NewsCategoryController::class, 'index'])->name('admin.news-categories.index');
