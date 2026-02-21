@@ -117,6 +117,8 @@ class NewsPostController extends Controller
             'title' => ['required', 'string', 'max:180'],
             'excerpt' => ['nullable', 'string', 'max:300'],
             'content' => ['required', 'string'],
+            'media_type' => ['required', 'in:image,youtube,instagram'],
+            'embed_url' => ['nullable', 'url', 'max:500', 'required_if:media_type,youtube,instagram'],
             'thumbnail' => ['nullable', 'image', 'max:2048'],
             'is_published' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
@@ -130,6 +132,12 @@ class NewsPostController extends Controller
             $data['published_at'] = \Carbon\Carbon::parse($data['published_at']);
         } elseif ($data['is_published']) {
             $data['published_at'] = now();
+        }
+
+        if ($data['media_type'] === 'image') {
+            $data['embed_url'] = null;
+        } elseif ($data['media_type'] === 'youtube' && !empty($data['embed_url'])) {
+            $data['embed_url'] = $this->normalizeYoutubeEmbedUrl($data['embed_url']);
         }
 
         if ($request->hasFile('thumbnail')) {
@@ -163,6 +171,8 @@ class NewsPostController extends Controller
             'title' => ['required', 'string', 'max:180'],
             'excerpt' => ['nullable', 'string', 'max:300'],
             'content' => ['required', 'string'],
+            'media_type' => ['required', 'in:image,youtube,instagram'],
+            'embed_url' => ['nullable', 'url', 'max:500', 'required_if:media_type,youtube,instagram'],
             'thumbnail' => ['nullable', 'image', 'max:2048'],
             'is_published' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
@@ -178,6 +188,12 @@ class NewsPostController extends Controller
             $data['published_at'] = now();
         } elseif (!$data['is_published']) {
             $data['published_at'] = null;
+        }
+
+        if ($data['media_type'] === 'image') {
+            $data['embed_url'] = null;
+        } elseif ($data['media_type'] === 'youtube' && !empty($data['embed_url'])) {
+            $data['embed_url'] = $this->normalizeYoutubeEmbedUrl($data['embed_url']);
         }
 
         if ($request->boolean('remove_thumbnail') && $newsPost->thumbnail_path) {
@@ -226,5 +242,36 @@ class NewsPostController extends Controller
         }
 
         return $slug;
+    }
+
+    private function normalizeYoutubeEmbedUrl(string $url): string
+    {
+        $url = trim($url);
+        $host = strtolower(parse_url($url, PHP_URL_HOST) ?? '');
+        $path = parse_url($url, PHP_URL_PATH) ?? '';
+        $query = parse_url($url, PHP_URL_QUERY) ?? '';
+
+        parse_str($query, $queryParams);
+        $videoId = null;
+
+        if (str_contains($host, 'youtu.be')) {
+            $videoId = ltrim($path, '/');
+        } elseif (str_contains($host, 'youtube.com')) {
+            if (str_starts_with($path, '/watch')) {
+                $videoId = $queryParams['v'] ?? null;
+            } elseif (str_starts_with($path, '/shorts/')) {
+                $videoId = trim(str_replace('/shorts/', '', $path), '/');
+            } elseif (str_starts_with($path, '/embed/')) {
+                $videoId = trim(str_replace('/embed/', '', $path), '/');
+            } elseif (str_starts_with($path, '/live/')) {
+                $videoId = trim(str_replace('/live/', '', $path), '/');
+            }
+        }
+
+        if (!$videoId) {
+            return $url;
+        }
+
+        return 'https://www.youtube.com/embed/' . $videoId;
     }
 }

@@ -48,6 +48,30 @@
             padding: 0 20px
         }
 
+        .post-media-img {
+            width: 100%;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .post-media-embed {
+            position: relative;
+            padding-top: 56.25%;
+            background: #000;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .post-media-embed iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
         .hero {
             position: relative;
             background: linear-gradient(180deg, var(--bg2), var(--bg));
@@ -323,9 +347,20 @@
 
     <main class="container">
         <div class="content">
-            @if ($post->thumbnail_url)
-                <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}"
-                    style="border-radius: 14px; margin-bottom: 16px;">
+            @if (($post->media_type ?? 'image') === 'instagram' && !empty($post->embed_url))
+                <div class="post-media-embed">
+                    <blockquote class="instagram-media"
+                        data-instgrm-permalink="{{ $post->embed_url }}" data-instgrm-version="14"
+                        style="background:#FFF; border:0; margin:0; padding:0; width:100%;"></blockquote>
+                </div>
+                <script async src="https://www.instagram.com/embed.js"></script>
+            @elseif (($post->media_type ?? 'image') !== 'image' && !empty($post->embed_url))
+                <div class="post-media-embed">
+                    <iframe src="{{ $post->embed_url }}" title="{{ $post->title }}" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                </div>
+            @elseif ($post->thumbnail_url)
+                <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" class="post-media-img">
             @endif
 
             {!! $post->content !!}

@@ -15,6 +15,8 @@ class NewsPost extends Model
         'slug',
         'excerpt',
         'content',
+        'media_type',
+        'embed_url',
         'thumbnail_path',
         'is_published',
         'published_at',

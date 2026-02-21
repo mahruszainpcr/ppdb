@@ -67,8 +67,29 @@
 
                 <div class="row g-3 mt-1">
                     <div class="col-md-6">
+                        <label class="form-label">Media Konten</label>
+                        <select name="media_type" id="mediaType" class="form-select" required>
+                            <option value="image" @selected(old('media_type', $post->media_type ?? 'image') === 'image')>Foto</option>
+                            <option value="youtube" @selected(old('media_type', $post->media_type ?? 'image') === 'youtube')>YouTube</option>
+                            <option value="instagram" @selected(old('media_type', $post->media_type ?? 'image') === 'instagram')>Instagram</option>
+                        </select>
+                        @error('media_type')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6" id="embedWrap">
+                        <label class="form-label">Embed URL (YouTube/Instagram)</label>
+                        <input type="url" name="embed_url" id="embedUrl" class="form-control"
+                            value="{{ old('embed_url', $post->embed_url) }}"
+                            placeholder="YouTube: https://youtu.be/xxxx | IG: https://www.instagram.com/p/.../">
+                        <div class="form-text">YouTube bisa link biasa. Instagram cukup link post/reel (bukan script).</div>
+                        @error('embed_url')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6" id="thumbnailWrap">
                         <label class="form-label">Thumbnail</label>
-                        <input type="file" name="thumbnail" class="form-control" accept="image/*">
+                        <input type="file" name="thumbnail" class="form-control" accept="image/*" id="thumbnailInput">
                         @error('thumbnail')
                             <div class="text-danger small mt-1">{{ $message }}</div>
                         @enderror
@@ -143,6 +164,25 @@
             form.addEventListener('submit', function () {
                 document.getElementById('contentInput').value = editor.root.innerHTML;
             });
+
+            const mediaType = document.getElementById('mediaType');
+            const embedWrap = document.getElementById('embedWrap');
+            const thumbnailWrap = document.getElementById('thumbnailWrap');
+
+            const toggleMediaFields = () => {
+                const isImage = mediaType && mediaType.value === 'image';
+                if (embedWrap) {
+                    embedWrap.style.display = isImage ? 'none' : 'block';
+                }
+                if (thumbnailWrap) {
+                    thumbnailWrap.style.display = isImage ? 'block' : 'none';
+                }
+            };
+
+            if (mediaType) {
+                toggleMediaFields();
+                mediaType.addEventListener('change', toggleMediaFields);
+            }
         });
     </script>
 @endpush

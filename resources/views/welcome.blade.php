@@ -662,6 +662,9 @@
             border: 1px solid var(--line);
             background: #fff;
             box-shadow: var(--shadow);
+            display: block;
+            color: inherit;
+            text-decoration: none;
         }
 
         .thumb {
@@ -671,6 +674,21 @@
                 url("https://images.unsplash.com/photo-1519455953755-af066f52f1a6?auto=format&fit=crop&w=1400&q=60");
             background-size: cover;
             background-position: center;
+        }
+
+        .thumb.embed {
+            position: relative;
+            height: auto;
+            padding-top: 56.25%;
+            background: #000;
+        }
+
+        .thumb.embed iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
         }
 
         .news-body {
@@ -1065,13 +1083,29 @@
                 </div>
             </div>
 
+            @php $hasInstagramEmbed = false; @endphp
             <div class="news-grid" style="margin-top:18px;">
                 @if (!empty($newsPosts) && $newsPosts->count())
                     @foreach ($newsPosts as $post)
-                        <article class="news-card">
-                            <div class="thumb"
-                                style="background-image: url('{{ $post->thumbnail_url ?? 'https://images.unsplash.com/photo-1519455953755-af066f52f1a6?auto=format&fit=crop&w=1400&q=60' }}');">
-                            </div>
+                        <a class="news-card" href="{{ route('news.show', $post->slug) }}">
+                            @if (($post->media_type ?? 'image') === 'instagram' && !empty($post->embed_url))
+                                @php $hasInstagramEmbed = true; @endphp
+                                <div class="thumb embed">
+                                    <blockquote class="instagram-media"
+                                        data-instgrm-permalink="{{ $post->embed_url }}" data-instgrm-version="14"
+                                        style="background:#FFF; border:0; border-radius:0; margin:0; padding:0; width:100%;">
+                                    </blockquote>
+                                </div>
+                            @elseif (($post->media_type ?? 'image') !== 'image' && !empty($post->embed_url))
+                                <div class="thumb embed">
+                                    <iframe src="{{ $post->embed_url }}" title="{{ $post->title }}" loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                                </div>
+                            @else
+                                <div class="thumb"
+                                    style="background-image: url('{{ $post->thumbnail_url ?? 'https://images.unsplash.com/photo-1519455953755-af066f52f1a6?auto=format&fit=crop&w=1400&q=60' }}');">
+                                </div>
+                            @endif
                             <div class="news-body">
                                 <span class="tag">{{ $post->category->name ?? 'INFO' }}</span>
                                 <h4>{{ $post->title }}</h4>
@@ -1081,9 +1115,8 @@
                             </div>
                             <div class="news-foot">
                                 <span>{{ optional($post->published_at ?? $post->created_at)->format('d M Y') }}</span>
-                                <a href="{{ route('news.show', $post->slug) }}">Selengkapnya →</a>
                             </div>
-                        </article>
+                        </a>
                     @endforeach
                 @else
                     <article class="news-card">
@@ -1132,6 +1165,10 @@
     </section>
 
         <x-landing-footer />
+
+        @if ($hasInstagramEmbed)
+            <script async src="https://www.instagram.com/embed.js"></script>
+        @endif
 
 </body>
 
