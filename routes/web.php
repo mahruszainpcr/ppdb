@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\ClassLevelController;
 use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\TeachingAssignmentController;
+use App\Http\Controllers\Admin\AcademicScheduleController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\ParentAuthController;
@@ -161,6 +162,23 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.teaching-assignments.destroy');
             Route::patch('/teaching-assignments/{teachingAssignment}/toggle', [TeachingAssignmentController::class, 'toggle'])
                 ->name('admin.teaching-assignments.toggle');
+
+            Route::get('/academic-schedules', [AcademicScheduleController::class, 'index'])
+                ->name('admin.academic-schedules.index');
+            Route::get('/academic-schedules/data', [AcademicScheduleController::class, 'data'])
+                ->name('admin.academic-schedules.data');
+            Route::get('/academic-schedules/create', [AcademicScheduleController::class, 'create'])
+                ->name('admin.academic-schedules.create');
+            Route::post('/academic-schedules', [AcademicScheduleController::class, 'store'])
+                ->name('admin.academic-schedules.store');
+            Route::get('/academic-schedules/{academicSchedule}/edit', [AcademicScheduleController::class, 'edit'])
+                ->name('admin.academic-schedules.edit');
+            Route::put('/academic-schedules/{academicSchedule}', [AcademicScheduleController::class, 'update'])
+                ->name('admin.academic-schedules.update');
+            Route::delete('/academic-schedules/{academicSchedule}', [AcademicScheduleController::class, 'destroy'])
+                ->name('admin.academic-schedules.destroy');
+            Route::patch('/academic-schedules/{academicSchedule}/toggle', [AcademicScheduleController::class, 'toggle'])
+                ->name('admin.academic-schedules.toggle');
         });
 
         Route::get('/news-categories', [NewsCategoryController::class, 'index'])->name('admin.news-categories.index');

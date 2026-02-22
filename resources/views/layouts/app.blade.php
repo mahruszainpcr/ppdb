@@ -10,6 +10,19 @@
     @stack('styles')
 
     <style>
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .app-wrapper,
+        .content-wrapper,
+        .container-fluid {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
         /* Desktop */
         @media (min-width: 992px) {
             .app-wrapper {
@@ -18,7 +31,8 @@
             }
 
             .sidebar-desktop {
-                width: 280px;
+                width: 320px !important;
+                min-width: 320px !important;
             }
 
             .content-wrapper {
@@ -58,12 +72,23 @@
                 background: linear-gradient(180deg, #0f3a2b, #0b2f23);
                 color: #fff;
             }
+
+            .content-wrapper {
+                padding: 0;
+            }
         }
 
         .sidebar-area {
             background: linear-gradient(180deg, #0f3a2b, #0b2f23);
             color: #fff;
             min-height: 100vh;
+            width: 320px !important;
+            min-width: 320px !important;
+        }
+
+        .layout-menu {
+            width: 320px !important;
+            min-width: 320px !important;
         }
 
         .navbar-mobile {
@@ -167,13 +192,13 @@
         }
 
         .layout-menu .menu-title-text {
-            color: rgba(255, 255, 255, 0.65);
+            color: #fff;
             font-size: 11px;
             letter-spacing: 0.08em;
         }
 
         .layout-menu .menu-link {
-            color: rgba(255, 255, 255, 0.9);
+            color: #fff !important;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -209,7 +234,12 @@
         .layout-menu .menu-sub .menu-link {
             font-size: 12px;
             padding: 8px 12px 8px 28px;
-            color: rgba(255, 255, 255, 0.75);
+            color: #fff !important;
+        }
+
+        .layout-menu .menu-link:not(.active),
+        .layout-menu .menu-sub .menu-link:not(.active) {
+            color: #fff !important;
         }
 
         .layout-menu .menu-sub {
@@ -254,6 +284,7 @@
             align-items: center;
             justify-content: center;
             font-size: 18px;
+            color: #fff !important;
         }
 
         .layout-menu .menu-link.active .menu-icon {
@@ -263,6 +294,28 @@
 
         .layout-menu .menu-inner {
             padding-bottom: 24px;
+        }
+
+        .content-wrapper .container-fluid {
+            padding: 16px 18px;
+        }
+
+        @media (max-width: 991.98px) {
+            .content-wrapper .container-fluid {
+                padding: 14px 12px;
+            }
+
+            .content-wrapper h1,
+            .content-wrapper h2,
+            .content-wrapper h3,
+            .content-wrapper h4 {
+                word-break: break-word;
+            }
+
+            .content-wrapper .table-responsive {
+                border-radius: 12px;
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
