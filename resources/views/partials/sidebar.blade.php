@@ -233,6 +233,22 @@
 
                 <li class="menu-item">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <span class="material-symbols-outlined menu-icon">groups_2</span>
+                        <span class="title">Kesantrian</span>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item"><a class="menu-link disabled" href="#">Kelas <span class="badge-soon">Soon</span></a></li>
+                        <li class="menu-item"><a class="menu-link disabled" href="#">Kamar <span class="badge-soon">Soon</span></a></li>
+                        <li class="menu-item"><a class="menu-link disabled" href="#">Santri <span class="badge-soon">Soon</span></a></li>
+                        <li class="menu-item"><a class="menu-link disabled" href="#">Tahfidz <span class="badge-soon">Soon</span></a></li>
+                        <li class="menu-item"><a class="menu-link disabled" href="#">Nadhoman <span class="badge-soon">Soon</span></a></li>
+                        <li class="menu-item"><a class="menu-link disabled" href="#">Kirim Pengumuman <span class="badge-soon">Soon</span></a></li>
+                        <li class="menu-item"><a class="menu-link disabled" href="#">Setting RFID <span class="badge-soon">Soon</span></a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <span class="material-symbols-outlined menu-icon">insights</span>
                         <span class="title">Executive</span>
                     </a>
