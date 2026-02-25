@@ -1007,8 +1007,8 @@
                     </p>
 
                     <div class="hero-actions">
-                        <a class="btn btn-primary" href="#program">Lihat Program</a>
-                        <a class="btn btn-ghost" href="#kontak">Hubungi Kami</a>
+                        <a class="btn btn-primary" href="{{ url('register') }}">Daftar Santri Baru</a>
+                        <a class="btn btn-ghost" href="#kontak">Kontak</a>
                     </div>
 
                     <div class="hero-meta">

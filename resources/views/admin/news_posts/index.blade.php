@@ -19,7 +19,7 @@
                     <input name="search" class="form-control" placeholder="Cari judul / kategori">
                 </div>
                 <div class="col-md-3">
-                    <select name="category_id" class="form-select">
+                    <select name="category_id" class="form-control form-select">
                         <option value="">Kategori (Semua)</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -27,7 +27,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select name="status" class="form-select">
+                    <select name="status" class="form-control form-select">
                         <option value="">Status (Semua)</option>
                         <option value="published">Publish</option>
                         <option value="draft">Draft</option>

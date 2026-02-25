@@ -24,7 +24,7 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Kategori</label>
-                        <select name="news_category_id" class="form-select" required>
+                        <select name="news_category_id" class="form-control form-select" required>
                             <option value="">Pilih Kategori</option>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}"
@@ -68,7 +68,7 @@
                 <div class="row g-3 mt-1">
                     <div class="col-md-6">
                         <label class="form-label">Media Konten</label>
-                        <select name="media_type" id="mediaType" class="form-select" required>
+                        <select name="media_type" id="mediaType" class="form-control form-select" required>
                             <option value="image" @selected(old('media_type', $post->media_type ?? 'image') === 'image')>Foto</option>
                             <option value="youtube" @selected(old('media_type', $post->media_type ?? 'image') === 'youtube')>YouTube</option>
                             <option value="instagram" @selected(old('media_type', $post->media_type ?? 'image') === 'instagram')>Instagram</option>

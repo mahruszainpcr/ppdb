@@ -90,7 +90,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Pendidikan Terakhir <span class="text-danger">*</span></label>
-                        <select name="father_education" class="form-select" required>
+                        <select name="father_education" class="form-control form-select" required>
                             @php $fe = old('father_education', $pp->father_education ?? 'SMA Sederajat'); @endphp
                             @foreach (['SMP Sederajat', 'SMA Sederajat', 'S1', 'S2', 'S3', 'Other'] as $v)
                                 <option value="{{ $v }}" {{ $fe === $v ? 'selected' : '' }}>
@@ -102,7 +102,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Pekerjaan <span class="text-danger">*</span></label>
-                        <select name="father_job" class="form-select" required>
+                        <select name="father_job" class="form-control form-select" required>
                             @php $fj = old('father_job', $pp->father_job ?? 'Karyawan Swasta'); @endphp
                             @foreach (['Pegawai Negeri Sipil', 'Perusahaan Nasional (BUMN, Perusahaan Besar)', 'Karyawan Swasta', 'WIRAUSAHA', 'Other'] as $v)
                                 <option value="{{ $v }}" {{ $fj === $v ? 'selected' : '' }}>
@@ -114,7 +114,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Penghasilan/Bulan <span class="text-danger">*</span></label>
-                        <select name="father_income" class="form-select" required>
+                        <select name="father_income" class="form-control form-select" required>
                             @php $fi = old('father_income', $pp->father_income ?? '2 -5 Juta'); @endphp
                             @foreach (['Dibawah 2 Juta', '2 -5 Juta', 'Diatas 5 Juta', 'Other'] as $v)
                                 <option value="{{ $v }}" {{ $fi === $v ? 'selected' : '' }}>
@@ -131,13 +131,13 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Kota/Kabupaten <span class="text-danger">*</span></label>
-                        <select name="father_city" id="fatherRegencySelect" class="form-select" required>
+                        <select name="father_city" id="fatherRegencySelect" class="form-control form-select" required>
                             <option value="" disabled selected>Memuat...</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Kecamatan <span class="text-danger">*</span></label>
-                        <select name="father_district" id="fatherDistrictSelect" class="form-select" required disabled>
+                        <select name="father_district" id="fatherDistrictSelect" class="form-control form-select" required disabled>
                             <option value="" disabled selected>Pilih kota/kabupaten dulu</option>
                         </select>
                     </div>
@@ -188,7 +188,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Pendidikan Terakhir <span class="text-danger">*</span></label>
-                        <select name="mother_education" class="form-select" required>
+                        <select name="mother_education" class="form-control form-select" required>
                             @php $me = old('mother_education', $pp->mother_education ?? 'SMA Sederajat'); @endphp
                             @foreach (['SMP Sederajat', 'SMA Sederajat', 'S1', 'S2', 'S3', 'Other'] as $v)
                                 <option value="{{ $v }}" {{ $me === $v ? 'selected' : '' }}>
@@ -200,7 +200,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Pekerjaan <span class="text-danger">*</span></label>
-                        <select name="mother_job" class="form-select" required>
+                        <select name="mother_job" class="form-control form-select" required>
                             @php $mj = old('mother_job', $pp->mother_job ?? 'Ibu Rumah Tangga'); @endphp
                             @foreach (['Pegawai Negeri Sipil', 'Perusahaan Nasional (BUMN, Perusahaan Besar)', 'Karyawan Swasta', 'WIRASWASTA', 'Ibu Rumah Tangga', 'Other'] as $v)
                                 <option value="{{ $v }}" {{ $mj === $v ? 'selected' : '' }}>
@@ -212,7 +212,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Penghasilan/Bulan <span class="text-danger">*</span></label>
-                        <select name="mother_income" class="form-select" required>
+                        <select name="mother_income" class="form-control form-select" required>
                             @php $mi = old('mother_income', $pp->mother_income ?? 'Tidak Bepenghasilan'); @endphp
                             @foreach (['Dibawah 2 Juta', '2 -5 Juta', 'Diatas 5 Juta', 'Tidak Bepenghasilan', 'Other'] as $v)
                                 <option value="{{ $v }}" {{ $mi === $v ? 'selected' : '' }}>

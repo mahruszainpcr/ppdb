@@ -22,7 +22,7 @@
                         value="{{ request('search') }}">
                 </div>
                 <div class="col-md-2">
-                    <select name="status" class="form-select">
+                    <select name="status" class="form-control form-select">
                         <option value="">Status (Semua)</option>
                         @foreach (['draft', 'submitted', 'verified', 'revision_requested'] as $st)
                             <option value="{{ $st }}" @selected(request('status') === $st)>{{ $st }}</option>
@@ -30,7 +30,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <select name="graduation_status" class="form-select">
+                    <select name="graduation_status" class="form-control form-select">
                         <option value="">Kelulusan (Semua)</option>
                         @foreach (['pending', 'lulus', 'tidak_lulus', 'cadangan'] as $gs)
                             <option value="{{ $gs }}" @selected(request('graduation_status') === $gs)>{{ $gs }}</option>

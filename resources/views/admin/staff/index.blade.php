@@ -38,7 +38,7 @@
                         value="{{ request('search') }}">
                 </div>
                 <div class="col-md-3">
-                    <select name="role" class="form-select">
+                    <select name="role" class="form-control form-select">
                         <option value="">Semua Role</option>
                         <option value="admin">Admin</option>
                         <option value="ustadz">Ustadz</option>
@@ -95,7 +95,7 @@
                         <input name="email" type="email" class="form-control mb-2">
 
                         <label class="form-label">Role</label>
-                        <select name="role" class="form-select" required>
+                        <select name="role" class="form-control form-select" required>
                             <option value="admin">Admin</option>
                             <option value="ustadz">Ustadz</option>
                         </select>
@@ -134,7 +134,7 @@
                         <input name="email" type="email" class="form-control mb-2" id="editUserEmail">
 
                         <label class="form-label">Role</label>
-                        <select name="role" class="form-select" id="editUserRole" required>
+                        <select name="role" class="form-control form-select" id="editUserRole" required>
                             <option value="admin">Admin</option>
                             <option value="ustadz">Ustadz</option>
                         </select>

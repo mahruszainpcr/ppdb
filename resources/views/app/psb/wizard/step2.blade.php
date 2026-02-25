@@ -55,8 +55,7 @@
                             required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">NISN</label>
-                        <p class="text-muted mb-4">Lihat rapor atau ijazah/SKL.</p>
+                        <label class="form-label">NISN (Lihat rapor atau ijazah/SKL.)</label>
                         <input name="nisn" class="form-control" value="{{ old('nisn', $sp->nisn ?? '') }}">
                     </div>
                     <div class="col-md-6">
@@ -76,7 +75,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Jenis Kelamin <span class="text-danger">*</span></label>
-                        <select name="gender" class="form-select" required>
+                        <select name="gender" class="form-control form-select" required>
                             <option value="" disabled {{ old('gender', $registration->gender) ? '' : 'selected' }}>
                                 Pilih...</option>
                             <option value="male" {{ old('gender', $registration->gender) === 'male' ? 'selected' : '' }}>
@@ -94,19 +93,19 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Provinsi <span class="text-danger">*</span></label>
-                        <select name="province" id="provinceSelect" class="form-select" required>
+                        <select name="province" id="provinceSelect" class="form-control form-select" required>
                             <option value="" disabled selected>Memuat...</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Kabupaten/Kota <span class="text-danger">*</span></label>
-                        <select name="city" id="regencySelect" class="form-select" required disabled>
+                        <select name="city" id="regencySelect" class="form-control form-select" required disabled>
                             <option value="" disabled selected>Pilih provinsi dulu</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Kecamatan <span class="text-danger">*</span></label>
-                        <select name="district" id="districtSelect" class="form-select" required disabled>
+                        <select name="district" id="districtSelect" class="form-control form-select" required disabled>
                             <option value="" disabled selected>Pilih kabupaten/kota dulu</option>
                         </select>
                     </div>
@@ -152,7 +151,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Status Calon Santri <span class="text-danger">*</span></label>
-                        <select name="orphan_status" class="form-select" required>
+                        <select name="orphan_status" class="form-control form-select" required>
                             @php $os = old('orphan_status', $sp->orphan_status ?? 'both'); @endphp
                             <option value="both" {{ $os === 'both' ? 'selected' : '' }}>Masih memiliki kedua orangtua
                             </option>
@@ -189,7 +188,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Motivasi Masuk Pondok <span class="text-danger">*</span></label>
                         @php $mot = old('motivation', $sp->motivation ?? 'self'); @endphp
-                        <select name="motivation" class="form-select" required>
+                        <select name="motivation" class="form-control form-select" required>
                             <option value="self" {{ $mot === 'self' ? 'selected' : '' }}>Keinginan Sendiri</option>
                             <option value="parents" {{ $mot === 'parents' ? 'selected' : '' }}>Keinginan Orangtua</option>
                         </select>
@@ -205,7 +204,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Hafalan Al-Qur'an (Juz) <span class="text-danger">*</span></label>
                         @php $hz = old('quran_memorization_level', $sp->quran_memorization_level ?? 'lt_half'); @endphp
-                        <select name="quran_memorization_level" class="form-select" required>
+                        <select name="quran_memorization_level" class="form-control form-select" required>
                             <option value="lt_half" {{ $hz === 'lt_half' ? 'selected' : '' }}>Kurang dari Setengah Juz
                             </option>
                             <option value="lt_one" {{ $hz === 'lt_one' ? 'selected' : '' }}>Kurang dari Satu Juz</option>
@@ -218,7 +217,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Kemampuan Membaca Al-Qur'an <span class="text-danger">*</span></label>
                         @php $qr = old('quran_reading_level', $sp->quran_reading_level ?? 'none'); @endphp
-                        <select name="quran_reading_level" class="form-select" required>
+                        <select name="quran_reading_level" class="form-control form-select" required>
                             <option value="none" {{ $qr === 'none' ? 'selected' : '' }}>Belum Bisa Baca</option>
                             <option value="iqro" {{ $qr === 'iqro' ? 'selected' : '' }}>Iqro'</option>
                             <option value="fluent" {{ $qr === 'fluent' ? 'selected' : '' }}>Lancar</option>
@@ -231,7 +230,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Program Pilihan <span class="text-danger">*</span></label>
                         @php $pc = old('program_choice', $sp->program_choice ?? 'mahad'); @endphp
-                        <select name="program_choice" class="form-select" required>
+                        <select name="program_choice" class="form-control form-select" required>
                             <option value="mahad" {{ $pc === 'mahad' ? 'selected' : '' }}>Ma'had (target hafalan
                                 persemester 1
                                 Juz)</option>

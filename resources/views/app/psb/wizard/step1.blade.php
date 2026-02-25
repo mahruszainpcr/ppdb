@@ -61,7 +61,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Jenis Pembiayaan <span class="text-danger">*</span></label>
-                                <select name="funding_type" class="form-select" required>
+                                <select name="funding_type" class="form-control form-select" required>
                                     <option value="" disabled
                                         {{ old('funding_type', $registration->funding_type) ? '' : 'selected' }}>Pilih...
                                     </option>
@@ -77,7 +77,7 @@
 
                             <div class="col-md-6">
                                 <label class="form-label">Jenjang Pendidikan <span class="text-danger">*</span></label>
-                                <select name="education_level" class="form-select" required>
+                                <select name="education_level" class="form-control form-select" required>
                                     <option value="" disabled
                                         {{ old('education_level', $registration->education_level) ? '' : 'selected' }}>
                                         Pilih...</option>
@@ -98,8 +98,7 @@
                             <div class="col-md-6">
                                 <label class="form-label">Gelombang <span class="text-danger">*</span></label>
                                 <input type="number" min="1" name="period_wave" class="form-control"
-                                    value="{{ old('period_wave', $activePeriod?->wave ?? 1) }}" required>
-                                <div class="form-text">Nanti bisa dibuat dinamis dari admin periode.</div>
+                                    value="{{ old('period_wave', $activePeriod?->wave ?? 1) }}" readonly>
                             </div>
                         </div>
                     </div>

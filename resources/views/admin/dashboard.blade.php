@@ -19,7 +19,7 @@
             <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-2 align-items-end">
                 <div class="col-12 col-md-6">
                     <label class="form-label mb-1">Filter Periode</label>
-                    <select name="period_id" class="form-select">
+                    <select name="period_id" class="form-control form-select">
                         <option value="">Semua Periode</option>
                         @foreach ($periods as $period)
                             <option value="{{ $period->id }}" @selected($periodId == $period->id)>
