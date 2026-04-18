@@ -137,6 +137,48 @@ class PsbWizardController extends Controller
             ->with('success', 'Draft pendaftaran baru berhasil dibuat. Silakan lengkapi data calon santri.');
     }
 
+    public function destroyRegistration(Request $request, Registration $registration)
+    {
+        if ($registration->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        if ($registration->status !== 'draft') {
+            return back()->withErrors(['delete' => 'Hanya pendaftaran berstatus draft yang bisa dihapus.']);
+        }
+
+        $filePaths = $registration->documents()
+            ->whereNotNull('file_path')
+            ->pluck('file_path')
+            ->toArray();
+
+        DB::transaction(function () use ($registration) {
+            $registration->delete();
+        });
+
+        foreach ($filePaths as $path) {
+            if ($path && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        $activeRegistrationId = (int) $request->session()->get('active_registration_id', 0);
+        if ($activeRegistrationId === $registration->id) {
+            $replacement = Registration::query()
+                ->where('user_id', $request->user()->id)
+                ->latest('id')
+                ->first();
+
+            if ($replacement) {
+                $request->session()->put('active_registration_id', $replacement->id);
+            } else {
+                $request->session()->forget('active_registration_id');
+            }
+        }
+
+        return back()->with('success', 'Pendaftaran berhasil dihapus.');
+    }
+
     public function result(Request $request)
     {
         $activePeriod = \App\Models\Period::query()->active()->latest('id')->first();

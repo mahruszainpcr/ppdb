@@ -5,6 +5,9 @@
     @if (session('success'))
         <div class="alert alert-success border-0 rounded-3">{{ session('success') }}</div>
     @endif
+    @if ($errors->any())
+        <div class="alert alert-danger border-0 rounded-3">{{ $errors->first() }}</div>
+    @endif
 
     @php
         $statusMap = [
@@ -133,6 +136,14 @@
                                                 class="btn btn-sm btn-outline-light">Pilih</a>
                                             <a href="{{ route('psb.wizard', ['step' => $item['next_step'], 'registration' => $item['id']]) }}"
                                                 class="btn btn-sm btn-primary">Lanjutkan</a>
+                                            @if ($item['status'] === 'draft')
+                                                <form method="POST" action="{{ route('psb.delete', ['registration' => $item['id']]) }}"
+                                                    class="d-inline"
+                                                    onsubmit="return confirm('Yakin ingin menghapus pendaftaran ini?');">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                                                </form>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

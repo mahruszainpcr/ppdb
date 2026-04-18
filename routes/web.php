@@ -23,6 +23,7 @@ Route::get('/psb/syarat', fn() => view('public.psb.syarat'));
 Route::middleware(['auth', 'role:parent'])->prefix('app')->group(function () {
     Route::get('/', [PsbWizardController::class, 'dashboard'])->name('app.dashboard');
     Route::get('/psb/new', [PsbWizardController::class, 'createNew'])->name('psb.new');
+    Route::post('/psb/{registration}/delete', [PsbWizardController::class, 'destroyRegistration'])->name('psb.delete');
 
     Route::get('/psb/wizard', [PsbWizardController::class, 'show'])->name('psb.wizard');
     Route::post('/psb/step-1', [PsbWizardController::class, 'saveStep1'])->name('psb.step1');

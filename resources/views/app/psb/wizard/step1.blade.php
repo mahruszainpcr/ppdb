@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Wizard PSB - Step 1')
+@section('title', 'Wizard PSB - Tahap 1')
 
 @section('content')
     <div class="row">
@@ -116,14 +116,14 @@
                             $docs = $registration->documents->keyBy('type');
                             $statusBadge = function ($doc) {
                                 if (!$doc) {
-                                    return '<span class="badge text-bg-secondary">N/A</span>';
+                                    return '<span class="badge text-bg-secondary">Tidak Ada</span>';
                                 }
                                 if ($doc->file_path) {
-                                    return '<span class="badge text-bg-success">Uploaded</span>';
+                                    return '<span class="badge text-bg-success">Sudah Diunggah</span>';
                                 }
                                 return $doc->is_required
-                                    ? '<span class="badge text-bg-warning">Required</span>'
-                                    : '<span class="badge text-bg-secondary">Optional</span>';
+                                    ? '<span class="badge text-bg-warning">Wajib</span>'
+                                    : '<span class="badge text-bg-secondary">Opsional</span>';
                             };
                             $previewBtn = function ($doc) {
                                 if (!$doc || !$doc->file_path) {
@@ -261,11 +261,18 @@
         <div class="col-12 col-lg-4">
             <div class="card trezo-card mb-3">
                 <div class="card-body">
-                    <h6 class="mb-2">Checklist Step 1</h6>
+                    <h6 class="mb-2">Checklist Tahap 1</h6>
                     <div class="text-muted small mb-3">Pastikan dokumen wajib sudah diunggah.</div>
 
                     @php
                         $requiredTypes = ['PAYMENT_PROOF', 'KK', 'BIRTH_CERT', 'KTP_FATHER', 'KTP_MOTHER'];
+                        $documentLabels = [
+                            'PAYMENT_PROOF' => 'Bukti Pembayaran',
+                            'KK' => 'Kartu Keluarga',
+                            'BIRTH_CERT' => 'Akta Kelahiran',
+                            'KTP_FATHER' => 'KTP Ayah',
+                            'KTP_MOTHER' => 'KTP Ibu',
+                        ];
                         $missing = [];
                         foreach ($requiredTypes as $t) {
                             if (empty($docs[$t]?->file_path)) {
@@ -280,12 +287,12 @@
                             <li
                                 class="list-group-item bg-transparent text-light d-flex justify-content-between align-items-center">
                                 <span>
-                                    {{ str_replace('_', ' ', $t) }}
+                                    {{ $documentLabels[$t] ?? $t }}
                                 </span>
                                 @if ($ok)
-                                    <span class="badge text-bg-success">OK</span>
+                                    <span class="badge text-bg-success">Sudah</span>
                                 @else
-                                    <span class="badge text-bg-warning">Missing</span>
+                                    <span class="badge text-bg-warning">Belum Diunggah</span>
                                 @endif
                             </li>
                         @endforeach
