@@ -167,22 +167,40 @@
         }
 
         .layout-menu .menu-title-text {
-            color: rgba(255, 255, 255, 0.65);
+            color: rgba(255, 255, 255, 0.82);
             font-size: 11px;
             letter-spacing: 0.08em;
         }
 
         .layout-menu .menu-link {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.96);
             display: flex;
             align-items: center;
             gap: 10px;
             padding: 10px 12px;
         }
 
+        .layout-menu .menu-link .title {
+            color: #ffffff !important;
+        }
+
+        .layout-menu .menu-link .menu-icon {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .layout-menu .menu-link.menu-toggle::after {
+            border-color: rgba(255, 255, 255, 0.78) !important;
+        }
+
         .layout-menu .menu-link.active,
         .layout-menu .menu-link:hover {
             color: #fff;
+        }
+
+        .layout-menu .menu-link:hover .title,
+        .layout-menu .menu-link:hover .menu-icon,
+        .layout-menu .menu-link:hover .menu-chevron {
+            color: #0f3a2b !important;
         }
 
         .layout-menu .menu-link.active {
