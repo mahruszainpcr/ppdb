@@ -73,6 +73,9 @@
                     </div>
 
                     <div class="d-flex gap-2 mt-3 flex-wrap">
+                        <a href="{{ route('psb.new') }}" class="btn btn-success">
+                            Daftarkan Calon Santri Baru
+                        </a>
                         <a href="{{ route('psb.wizard', ['step' => $nextStep]) }}" class="btn btn-primary">
                             {{ $progressPercent < 100 ? 'Lanjut Lengkapi Form' : 'Lihat / Review Form' }}
                         </a>
@@ -84,6 +87,58 @@
                             Pernyataan</a>
                     </div>
 
+                </div>
+            </div>
+        </div>
+
+        {{-- Riwayat pendaftaran --}}
+        <div class="col-12">
+            <div class="card trezo-card">
+                <div class="card-body">
+                    <h6 class="mb-3">Riwayat Pendaftaran Calon Santri</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nomor Pendaftaran</th>
+                                    <th>Nama Calon Santri</th>
+                                    <th>Progress</th>
+                                    <th>Status</th>
+                                    <th>Dibuat</th>
+                                    <th class="text-end">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($registrationHistories as $item)
+                                    @php
+                                        [$rowStatusLabel, $rowStatusColor] = $statusMap[$item['status']] ?? ['Status', 'secondary'];
+                                    @endphp
+                                    <tr class="{{ $activeRegistrationId === $item['id'] ? 'table-active' : '' }}">
+                                        <td class="fw-semibold">{{ $item['registration_no'] }}</td>
+                                        <td>{{ $item['student_name'] }}</td>
+                                        <td style="min-width: 160px;">
+                                            <div class="d-flex justify-content-between small mb-1">
+                                                <span>{{ $item['progress'] }}%</span>
+                                            </div>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar" style="width: {{ $item['progress'] }}%"></div>
+                                            </div>
+                                        </td>
+                                        <td><span
+                                                class="badge text-bg-{{ $rowStatusColor }}">{{ $rowStatusLabel }}</span>
+                                        </td>
+                                        <td>{{ $item['created_at'] }}</td>
+                                        <td class="text-end">
+                                            <a href="{{ route('app.dashboard', ['registration' => $item['id']]) }}"
+                                                class="btn btn-sm btn-outline-light">Pilih</a>
+                                            <a href="{{ route('psb.wizard', ['step' => $item['next_step'], 'registration' => $item['id']]) }}"
+                                                class="btn btn-sm btn-primary">Lanjutkan</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

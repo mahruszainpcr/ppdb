@@ -22,16 +22,26 @@ class PsbWizardController extends Controller
     {
         $activePeriod = \App\Models\Period::query()->active()->latest('id')->first();
 
-        $registration = \App\Models\Registration::query()
+        $registrations = \App\Models\Registration::query()
             ->where('user_id', $request->user()->id)
-            ->latest('id')
             ->with(['period', 'documents', 'studentProfile', 'parentProfile', 'statement'])
-            ->first();
+            ->latest('id')
+            ->get();
 
         // Jika belum ada pendaftaran sama sekali: arahkan ke wizard step 1 (auto create di show())
-        if (!$registration) {
-            return redirect()->route('psb.wizard', ['step' => 1]);
+        if ($registrations->isEmpty()) {
+            return redirect()->route('psb.new');
         }
+
+        // optional: pilih registration dari query (?registration=ID)
+        $selectedRegistrationId = (int) $request->query('registration', 0);
+        if ($selectedRegistrationId > 0 && $registrations->firstWhere('id', $selectedRegistrationId)) {
+            $request->session()->put('active_registration_id', $selectedRegistrationId);
+        }
+
+        $activeRegistrationId = (int) $request->session()->get('active_registration_id', 0);
+        $registration = $registrations->firstWhere('id', $activeRegistrationId) ?? $registrations->first();
+        $request->session()->put('active_registration_id', $registration->id);
 
         // Hitung progress
         $step1Complete = $registration->isStep1Complete();
@@ -60,6 +70,36 @@ class PsbWizardController extends Controller
 
         // Missing docs list (untuk alert)
         $missingDocs = $registration->missingRequiredDocuments();
+
+        $registrationHistories = $registrations->map(function (Registration $reg) {
+            $step1 = $reg->isStep1Complete();
+            $step2 = (bool) $reg->studentProfile;
+            $step3 = (bool) $reg->parentProfile && (bool) $reg->statement;
+            $done = collect([$step1, $step2, $step3])->filter()->count();
+            $progress = (int) round(($done / 3) * 100);
+
+            $nextStep = 1;
+            if ($step1) {
+                $nextStep = 2;
+            }
+            if ($step1 && $step2) {
+                $nextStep = 3;
+            }
+            if ($step1 && $step2 && $step3) {
+                $nextStep = 3;
+            }
+
+            return [
+                'id' => $reg->id,
+                'registration_no' => $reg->registration_no,
+                'student_name' => $reg->studentProfile?->full_name ?? '-',
+                'status' => $reg->status,
+                'progress' => $progress,
+                'next_step' => $nextStep,
+                'created_at' => $reg->created_at?->format('d M Y') ?? '-',
+            ];
+        });
+
         // dd($waLink);
         return view('app.dashboard', compact(
             'registration',
@@ -70,8 +110,31 @@ class PsbWizardController extends Controller
             'progressPercent',
             'nextStep',
             'waLink',
-            'missingDocs'
+            'missingDocs',
+            'registrationHistories',
+            'activeRegistrationId'
         ));
+    }
+
+    public function createNew(Request $request)
+    {
+        $activePeriod = Period::query()->where('is_active', true)->latest('id')->first();
+
+        $registration = Registration::create([
+            'user_id' => $request->user()->id,
+            'period_id' => $activePeriod?->id,
+            'registration_no' => $this->generateRegistrationNo(),
+            'funding_type' => 'mandiri',
+            'education_level' => 'SMP_NEW',
+            'status' => 'draft',
+            'graduation_status' => 'pending',
+        ]);
+
+        $this->seedDefaultDocuments($registration);
+        $request->session()->put('active_registration_id', $registration->id);
+
+        return redirect()->route('psb.wizard', ['step' => 1])
+            ->with('success', 'Draft pendaftaran baru berhasil dibuat. Silakan lengkapi data calon santri.');
     }
 
     public function result(Request $request)
@@ -100,11 +163,30 @@ class PsbWizardController extends Controller
         // Ambil periode aktif (opsional: kalau belum ada, tetap bisa isi; nanti admin set)
         $activePeriod = Period::query()->where('is_active', true)->latest('id')->first();
 
+        $selectedRegistrationId = (int) $request->query('registration', 0);
+        if ($selectedRegistrationId > 0) {
+            $selectedRegistration = Registration::query()
+                ->where('user_id', $request->user()->id)
+                ->where('id', $selectedRegistrationId)
+                ->first();
+
+            if ($selectedRegistration) {
+                $request->session()->put('active_registration_id', $selectedRegistration->id);
+            }
+        }
+
         // Ambil atau buat draft registration untuk user ini
         $registration = Registration::query()
             ->where('user_id', $request->user()->id)
-            ->latest('id')
+            ->where('id', (int) $request->session()->get('active_registration_id', 0))
             ->first();
+
+        if (!$registration) {
+            $registration = Registration::query()
+                ->where('user_id', $request->user()->id)
+                ->latest('id')
+                ->first();
+        }
 
         if (!$registration) {
             $registration = Registration::create([
@@ -122,6 +204,7 @@ class PsbWizardController extends Controller
             // pastikan dokumen default ada (kalau migration lama / data lama)
             $this->ensureDefaultDocumentsExist($registration);
         }
+        $request->session()->put('active_registration_id', $registration->id);
 
         // Load documents for UI
         $registration->load('documents');
@@ -144,8 +227,15 @@ class PsbWizardController extends Controller
         /** @var Registration $registration */
         $registration = Registration::query()
             ->where('user_id', $user->id)
-            ->latest('id')
-            ->firstOrFail();
+            ->where('id', (int) $request->session()->get('active_registration_id', 0))
+            ->first();
+        if (!$registration) {
+            $registration = Registration::query()
+                ->where('user_id', $user->id)
+                ->latest('id')
+                ->firstOrFail();
+            $request->session()->put('active_registration_id', $registration->id);
+        }
 
         // Validasi pilihan program
         $validated = $request->validate([
@@ -212,8 +302,15 @@ class PsbWizardController extends Controller
     {
         $registration = Registration::query()
             ->where('user_id', $request->user()->id)
-            ->latest('id')
-            ->firstOrFail();
+            ->where('id', (int) $request->session()->get('active_registration_id', 0))
+            ->first();
+        if (!$registration) {
+            $registration = Registration::query()
+                ->where('user_id', $request->user()->id)
+                ->latest('id')
+                ->firstOrFail();
+            $request->session()->put('active_registration_id', $registration->id);
+        }
 
         // Validasi sesuai form kamu (yang bertanda * wajib)
         $validated = $request->validate([
@@ -274,9 +371,17 @@ class PsbWizardController extends Controller
     {
         $registration = Registration::query()
             ->where('user_id', $request->user()->id)
-            ->latest('id')
+            ->where('id', (int) $request->session()->get('active_registration_id', 0))
             ->with('documents', 'studentProfile')
-            ->firstOrFail();
+            ->first();
+        if (!$registration) {
+            $registration = Registration::query()
+                ->where('user_id', $request->user()->id)
+                ->with('documents', 'studentProfile')
+                ->latest('id')
+                ->firstOrFail();
+            $request->session()->put('active_registration_id', $registration->id);
+        }
 
         // Guard: Step 1 minimal lengkap dokumen wajib
         $missing = $registration->missingRequiredDocuments();
@@ -444,4 +549,3 @@ class PsbWizardController extends Controller
         ]);
     }
 }
-
