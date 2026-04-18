@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserAdminController extends Controller
 {
@@ -73,6 +74,31 @@ class UserAdminController extends Controller
             'recordsFiltered' => $recordsFiltered,
             'data' => $data,
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:30', 'unique:users,phone'],
+            'password' => ['required', Password::min(8), 'confirmed'],
+        ], [
+            'phone.unique' => 'Nomor WhatsApp sudah terdaftar.',
+        ]);
+
+        $phone = $this->normalizePhone($data['phone']);
+        if (User::where('phone', $phone)->exists()) {
+            return back()->withErrors(['phone' => 'Nomor WhatsApp sudah terdaftar.'])->withInput();
+        }
+
+        User::create([
+            'name' => $data['name'],
+            'phone' => $phone,
+            'role' => 'parent',
+            'password' => Hash::make($data['password']),
+        ]);
+
+        return back()->with('success', 'Akun wali berhasil ditambahkan.');
     }
 
     public function update(Request $request, User $user)

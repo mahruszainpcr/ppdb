@@ -87,6 +87,38 @@
             margin-top: 4px;
         }
 
+        .parent-auth-page__info {
+            margin-top: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(30, 127, 92, .24);
+            background: #f0fdf4;
+            padding: 12px;
+        }
+
+        .parent-auth-page__info-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #14532d;
+            margin-bottom: 4px;
+        }
+
+        .parent-auth-page__info-text {
+            font-size: 12px;
+            color: #166534;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .parent-auth-page__info-link {
+            width: 100%;
+        }
+
+        .parent-auth-page__info-fallback {
+            font-size: 12px;
+            color: #64748b;
+            margin: 0;
+        }
+
         .parent-auth-page__divider {
             border: 0;
             border-top: 1px solid rgba(15, 23, 42, .08);
@@ -159,6 +191,24 @@
 
                     <button class="btn btn-primary parent-auth-page__submit">Login</button>
                 </form>
+
+                @php
+                    $activePeriod = \App\Models\Period::query()->active()->latest('id')->first();
+
+                @endphp
+
+                <div class="parent-auth-page__info">
+                    <div class="parent-auth-page__info-title">Bergabung Group Info</div>
+                    <div class="parent-auth-page__info-text">
+                        Bergabung dengan group info untuk mendapatkan username dan password dan info login pendaftaran.
+                    </div>
+
+
+                        <a href="https://chat.whatsapp.com/FAUOWIpZJSfHiz6JBsRTfB" target="_blank" rel="noopener"
+                            class="btn btn-outline-success parent-auth-page__info-link">
+                            Gabung Group WA Info
+                        </a>
+                </div>
 
                 <hr class="parent-auth-page__divider">
 

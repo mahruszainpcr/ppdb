@@ -57,6 +57,8 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.users.index');
             Route::get('/users/data', [UserAdminController::class, 'data'])
                 ->name('admin.users.data');
+            Route::post('/users', [UserAdminController::class, 'store'])
+                ->name('admin.users.store');
 
             Route::post('/users/{user}/update', [UserAdminController::class, 'update'])
                 ->name('admin.users.update');
@@ -95,7 +97,7 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/informasi', [NewsController::class, 'index'])->name('news.index');
 Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('news.show');
 
-Route::get('/register', [ParentAuthController::class, 'showRegister'])->name('parent.register');
+Route::get('/register', [ParentAuthController::class, 'showLogin'])->name('parent.register');
 Route::post('/register', [ParentAuthController::class, 'register'])->name('parent.register.store');
 
 Route::get('/login', [ParentAuthController::class, 'showLogin'])->name('login');
