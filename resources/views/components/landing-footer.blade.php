@@ -33,7 +33,7 @@
             <div>
                 <h5>Contact Person</h5>
                 <a href="tel:082172676721">Ikhwan — Ustadz Abu Jafar (0821-7267-6721)</a>
-                <a href="tel:08216790435">Ikhwan — Ustadz Haryadi (0821-6790-435)</a>
+                <a href="tel:08216790435">Ikhwan — Ustadz Haryadi (0812-6790-435)</a>
                 <a href="tel:082117927452">Admin (0821-1792-7452)</a>
                 <a href="tel:087795021625">Akhwat — Ustadzah Rina (0877-9502-1625)</a>
             </div>
