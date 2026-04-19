@@ -65,8 +65,10 @@ Route::prefix('admin')->group(function () {
             Route::post('/users/{user}/update', [UserAdminController::class, 'update'])
                 ->name('admin.users.update');
 
-            Route::post('/users/{user}/reset-password', [UserAdminController::class, 'resetPassword'])
-                ->name('admin.users.resetPassword');
+            Route::post('/users/{user}/update-password', [UserAdminController::class, 'updatePassword'])
+                ->name('admin.users.updatePassword');
+            Route::post('/users/{user}/delete', [UserAdminController::class, 'destroy'])
+                ->name('admin.users.destroy');
 
             Route::get('/periods', [PeriodController::class, 'index'])->name('admin.periods.index');
             Route::post('/periods/save', [PeriodController::class, 'save'])->name('admin.periods.save');

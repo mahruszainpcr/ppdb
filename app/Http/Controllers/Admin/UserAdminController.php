@@ -17,7 +17,7 @@ class UserAdminController extends Controller
 
     public function data(Request $request)
     {
-        $baseQuery = User::query()->where('role', 'parent');
+        $baseQuery = User::query()->where('role', 'parent')->withCount('registrations');
         $recordsTotal = (clone $baseQuery)->count();
 
         $search = $request->input('search');
@@ -58,7 +58,12 @@ class UserAdminController extends Controller
             $name = e($u->name ?? '-');
             $phone = e($u->phone ?? '-');
             $actions = '<button class="btn btn-sm btn-outline-primary btn-edit-user" data-id="' . $u->id . '" data-name="' . $name . '" data-phone="' . $phone . '" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit</button> ';
-            $actions .= '<button class="btn btn-sm btn-outline-warning btn-reset-user" data-id="' . $u->id . '" data-phone="' . $phone . '" data-bs-toggle="modal" data-bs-target="#resetUserModal">Reset Password</button>';
+            $actions .= '<button class="btn btn-sm btn-outline-info btn-password-user" data-id="' . $u->id . '" data-name="' . $name . '" data-phone="' . $phone . '" data-bs-toggle="modal" data-bs-target="#passwordUserModal">Password</button> ';
+            if ((int) ($u->registrations_count ?? 0) === 0) {
+                $actions .= ' <button class="btn btn-sm btn-outline-danger btn-delete-user" data-id="' . $u->id . '" data-name="' . $name . '" data-bs-toggle="modal" data-bs-target="#deleteUserModal">Hapus</button>';
+            } else {
+                $actions .= ' <button class="btn btn-sm btn-outline-secondary" disabled title="Sudah memiliki pendaftaran">Tidak bisa dihapus</button>';
+            }
 
             return [
                 'name' => $name,
@@ -140,6 +145,38 @@ class UserAdminController extends Controller
         return back()
             ->with('reset_password_success', true)
             ->with('reset_password_value', $password);
+    }
+
+    public function updatePassword(Request $request, User $user)
+    {
+        if ($user->role !== 'parent') {
+            return back()->withErrors(['password' => 'User ini bukan akun wali.']);
+        }
+
+        $validated = $request->validate([
+            'password' => ['required', Password::min(8), 'confirmed'],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return back()->with('success', 'Password user berhasil diperbarui.');
+    }
+
+    public function destroy(User $user)
+    {
+        if ($user->role !== 'parent') {
+            return back()->withErrors(['delete' => 'Hanya akun wali yang bisa dihapus dari menu ini.']);
+        }
+
+        if ($user->registrations()->exists()) {
+            return back()->withErrors(['delete' => 'User sudah mengisi pendaftaran, tidak dapat dihapus.']);
+        }
+
+        $user->delete();
+
+        return back()->with('success', 'User berhasil dihapus.');
     }
 
     private function normalizePhone(string $phone): string

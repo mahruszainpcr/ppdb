@@ -5,20 +5,12 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-0">Manajemen Akun Wali</h4>
-            <div class="text-muted">Tambah akun, edit data, dan reset password.</div>
+            <div class="text-muted">Tambah akun, edit data, atur password, dan hapus user yang belum mendaftar.</div>
         </div>
     </div>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    @if (session('reset_password_success'))
-        <div class="alert alert-success">
-            Password berhasil di-reset.<br>
-            <b>Password baru:</b>
-            <span class="bg-dark text-white px-2 py-1 rounded">{{ session('reset_password_value') }}</span>
-        </div>
     @endif
 
     @if ($errors->any())
@@ -125,26 +117,68 @@
         </div>
     </div>
 
-    {{-- MODAL RESET --}}
-    <div class="modal fade" id="resetUserModal" tabindex="-1">
+    {{-- MODAL PASSWORD --}}
+    <div class="modal fade" id="passwordUserModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content trezo-card">
-                <form method="POST" id="resetUserForm">
+                <form method="POST" id="passwordUserForm">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title">Reset Password</h5>
+                        <h5 class="modal-title">Atur Password User</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Password akan di-set sama dengan nomor HP:</p>
-                        <div class="fw-semibold" id="resetUserPhone"></div>
-                        <div class="alert alert-warning mt-2 mb-0">
-                            Password lama akan diganti.
+                        <div class="small text-muted mb-2">User: <span id="passwordUserName" class="fw-semibold">-</span>
+                        </div>
+                        <div class="alert alert-secondary py-2 small">
+                            Password lama tidak bisa ditampilkan karena tersimpan aman (hash). Gunakan password baru.
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="fillPasswordFromPhone">
+                            Gunakan No WhatsApp
+                        </button>
+                        <label class="form-label">Password Baru</label>
+                        <input type="password" name="password" id="passwordUserInput" class="form-control mb-2" required>
+
+                        <label class="form-label">Konfirmasi Password</label>
+                        <input type="password" name="password_confirmation" id="passwordUserConfirmInput"
+                            class="form-control mb-2" required>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="togglePasswordUserInput">
+                            <label class="form-check-label" for="togglePasswordUserInput">
+                                Tampilkan password
+                            </label>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-outline-light" data-bs-dismiss="modal">Batal</button>
-                        <button class="btn btn-warning">Reset</button>
+                        <button class="btn btn-info">Simpan Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL DELETE --}}
+    <div class="modal fade" id="deleteUserModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content trezo-card">
+                <form method="POST" id="deleteUserForm">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title">Hapus User</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-1">Yakin ingin menghapus user ini?</p>
+                        <div class="fw-semibold" id="deleteUserName">-</div>
+                        <div class="alert alert-warning mt-2 mb-0">
+                            User hanya bisa dihapus jika belum memiliki data pendaftaran.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-light" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-danger">Hapus</button>
                     </div>
                 </form>
             </div>
@@ -163,10 +197,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const updateUrlTemplate = @json(route('admin.users.update', ['user' => '__ID__']));
-            const resetUrlTemplate = @json(route('admin.users.resetPassword', ['user' => '__ID__']));
+            const updatePasswordUrlTemplate = @json(route('admin.users.updatePassword', ['user' => '__ID__']));
+            const deleteUrlTemplate = @json(route('admin.users.destroy', ['user' => '__ID__']));
             const toggleCreateUserPassword = document.getElementById('toggleCreateUserPassword');
             const createUserPassword = document.getElementById('createUserPassword');
             const createUserPasswordConfirmation = document.getElementById('createUserPasswordConfirmation');
+            const togglePasswordUserInput = document.getElementById('togglePasswordUserInput');
+            const passwordUserInput = document.getElementById('passwordUserInput');
+            const passwordUserConfirmInput = document.getElementById('passwordUserConfirmInput');
+            const fillPasswordFromPhone = document.getElementById('fillPasswordFromPhone');
+            let selectedUserPhone = '';
 
             const table = $('#usersTable').DataTable({
                 processing: true,
@@ -200,6 +240,20 @@
                     createUserPasswordConfirmation.type = type;
                 });
             }
+            if (togglePasswordUserInput && passwordUserInput && passwordUserConfirmInput) {
+                togglePasswordUserInput.addEventListener('change', function () {
+                    const type = this.checked ? 'text' : 'password';
+                    passwordUserInput.type = type;
+                    passwordUserConfirmInput.type = type;
+                });
+            }
+            if (fillPasswordFromPhone && passwordUserInput && passwordUserConfirmInput) {
+                fillPasswordFromPhone.addEventListener('click', function () {
+                    if (!selectedUserPhone) return;
+                    passwordUserInput.value = selectedUserPhone;
+                    passwordUserConfirmInput.value = selectedUserPhone;
+                });
+            }
 
             document.addEventListener('click', function (e) {
                 const editBtn = e.target.closest('.btn-edit-user');
@@ -209,10 +263,22 @@
                     document.getElementById('editUserForm').action = updateUrlTemplate.replace('__ID__', editBtn.dataset.id);
                 }
 
-                const resetBtn = e.target.closest('.btn-reset-user');
-                if (resetBtn) {
-                    document.getElementById('resetUserPhone').textContent = resetBtn.dataset.phone || '-';
-                    document.getElementById('resetUserForm').action = resetUrlTemplate.replace('__ID__', resetBtn.dataset.id);
+                const passwordBtn = e.target.closest('.btn-password-user');
+                if (passwordBtn) {
+                    document.getElementById('passwordUserName').textContent = passwordBtn.dataset.name || '-';
+                    document.getElementById('passwordUserForm').action = updatePasswordUrlTemplate.replace('__ID__', passwordBtn.dataset.id);
+                    selectedUserPhone = (passwordBtn.dataset.phone || '').trim();
+                    if (passwordUserInput) passwordUserInput.value = '';
+                    if (passwordUserConfirmInput) passwordUserConfirmInput.value = '';
+                    if (togglePasswordUserInput) togglePasswordUserInput.checked = false;
+                    if (passwordUserInput) passwordUserInput.type = 'password';
+                    if (passwordUserConfirmInput) passwordUserConfirmInput.type = 'password';
+                }
+
+                const deleteBtn = e.target.closest('.btn-delete-user');
+                if (deleteBtn) {
+                    document.getElementById('deleteUserName').textContent = deleteBtn.dataset.name || '-';
+                    document.getElementById('deleteUserForm').action = deleteUrlTemplate.replace('__ID__', deleteBtn.dataset.id);
                 }
             });
         });
