@@ -76,6 +76,29 @@ class AdminDashboardController extends Controller
 
         $paymentPending = max($totalRegistrations - $paymentUploaded, 0);
 
+        $paidApprovedList = Registration::query()
+            ->with(['user', 'studentProfile'])
+            ->when($periodId, fn($q) => $q->where('period_id', $periodId))
+            ->whereHas('documents', function ($q) {
+                $q->where('type', 'PAYMENT_PROOF')
+                    ->whereNotNull('file_path')
+                    ->where('is_verified', true);
+            })
+            ->latest('id')
+            ->limit(15)
+            ->get();
+
+        $unpaidList = Registration::query()
+            ->with(['user', 'studentProfile'])
+            ->when($periodId, fn($q) => $q->where('period_id', $periodId))
+            ->whereDoesntHave('documents', function ($q) {
+                $q->where('type', 'PAYMENT_PROOF')
+                    ->whereNotNull('file_path');
+            })
+            ->latest('id')
+            ->limit(15)
+            ->get();
+
         $topSchools = DB::table('student_profiles')
             ->join('registrations', 'student_profiles.registration_id', '=', 'registrations.id')
             ->select('student_profiles.school_origin as label', DB::raw('count(*) as total'))
@@ -145,6 +168,8 @@ class AdminDashboardController extends Controller
             'paymentUploaded' => $paymentUploaded,
             'paymentVerified' => $paymentVerified,
             'paymentPending' => $paymentPending,
+            'paidApprovedList' => $paidApprovedList,
+            'unpaidList' => $unpaidList,
             'topSchools' => $topSchools,
             'topCities' => $topCities,
             'topDistricts' => $topDistricts,
