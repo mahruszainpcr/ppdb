@@ -55,6 +55,7 @@
                         <tr>
                             <th>No Daftar</th>
                             <th>Nama Santri</th>
+                            <th>Nama Wali</th>
                             <th>No WA Wali</th>
                             <th>Jenjang</th>
                             <th>Status</th>
@@ -97,6 +98,7 @@
                 columns: [
                     { data: 'registration_no' },
                     { data: 'student_name', orderable: false },
+                    { data: 'parent_name', orderable: false },
                     { data: 'phone', orderable: false },
                     { data: 'education_level' },
                     { data: 'status', orderable: false, searchable: false },

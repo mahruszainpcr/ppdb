@@ -39,6 +39,7 @@ class RegistrationAdminController extends Controller
             $baseQuery->where(function ($q) use ($s) {
                 $q->where('registration_no', 'like', "%{$s}%")
                     ->orWhereHas('studentProfile', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
+                    ->orWhereHas('user', fn($qq) => $qq->where('name', 'like', "%{$s}%"))
                     ->orWhereHas('user', fn($qq) => $qq->where('phone', 'like', "%{$s}%"));
             });
         }
@@ -57,9 +58,9 @@ class RegistrationAdminController extends Controller
 
         $columns = [
             0 => 'registration_no',
-            3 => 'education_level',
-            4 => 'status',
-            5 => 'graduation_status',
+            4 => 'education_level',
+            5 => 'status',
+            6 => 'graduation_status',
         ];
         $orderColumn = $columns[$request->input('order.0.column')] ?? 'created_at';
         $orderDir = $request->input('order.0.dir') === 'asc' ? 'asc' : 'desc';
@@ -78,6 +79,7 @@ class RegistrationAdminController extends Controller
 
         $data = $registrations->map(function (Registration $r) {
             $studentName = e(optional($r->studentProfile)->full_name ?? '-');
+            $parentName = e($r->user->name ?? '-');
             $phone = e($r->user->phone ?? '-');
             $status = e($r->status ?? '-');
             $graduation = e($r->graduation_status ?? '-');
@@ -86,6 +88,7 @@ class RegistrationAdminController extends Controller
             return [
                 'registration_no' => e($r->registration_no ?? '-'),
                 'student_name' => $studentName,
+                'parent_name' => $parentName,
                 'phone' => $phone,
                 'education_level' => e($r->education_level ?? '-'),
                 'status' => '<span class="badge bg-secondary">' . $status . '</span>',
