@@ -216,13 +216,13 @@
                         <span class="title">Ganti Password</span>
                     </a>
                 </li>
-                {{-- <li class="menu-item">
-                    <a href="{{ route('periods.index') }}"
+                <li class="menu-item">
+                    <a href="{{ route('admin.periods.index') }}"
                         class="menu-link {{ Request::is('admin/periods*') ? 'active' : '' }}">
                         <span class="material-symbols-outlined menu-icon">event</span>
-                        <span class="title">Periode / Gelombang</span>
+                        <span class="title">Pengaturan PPDB</span>
                     </a>
-                </li> --}}
+                </li>
 
                 <li class="menu-item">
                     <form method="POST" action="{{ route('admin.logout') }}">

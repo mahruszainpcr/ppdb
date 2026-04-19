@@ -18,6 +18,10 @@ class PeriodSeeder extends Seeder
             'wave' => 1,
             'is_active' => true,
 
+            // Periode pendaftaran
+            'registration_open_date' => Carbon::create(2025, 9, 1),
+            'registration_close_date' => Carbon::create(2025, 9, 30),
+
             // Jadwal penting
             'exam_date' => Carbon::create(2025, 10, 4),        // Sabtu, 04 Oktober 2025
             'announce_date' => Carbon::create(2025, 10, 6),    // Pengumuman 06 Oktober 2025
@@ -30,6 +34,7 @@ class PeriodSeeder extends Seeder
             // Kontak admin
             'admin_contact_1' => 'Abu Ja\'far : 0821-7267-6721',
             'admin_contact_2' => 'Admin : 0821-1792-7452',
+            'information_note' => 'Silakan pantau update jadwal dan informasi resmi melalui dashboard ini.',
 
             'created_at' => now(),
             'updated_at' => now(),

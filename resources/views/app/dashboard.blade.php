@@ -277,6 +277,13 @@
                     <h6 class="mb-2">Jadwal Penting</h6>
                     @if ($period)
                         <ul class="small text-muted mb-0">
+                            <li>Pendaftaran:
+                                <b>
+                                    {{ optional($period->registration_open_date)->format('d M Y') ?? '-' }}
+                                    s/d
+                                    {{ optional($period->registration_close_date)->format('d M Y') ?? '-' }}
+                                </b>
+                            </li>
                             <li>Ujian: <b>{{ optional($period->exam_date)->format('d M Y') ?? '-' }}</b></li>
                             <li>Pengumuman: <b>{{ optional($period->announce_date)->format('d M Y') ?? '-' }}</b></li>
                             <li>Batas Tanda Jadi:
@@ -315,11 +322,20 @@
                     <div class="text-muted small mb-2">Untuk informasi lebih lanjut:</div>
 
                     <ul class="small text-muted mb-0">
-                        <li>Abu Ja'far: <b>{{ $period?->admin_contact_1 ?? '0821-7267-6721' }}</b></li>
-                        <li>Admin: <b>{{ $period?->admin_contact_2 ?? '0821-1792-7452' }}</b></li>
+                        <li><b>{{ $period?->admin_contact_1 ?? "Abu Ja'far: 0821-7267-6721" }}</b></li>
+                        <li><b>{{ $period?->admin_contact_2 ?? 'Admin: 0821-1792-7452' }}</b></li>
                     </ul>
                 </div>
             </div>
+
+            @if (!empty($period?->information_note))
+                <div class="card trezo-card mt-3">
+                    <div class="card-body">
+                        <h6 class="mb-2">Informasi Tambahan</h6>
+                        <div class="small text-muted" style="white-space: pre-line;">{{ $period->information_note }}</div>
+                    </div>
+                </div>
+            @endif
         </div>
 
     </div>

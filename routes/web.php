@@ -68,6 +68,9 @@ Route::prefix('admin')->group(function () {
             Route::post('/users/{user}/reset-password', [UserAdminController::class, 'resetPassword'])
                 ->name('admin.users.resetPassword');
 
+            Route::get('/periods', [PeriodController::class, 'index'])->name('admin.periods.index');
+            Route::post('/periods/save', [PeriodController::class, 'save'])->name('admin.periods.save');
+
             Route::get('/staff', [StaffAdminController::class, 'index'])->name('admin.staff.index');
             Route::get('/staff/data', [StaffAdminController::class, 'data'])->name('admin.staff.data');
             Route::post('/staff', [StaffAdminController::class, 'store'])->name('admin.staff.store');
@@ -125,5 +128,11 @@ Route::middleware('auth')->group(function () {
 //     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 //     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 // });
+Route::get('/migrate', function () {
+    // Run the migrations
+    Artisan::call('migrate', ['--force' => true]);
+
+    return "Migrations completed successfully!";
+});
 
 // require __DIR__ . '/auth.php';

@@ -11,6 +11,8 @@ class Period extends Model
         'name',
         'wave',
         'is_active',
+        'registration_open_date',
+        'registration_close_date',
         'exam_date',
         'announce_date',
         'down_payment_deadline',
@@ -18,10 +20,13 @@ class Period extends Model
         'wa_group_akhwat',
         'admin_contact_1',
         'admin_contact_2',
+        'information_note',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'registration_open_date' => 'date',
+        'registration_close_date' => 'date',
         'exam_date' => 'date',
         'announce_date' => 'date',
         'down_payment_deadline' => 'date',
