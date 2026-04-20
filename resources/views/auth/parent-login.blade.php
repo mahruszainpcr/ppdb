@@ -82,6 +82,28 @@
             box-shadow: 0 0 0 3px rgba(30, 127, 92, .12);
         }
 
+        .parent-auth-page__password-wrap {
+            position: relative;
+        }
+
+        .parent-auth-page__password-wrap .parent-auth-page__input {
+            padding-right: 88px;
+        }
+
+        .parent-auth-page__toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: #1E7F5C;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 4px 6px;
+        }
+
         .parent-auth-page__submit {
             width: 100%;
             margin-top: 4px;
@@ -186,7 +208,12 @@
                         <label class="parent-auth-page__label">
                             Password <span class="parent-auth-page__req">*</span>
                         </label>
-                        <input type="password" name="password" class="parent-auth-page__input" required>
+                        <div class="parent-auth-page__password-wrap">
+                            <input type="password" name="password" id="parentLoginPassword" class="parent-auth-page__input"
+                                required>
+                            <button type="button" id="toggleParentLoginPassword"
+                                class="parent-auth-page__toggle-password">Lihat</button>
+                        </div>
                     </div>
 
                     <button class="btn btn-primary parent-auth-page__submit">Login</button>
@@ -222,3 +249,22 @@
 
     <x-landing-footer />
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('parentLoginPassword');
+            const toggleButton = document.getElementById('toggleParentLoginPassword');
+
+            if (!passwordInput || !toggleButton) {
+                return;
+            }
+
+            toggleButton.addEventListener('click', function() {
+                const show = passwordInput.type === 'password';
+                passwordInput.type = show ? 'text' : 'password';
+                toggleButton.textContent = show ? 'Sembunyikan' : 'Lihat';
+            });
+        });
+    </script>
+@endpush
