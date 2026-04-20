@@ -35,7 +35,7 @@
                     </form>
                 @else
                     <a class="btn btn-ghost" href="{{ route('login') }}">Login</a>
-                    <a class="btn btn-primary" href="{{ route('parent.register') }}">Daftar Santri Baru</a>
+                    <a class="btn btn-primary" href="{{ url('/register') }}">Daftar Santri Baru</a>
                 @endauth
             </div>
         </div>
@@ -64,7 +64,7 @@
                     </form>
                 @else
                     <a class="btn btn-ghost" href="{{ route('login') }}">Login</a>
-                    <a class="btn btn-primary" href="{{ route('parent.register') }}">Daftar Santri Baru</a>
+                    <a class="btn btn-primary" href="{{ url('/register') }}">Daftar Santri Baru</a>
                 @endauth
             </div>
         </div>

@@ -20,8 +20,10 @@ class ParentProfile extends Model
         'father_job',
         'father_income',
         'father_address',
+        'father_province',
         'father_city',
         'father_district',
+        'father_village',
         'father_postal_code',
         'father_phone',
 

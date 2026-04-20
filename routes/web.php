@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\App\PsbWizardController;
+use App\Http\Controllers\App\WilayahController;
 use App\Http\Controllers\Admin\RegistrationAdminController;
 use App\Http\Controllers\Admin\PeriodController;
 use App\Http\Controllers\Admin\AdminAuthController;
@@ -29,6 +30,7 @@ Route::middleware(['auth', 'role:parent'])->prefix('app')->group(function () {
     Route::post('/psb/step-1', [PsbWizardController::class, 'saveStep1'])->name('psb.step1');
     Route::post('/psb/step-2', [PsbWizardController::class, 'saveStep2'])->name('psb.step2');
     Route::post('/psb/step-3', [PsbWizardController::class, 'saveStep3Submit'])->name('psb.step3.submit');
+    Route::get('/wilayah/options', [WilayahController::class, 'options'])->name('app.wilayah.options');
 
     Route::get('/result', [PsbWizardController::class, 'result'])->name('psb.result');
 });

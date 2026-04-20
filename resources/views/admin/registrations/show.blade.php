@@ -367,7 +367,8 @@
                                             <div class="text-muted small">Alamat</div>
                                             <div class="fw-semibold">{{ $pp?->father_address ?? '-' }}</div>
                                             <div class="text-muted small">
-                                                {{ $pp?->father_city ?? '-' }} • {{ $pp?->father_district ?? '-' }} •
+                                                {{ $pp?->father_province ?? '-' }} • {{ $pp?->father_city ?? '-' }} •
+                                                {{ $pp?->father_district ?? '-' }} • {{ $pp?->father_village ?? '-' }} •
                                                 {{ $pp?->father_postal_code ?? '-' }}
                                             </div>
                                         </div>

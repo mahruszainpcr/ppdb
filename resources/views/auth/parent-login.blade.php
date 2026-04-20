@@ -214,7 +214,7 @@
 
                 <div class="parent-auth-page__foot">
                     <span>Belum punya akun?</span>
-                    <a href="{{ route('parent.register') }}">Registrasi</a>
+                    <a href="{{ url('/register') }}">Registrasi</a>
                 </div>
             </div>
         </div>

@@ -12,6 +12,7 @@ class Statement extends Model
         'willing_to_serve',
         'agree_morality',
         'agree_rules',
+        'agree_integrity',
         'agree_payment',
         'submitted_at',
     ];
@@ -20,6 +21,7 @@ class Statement extends Model
         'willing_to_serve' => 'boolean',
         'agree_morality' => 'boolean',
         'agree_rules' => 'boolean',
+        'agree_integrity' => 'boolean',
         'agree_payment' => 'boolean',
         'submitted_at' => 'datetime',
     ];

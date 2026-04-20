@@ -60,12 +60,15 @@ class PsbWizardController extends Controller
         if ($step1Complete && $step2Complete && $step3Complete)
             $nextStep = 3; // sudah lengkap, step 3 jadi review
 
-        // WA group berdasarkan gender
+        // WA group berdasarkan gender, hanya tampil jika progress sudah 100%
         $waLink = null;
-        if ($registration->gender === 'male') {
-            $waLink = $registration->period?->wa_group_ikhwan ?? $activePeriod?->wa_group_ikhwan;
-        } elseif ($registration->gender === 'female') {
-            $waLink = $registration->period?->wa_group_akhwat ?? $activePeriod?->wa_group_akhwat;
+        $showWaGroup = $progressPercent === 100;
+        if ($showWaGroup) {
+            if ($registration->gender === 'male') {
+                $waLink = $registration->period?->wa_group_ikhwan ?? $activePeriod?->wa_group_ikhwan;
+            } elseif ($registration->gender === 'female') {
+                $waLink = $registration->period?->wa_group_akhwat ?? $activePeriod?->wa_group_akhwat;
+            }
         }
 
         // Missing docs list (untuk alert)
@@ -369,6 +372,7 @@ class PsbWizardController extends Controller
             'province' => ['required', 'string', 'max:120'],
             'city' => ['required', 'string', 'max:120'],
             'district' => ['required', 'string', 'max:120'],
+            'village' => ['required', 'string', 'max:120'],
             'postal_code' => ['nullable', 'string', 'max:10'],
 
             'school_origin' => ['required', 'string', 'max:255'],
@@ -450,8 +454,10 @@ class PsbWizardController extends Controller
             'father_job' => ['required', 'string', 'max:120'],
             'father_income' => ['required', 'string', 'max:120'],
             'father_address' => ['required', 'string', 'max:1000'],
+            'father_province' => ['required', 'string', 'max:120'],
             'father_city' => ['required', 'string', 'max:120'],
             'father_district' => ['required', 'string', 'max:120'],
+            'father_village' => ['required', 'string', 'max:120'],
             'father_postal_code' => ['nullable', 'string', 'max:10'],
             'father_phone' => ['required', 'string', 'max:30'],
 
@@ -502,6 +508,7 @@ class PsbWizardController extends Controller
                     'willing_to_serve' => true,
                     'agree_morality' => true,
                     'agree_rules' => true,
+                    'agree_integrity' => true,
                     'agree_payment' => true,
                     'submitted_at' => now(),
                 ]

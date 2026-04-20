@@ -18,6 +18,7 @@ class StudentProfile extends Model
         'province',
         'city',
         'district',
+        'village',
         'postal_code',
         'school_origin',
         'hobby',
