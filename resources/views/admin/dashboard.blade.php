@@ -173,21 +173,25 @@
                             <tbody>
                                 @foreach ($completedList as $item)
                                     @php
-                                        $studentNames = $item->registrations
-                                            ->map(fn($reg) => $reg->studentProfile?->full_name)
+                                        $studentRegistrations = $item->registrations
+                                            ->filter(fn($reg) => filled($reg->studentProfile?->full_name))
+                                            ->unique(fn($reg) => strtolower(trim((string) $reg->studentProfile?->full_name)))
                                             ->filter()
-                                            ->unique()
                                             ->values();
                                     @endphp
                                     <tr>
                                         <td>{{ $item->name ?? '-' }}</td>
                                         <td>
-                                            @if ($studentNames->isEmpty())
+                                            @if ($studentRegistrations->isEmpty())
                                                 -
                                             @else
                                                 <ol class="mb-0 ps-3">
-                                                    @foreach ($studentNames as $studentName)
-                                                        <li>{{ $studentName }}</li>
+                                                    @foreach ($studentRegistrations as $reg)
+                                                        <li>
+                                                            <a href="{{ route('admin.registrations.show', $reg) }}">
+                                                                {{ $reg->studentProfile?->full_name }}
+                                                            </a>
+                                                        </li>
                                                     @endforeach
                                                 </ol>
                                             @endif
@@ -215,21 +219,25 @@
                             <tbody>
                                 @foreach ($loggedInList as $item)
                                     @php
-                                        $studentNames = $item->registrations
-                                            ->map(fn($reg) => $reg->studentProfile?->full_name)
+                                        $studentRegistrations = $item->registrations
+                                            ->filter(fn($reg) => filled($reg->studentProfile?->full_name))
+                                            ->unique(fn($reg) => strtolower(trim((string) $reg->studentProfile?->full_name)))
                                             ->filter()
-                                            ->unique()
                                             ->values();
                                     @endphp
                                     <tr>
                                         <td>{{ $item->name ?? '-' }}</td>
                                         <td>
-                                            @if ($studentNames->isEmpty())
+                                            @if ($studentRegistrations->isEmpty())
                                                 -
                                             @else
                                                 <ol class="mb-0 ps-3">
-                                                    @foreach ($studentNames as $studentName)
-                                                        <li>{{ $studentName }}</li>
+                                                    @foreach ($studentRegistrations as $reg)
+                                                        <li>
+                                                            <a href="{{ route('admin.registrations.show', $reg) }}">
+                                                                {{ $reg->studentProfile?->full_name }}
+                                                            </a>
+                                                        </li>
                                                     @endforeach
                                                 </ol>
                                             @endif
@@ -257,21 +265,25 @@
                             <tbody>
                                 @foreach ($filledPaidList as $item)
                                     @php
-                                        $studentNames = $item->registrations
-                                            ->map(fn($reg) => $reg->studentProfile?->full_name)
+                                        $studentRegistrations = $item->registrations
+                                            ->filter(fn($reg) => filled($reg->studentProfile?->full_name))
+                                            ->unique(fn($reg) => strtolower(trim((string) $reg->studentProfile?->full_name)))
                                             ->filter()
-                                            ->unique()
                                             ->values();
                                     @endphp
                                     <tr>
                                         <td>{{ $item->name ?? '-' }}</td>
                                         <td>
-                                            @if ($studentNames->isEmpty())
+                                            @if ($studentRegistrations->isEmpty())
                                                 -
                                             @else
                                                 <ol class="mb-0 ps-3">
-                                                    @foreach ($studentNames as $studentName)
-                                                        <li>{{ $studentName }}</li>
+                                                    @foreach ($studentRegistrations as $reg)
+                                                        <li>
+                                                            <a href="{{ route('admin.registrations.show', $reg) }}">
+                                                                {{ $reg->studentProfile?->full_name }}
+                                                            </a>
+                                                        </li>
                                                     @endforeach
                                                 </ol>
                                             @endif
