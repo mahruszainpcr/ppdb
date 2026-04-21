@@ -162,26 +162,41 @@
             <div class="card trezo-card h-100">
                 <div class="card-body">
                     <div class="fw-semibold mb-2">Yang Sudah Selesai</div>
-                    @if ($completedList->isEmpty())
-                        <div class="text-muted small">Belum ada data pada filter periode ini.</div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-sm align-middle mb-0">
-                                <thead>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0 dashboard-mini-table" id="completedTable">
+                            <thead>
+                                <tr>
+                                    <th>Nama Wali</th>
+                                    <th>Nama Calon Santri</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($completedList as $item)
+                                    @php
+                                        $studentNames = $item->registrations
+                                            ->map(fn($reg) => $reg->studentProfile?->full_name)
+                                            ->filter()
+                                            ->unique()
+                                            ->values();
+                                    @endphp
                                     <tr>
-                                        <th>Nama Wali</th>
+                                        <td>{{ $item->name ?? '-' }}</td>
+                                        <td>
+                                            @if ($studentNames->isEmpty())
+                                                -
+                                            @else
+                                                <ol class="mb-0 ps-3">
+                                                    @foreach ($studentNames as $studentName)
+                                                        <li>{{ $studentName }}</li>
+                                                    @endforeach
+                                                </ol>
+                                            @endif
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($completedList as $item)
-                                        <tr>
-                                            <td>{{ $item->name ?? '-' }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -189,26 +204,41 @@
             <div class="card trezo-card h-100">
                 <div class="card-body">
                     <div class="fw-semibold mb-2">Yang Sudah Login</div>
-                    @if ($loggedInList->isEmpty())
-                        <div class="text-muted small">Belum ada data pada filter periode ini.</div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-sm align-middle mb-0">
-                                <thead>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0 dashboard-mini-table" id="loggedInTable">
+                            <thead>
+                                <tr>
+                                    <th>Nama Wali</th>
+                                    <th>Nama Calon Santri</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($loggedInList as $item)
+                                    @php
+                                        $studentNames = $item->registrations
+                                            ->map(fn($reg) => $reg->studentProfile?->full_name)
+                                            ->filter()
+                                            ->unique()
+                                            ->values();
+                                    @endphp
                                     <tr>
-                                        <th>Nama Wali</th>
+                                        <td>{{ $item->name ?? '-' }}</td>
+                                        <td>
+                                            @if ($studentNames->isEmpty())
+                                                -
+                                            @else
+                                                <ol class="mb-0 ps-3">
+                                                    @foreach ($studentNames as $studentName)
+                                                        <li>{{ $studentName }}</li>
+                                                    @endforeach
+                                                </ol>
+                                            @endif
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($loggedInList as $item)
-                                        <tr>
-                                            <td>{{ $item->name ?? '-' }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -216,26 +246,41 @@
             <div class="card trezo-card h-100">
                 <div class="card-body">
                     <div class="fw-semibold mb-2">Yang Sudah Isi/Bayar</div>
-                    @if ($filledPaidList->isEmpty())
-                        <div class="text-muted small">Belum ada data pada filter periode ini.</div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-sm align-middle mb-0">
-                                <thead>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0 dashboard-mini-table" id="filledPaidTable">
+                            <thead>
+                                <tr>
+                                    <th>Nama Wali</th>
+                                    <th>Nama Calon Santri</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($filledPaidList as $item)
+                                    @php
+                                        $studentNames = $item->registrations
+                                            ->map(fn($reg) => $reg->studentProfile?->full_name)
+                                            ->filter()
+                                            ->unique()
+                                            ->values();
+                                    @endphp
                                     <tr>
-                                        <th>Nama Wali</th>
+                                        <td>{{ $item->name ?? '-' }}</td>
+                                        <td>
+                                            @if ($studentNames->isEmpty())
+                                                -
+                                            @else
+                                                <ol class="mb-0 ps-3">
+                                                    @foreach ($studentNames as $studentName)
+                                                        <li>{{ $studentName }}</li>
+                                                    @endforeach
+                                                </ol>
+                                            @endif
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($filledPaidList as $item)
-                                        <tr>
-                                            <td>{{ $item->name ?? '-' }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -312,7 +357,14 @@
     </div>
 @endsection
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
 @push('scripts')
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const genderSeries = @json($genderSeries);
@@ -391,6 +443,20 @@
                 xaxis: { categories: topDistrictsLabels },
                 plotOptions: { bar: { horizontal: true, barHeight: '60%' } },
             }).render();
+
+            const datatableOptions = {
+                pageLength: 10,
+                lengthChange: true,
+                searching: true,
+                ordering: false,
+                info: true,
+            };
+
+            if (window.jQuery && $.fn.DataTable) {
+                $('#completedTable').DataTable(datatableOptions);
+                $('#loggedInTable').DataTable(datatableOptions);
+                $('#filledPaidTable').DataTable(datatableOptions);
+            }
         });
     </script>
 @endpush

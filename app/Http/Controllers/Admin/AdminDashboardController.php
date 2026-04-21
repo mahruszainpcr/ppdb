@@ -77,8 +77,14 @@ class AdminDashboardController extends Controller
 
         $paymentPending = max($totalRegistrations - $paymentUploaded, 0);
 
+        $registrationsWithStudent = fn($q) => $q
+            ->when($periodId, fn($qq) => $qq->where('period_id', $periodId))
+            ->with('studentProfile')
+            ->latest('id');
+
         $completedList = User::query()
             ->where('role', 'parent')
+            ->with(['registrations' => $registrationsWithStudent])
             ->whereHas('registrations', function ($q) use ($periodId) {
                 $q->when($periodId, fn($qq) => $qq->where('period_id', $periodId))
                     ->whereIn('status', ['submitted', 'verified']);
@@ -91,11 +97,11 @@ class AdminDashboardController extends Controller
                     });
             })
             ->latest('id')
-            ->limit(15)
             ->get(['id', 'name']);
 
         $loggedInList = User::query()
             ->where('role', 'parent')
+            ->with(['registrations' => $registrationsWithStudent])
             ->whereHas('registrations', function ($q) use ($periodId) {
                 $q->when($periodId, fn($qq) => $qq->where('period_id', $periodId));
             })
@@ -111,11 +117,11 @@ class AdminDashboardController extends Controller
                     ->whereIn('status', ['submitted', 'verified']);
             })
             ->latest('id')
-            ->limit(15)
             ->get(['id', 'name']);
 
         $filledPaidList = User::query()
             ->where('role', 'parent')
+            ->with(['registrations' => $registrationsWithStudent])
             ->whereHas('registrations', function ($q) use ($periodId) {
                 $q->when($periodId, fn($qq) => $qq->where('period_id', $periodId))
                     ->whereHas('documents', function ($dq) {
@@ -124,7 +130,6 @@ class AdminDashboardController extends Controller
                     });
             })
             ->latest('id')
-            ->limit(15)
             ->get(['id', 'name']);
 
         $topSchools = DB::table('student_profiles')
