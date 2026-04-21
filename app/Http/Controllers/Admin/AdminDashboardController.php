@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Period;
 use App\Models\Registration;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -76,28 +77,55 @@ class AdminDashboardController extends Controller
 
         $paymentPending = max($totalRegistrations - $paymentUploaded, 0);
 
-        $paidApprovedList = Registration::query()
-            ->with(['user', 'studentProfile'])
-            ->when($periodId, fn($q) => $q->where('period_id', $periodId))
-            ->whereHas('documents', function ($q) {
-                $q->where('type', 'PAYMENT_PROOF')
-                    ->whereNotNull('file_path')
-                    ->where('is_verified', true);
+        $completedList = User::query()
+            ->where('role', 'parent')
+            ->whereHas('registrations', function ($q) use ($periodId) {
+                $q->when($periodId, fn($qq) => $qq->where('period_id', $periodId))
+                    ->whereIn('status', ['submitted', 'verified']);
+            })
+            ->whereDoesntHave('registrations', function ($q) use ($periodId) {
+                $q->when($periodId, fn($qq) => $qq->where('period_id', $periodId))
+                    ->whereHas('documents', function ($dq) {
+                        $dq->where('type', 'PAYMENT_PROOF')
+                            ->whereNotNull('file_path');
+                    });
             })
             ->latest('id')
             ->limit(15)
-            ->get();
+            ->get(['id', 'name']);
 
-        $unpaidList = Registration::query()
-            ->with(['user', 'studentProfile'])
-            ->when($periodId, fn($q) => $q->where('period_id', $periodId))
-            ->whereDoesntHave('documents', function ($q) {
-                $q->where('type', 'PAYMENT_PROOF')
-                    ->whereNotNull('file_path');
+        $loggedInList = User::query()
+            ->where('role', 'parent')
+            ->whereHas('registrations', function ($q) use ($periodId) {
+                $q->when($periodId, fn($qq) => $qq->where('period_id', $periodId));
+            })
+            ->whereDoesntHave('registrations', function ($q) use ($periodId) {
+                $q->when($periodId, fn($qq) => $qq->where('period_id', $periodId))
+                    ->whereHas('documents', function ($dq) {
+                        $dq->where('type', 'PAYMENT_PROOF')
+                            ->whereNotNull('file_path');
+                    });
+            })
+            ->whereDoesntHave('registrations', function ($q) use ($periodId) {
+                $q->when($periodId, fn($qq) => $qq->where('period_id', $periodId))
+                    ->whereIn('status', ['submitted', 'verified']);
             })
             ->latest('id')
             ->limit(15)
-            ->get();
+            ->get(['id', 'name']);
+
+        $filledPaidList = User::query()
+            ->where('role', 'parent')
+            ->whereHas('registrations', function ($q) use ($periodId) {
+                $q->when($periodId, fn($qq) => $qq->where('period_id', $periodId))
+                    ->whereHas('documents', function ($dq) {
+                        $dq->where('type', 'PAYMENT_PROOF')
+                            ->whereNotNull('file_path');
+                    });
+            })
+            ->latest('id')
+            ->limit(15)
+            ->get(['id', 'name']);
 
         $topSchools = DB::table('student_profiles')
             ->join('registrations', 'student_profiles.registration_id', '=', 'registrations.id')
@@ -168,8 +196,9 @@ class AdminDashboardController extends Controller
             'paymentUploaded' => $paymentUploaded,
             'paymentVerified' => $paymentVerified,
             'paymentPending' => $paymentPending,
-            'paidApprovedList' => $paidApprovedList,
-            'unpaidList' => $unpaidList,
+            'completedList' => $completedList,
+            'loggedInList' => $loggedInList,
+            'filledPaidList' => $filledPaidList,
             'topSchools' => $topSchools,
             'topCities' => $topCities,
             'topDistricts' => $topDistricts,

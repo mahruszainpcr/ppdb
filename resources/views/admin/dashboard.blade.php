@@ -158,33 +158,24 @@
     </div>
 
     <div class="row g-3 mt-1">
-        <div class="col-12 col-lg-6">
+        <div class="col-12 col-lg-4">
             <div class="card trezo-card h-100">
                 <div class="card-body">
-                    <div class="fw-semibold mb-2">Sudah Bayar & Approval Pembayaran</div>
-                    @if ($paidApprovedList->isEmpty())
+                    <div class="fw-semibold mb-2">Yang Sudah Selesai</div>
+                    @if ($completedList->isEmpty())
                         <div class="text-muted small">Belum ada data pada filter periode ini.</div>
                     @else
                         <div class="table-responsive">
                             <table class="table table-sm align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th>No Daftar</th>
-                                        <th>Nama Santri</th>
-                                        <th>Wali</th>
-                                        <th class="text-end">Aksi</th>
+                                        <th>Nama Wali</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($paidApprovedList as $item)
+                                    @foreach ($completedList as $item)
                                         <tr>
-                                            <td>{{ $item->registration_no }}</td>
-                                            <td>{{ $item->studentProfile?->full_name ?? '-' }}</td>
-                                            <td>{{ $item->user?->name ?? '-' }}</td>
-                                            <td class="text-end">
-                                                <a class="btn btn-sm btn-outline-light"
-                                                    href="{{ route('admin.registrations.show', $item) }}">Detail</a>
-                                            </td>
+                                            <td>{{ $item->name ?? '-' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -194,33 +185,51 @@
                 </div>
             </div>
         </div>
-        <div class="col-12 col-lg-6">
+        <div class="col-12 col-lg-4">
             <div class="card trezo-card h-100">
                 <div class="card-body">
-                    <div class="fw-semibold mb-2">Belum Bayar (Belum Upload Bukti)</div>
-                    @if ($unpaidList->isEmpty())
+                    <div class="fw-semibold mb-2">Yang Sudah Login</div>
+                    @if ($loggedInList->isEmpty())
                         <div class="text-muted small">Belum ada data pada filter periode ini.</div>
                     @else
                         <div class="table-responsive">
                             <table class="table table-sm align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th>No Daftar</th>
-                                        <th>Nama Santri</th>
-                                        <th>Wali</th>
-                                        <th class="text-end">Aksi</th>
+                                        <th>Nama Wali</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($unpaidList as $item)
+                                    @foreach ($loggedInList as $item)
                                         <tr>
-                                            <td>{{ $item->registration_no }}</td>
-                                            <td>{{ $item->studentProfile?->full_name ?? '-' }}</td>
-                                            <td>{{ $item->user?->name ?? '-' }}</td>
-                                            <td class="text-end">
-                                                <a class="btn btn-sm btn-outline-light"
-                                                    href="{{ route('admin.registrations.show', $item) }}">Detail</a>
-                                            </td>
+                                            <td>{{ $item->name ?? '-' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card trezo-card h-100">
+                <div class="card-body">
+                    <div class="fw-semibold mb-2">Yang Sudah Isi/Bayar</div>
+                    @if ($filledPaidList->isEmpty())
+                        <div class="text-muted small">Belum ada data pada filter periode ini.</div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Wali</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($filledPaidList as $item)
+                                        <tr>
+                                            <td>{{ $item->name ?? '-' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
