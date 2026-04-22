@@ -88,6 +88,8 @@
 
         $topDistrictsLabels = $topDistricts->pluck('label')->values();
         $topDistrictsTotals = $topDistricts->pluck('total')->values();
+
+        $paymentProgressPercent = $totalRegistrations > 0 ? round(($paymentUploaded / $totalRegistrations) * 100, 1) : 0;
     @endphp
 
     <div class="row g-3">
@@ -185,7 +187,7 @@
                                             @if ($studentRegistrations->isEmpty())
                                                 -
                                             @else
-                                                <ol class="mb-0 ps-3">
+                                                <ul class="mb-0 ps-3">
                                                     @foreach ($studentRegistrations as $reg)
                                                         <li>
                                                             <a href="{{ route('admin.registrations.show', $reg) }}">
@@ -193,7 +195,7 @@
                                                             </a>
                                                         </li>
                                                     @endforeach
-                                                </ol>
+                                                </ul>
                                             @endif
                                         </td>
                                     </tr>
@@ -253,7 +255,20 @@
         <div class="col-12 col-lg-4">
             <div class="card trezo-card h-100">
                 <div class="card-body">
-                    <div class="fw-semibold mb-2">Yang Sudah Isi/Bayar</div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="fw-semibold">Yang Sudah Isi/Bayar</div>
+                        <div class="small text-muted">{{ $paymentProgressPercent }}%</div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                style="width: {{ $paymentProgressPercent }}%;"
+                                aria-valuenow="{{ $paymentProgressPercent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="small text-muted mt-1">
+                            {{ number_format($paymentUploaded) }} dari {{ number_format($totalRegistrations) }} pendaftar
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-sm align-middle mb-0 dashboard-mini-table" id="filledPaidTable">
                             <thead>
