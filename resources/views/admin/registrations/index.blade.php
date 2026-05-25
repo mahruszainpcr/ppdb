@@ -47,19 +47,54 @@
         </div>
     </div>
 
+    <div class="row g-3 mb-3" id="registrationStatsCards">
+        <div class="col-md-3 col-6">
+            <div class="card trezo-card">
+                <div class="card-body py-3">
+                    <div class="text-muted small">Total Pendaftar</div>
+                    <div class="fs-4 fw-semibold" id="statTotal">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card trezo-card">
+                <div class="card-body py-3">
+                    <div class="text-muted small">Lengkap</div>
+                    <div class="fs-4 fw-semibold text-success" id="statLengkap">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card trezo-card">
+                <div class="card-body py-3">
+                    <div class="text-muted small">Kurang</div>
+                    <div class="fs-4 fw-semibold text-warning" id="statKurang">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card trezo-card">
+                <div class="card-body py-3">
+                    <div class="text-muted small">Belum Isi</div>
+                    <div class="fs-4 fw-semibold text-secondary" id="statBelumIsi">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card trezo-card">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0 align-middle" id="registrationsTable">
                     <thead>
                         <tr>
-                            <th>No Daftar</th>
+                            <th>No</th>
+                            <th>No. Pendaftaran</th>
                             <th>Nama Santri</th>
-                            <th>Nama Wali</th>
-                            <th>No WA Wali</th>
-                            <th>Jenjang</th>
-                            <th>Status</th>
-                            <th>Kelulusan</th>
+                            <th>Ikhwan/Akhwat</th>
+                            <th>Asal SD</th>
+                            <th>Status Pendaftaran</th>
+                            <th>Tanggal Daftar</th>
                             <th class="text-end">Aksi</th>
                         </tr>
                     </thead>
@@ -96,15 +131,23 @@
                     }
                 },
                 columns: [
+                    { data: 'row_no', orderable: false, searchable: false },
                     { data: 'registration_no' },
                     { data: 'student_name', orderable: false },
-                    { data: 'parent_name', orderable: false },
-                    { data: 'phone', orderable: false },
-                    { data: 'education_level' },
-                    { data: 'status', orderable: false, searchable: false },
-                    { data: 'graduation_status', orderable: false, searchable: false },
+                    { data: 'gender_group' },
+                    { data: 'school_origin', orderable: false },
+                    { data: 'completion_status', orderable: false, searchable: false },
+                    { data: 'registered_at' },
                     { data: 'actions', orderable: false, searchable: false, className: 'text-end' }
-                ]
+                ],
+                drawCallback: function () {
+                    const json = table.ajax.json();
+                    const stats = json?.stats ?? {};
+                    document.getElementById('statTotal').textContent = stats.total ?? 0;
+                    document.getElementById('statLengkap').textContent = stats.lengkap ?? 0;
+                    document.getElementById('statKurang').textContent = stats.kurang ?? 0;
+                    document.getElementById('statBelumIsi').textContent = stats.belum_isi ?? 0;
+                }
             });
 
             document.getElementById('registrationsFilterForm').addEventListener('submit', function (e) {

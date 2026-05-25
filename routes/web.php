@@ -52,6 +52,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
         Route::get('/registrations/data', [RegistrationAdminController::class, 'data'])->name('admin.registrations.data');
         Route::get('/registrations/export', [RegistrationAdminController::class, 'export'])->name('admin.registrations.export');
+        Route::delete('/registrations/{registration}', [RegistrationAdminController::class, 'destroy'])->name('admin.registrations.destroy');
         Route::get('/registrations/{registration}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.show');
         Route::post(
             'registrations/{registration}/graduation',

@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class RegistrationAdminController extends Controller
 {
@@ -27,8 +29,28 @@ class RegistrationAdminController extends Controller
 
     public function data(Request $request)
     {
-        $baseQuery = Registration::query()->with(['user', 'studentProfile']);
+        $baseQuery = Registration::query()->with(['user', 'studentProfile', 'parentProfile', 'statement', 'documents']);
         $recordsTotal = (clone $baseQuery)->count();
+        $globalStatsRegistrations = Registration::query()
+            ->with(['studentProfile', 'parentProfile', 'statement', 'documents'])
+            ->orderBy('id')
+            ->get();
+        $globalStats = [
+            'total' => $globalStatsRegistrations->count(),
+            'lengkap' => 0,
+            'kurang' => 0,
+            'belum_isi' => 0,
+        ];
+        foreach ($globalStatsRegistrations as $item) {
+            $status = $this->registrationCompletionStatus($this->registrationProgressPercent($item));
+            if ($status === 'Lengkap') {
+                $globalStats['lengkap']++;
+            } elseif ($status === 'Kurang') {
+                $globalStats['kurang']++;
+            } else {
+                $globalStats['belum_isi']++;
+            }
+        }
 
         $search = $request->input('search');
         if (is_array($search)) {
@@ -57,10 +79,9 @@ class RegistrationAdminController extends Controller
         $recordsFiltered = (clone $baseQuery)->count();
 
         $columns = [
-            0 => 'registration_no',
-            4 => 'education_level',
-            5 => 'status',
-            6 => 'graduation_status',
+            1 => 'registration_no',
+            3 => 'gender',
+            5 => 'created_at',
         ];
         $orderColumn = $columns[$request->input('order.0.column')] ?? 'created_at';
         $orderDir = $request->input('order.0.dir') === 'asc' ? 'asc' : 'desc';
@@ -77,31 +98,43 @@ class RegistrationAdminController extends Controller
             ->take($length)
             ->get();
 
-        $data = $registrations->map(function (Registration $r) {
+        $data = $registrations->values()->map(function (Registration $r, int $index) use ($start) {
             $studentName = e(optional($r->studentProfile)->full_name ?? '-');
-            $parentName = e($r->user->name ?? '-');
-            $phone = e($r->user->phone ?? '-');
-            $status = e($r->status ?? '-');
-            $graduation = e($r->graduation_status ?? '-');
             $detailUrl = route('admin.registrations.show', $r);
+            $deleteUrl = route('admin.registrations.destroy', $r);
+            $progress = $this->registrationProgressPercent($r);
+            $completionStatus = $this->registrationCompletionStatus($progress);
+            $completionBadgeClass = match ($completionStatus) {
+                'Lengkap' => 'bg-success',
+                'Kurang' => 'bg-warning text-dark',
+                default => 'bg-secondary',
+            };
 
             return [
+                'row_no' => $start + $index + 1,
                 'registration_no' => e($r->registration_no ?? '-'),
                 'student_name' => $studentName,
-                'parent_name' => $parentName,
-                'phone' => $phone,
-                'education_level' => e($r->education_level ?? '-'),
-                'status' => '<span class="badge bg-secondary">' . $status . '</span>',
-                'graduation_status' => '<span class="badge bg-info">' . $graduation . '</span>',
-                'actions' => '<a class="btn btn-sm btn-outline-light" href="' . $detailUrl . '">Detail</a>',
+                'gender_group' => e($this->genderGroupLabel($r->gender)),
+                'school_origin' => e(optional($r->studentProfile)->school_origin ?? '-'),
+                'completion_status' => '<div><span class="badge ' . $completionBadgeClass . '">' . e($completionStatus) . '</span><div class="small text-muted mt-1">' . $progress . '%</div></div>',
+                'registered_at' => e(optional($r->created_at)->format('d-m-Y H:i') ?? '-'),
+                'actions' => '<div class="d-flex justify-content-end gap-2">'
+                    . '<a class="btn btn-sm btn-outline-light" href="' . $detailUrl . '">Detail</a>'
+                    . '<form method="POST" action="' . $deleteUrl . '" onsubmit="return confirm(\'Yakin hapus data pendaftaran ini?\')">'
+                    . '<input type="hidden" name="_token" value="' . csrf_token() . '">'
+                    . '<input type="hidden" name="_method" value="DELETE">'
+                    . '<button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>'
+                    . '</form>'
+                    . '</div>',
             ];
-        })->values();
+        });
 
         return response()->json([
             'draw' => (int) $request->input('draw', 1),
             'recordsTotal' => $recordsTotal,
             'recordsFiltered' => $recordsFiltered,
             'data' => $data,
+            'stats' => $globalStats,
         ]);
     }
 
@@ -143,6 +176,10 @@ class RegistrationAdminController extends Controller
             $header = [
                 'No Pendaftaran',
                 'Nama Santri',
+                'Kategori',
+                'Asal SD',
+                'Status Kelengkapan',
+                'Progress (%)',
                 'NISN',
                 'NIK',
                 'Tempat Lahir',
@@ -231,6 +268,10 @@ class RegistrationAdminController extends Controller
                     $row = [
                         $r->registration_no ?? '',
                         optional($student)->full_name ?? '',
+                        $this->genderGroupLabel($r->gender),
+                        optional($student)->school_origin ?? '',
+                        $this->registrationCompletionStatus($this->registrationProgressPercent($r)),
+                        $this->registrationProgressPercent($r),
                         optional($student)->nisn ?? '',
                         optional($student)->nik ?? '',
                         optional($student)->birth_place ?? '',
@@ -313,6 +354,37 @@ class RegistrationAdminController extends Controller
         ]);
     }
 
+    private function registrationProgressPercent(Registration $registration): int
+    {
+        $step1Complete = $registration->isStep1Complete();
+        $step2Complete = (bool) $registration->studentProfile;
+        $step3Complete = (bool) $registration->parentProfile && (bool) $registration->statement;
+        $stepsDone = collect([$step1Complete, $step2Complete, $step3Complete])->filter()->count();
+
+        return (int) round(($stepsDone / 3) * 100);
+    }
+
+    private function registrationCompletionStatus(int $progressPercent): string
+    {
+        if ($progressPercent >= 100) {
+            return 'Lengkap';
+        }
+        if ($progressPercent <= 0) {
+            return 'Belum Isi';
+        }
+
+        return 'Kurang';
+    }
+
+    private function genderGroupLabel(?string $gender): string
+    {
+        return match ($gender) {
+            'male' => 'Ikhwan',
+            'female' => 'Akhwat',
+            default => '-',
+        };
+    }
+
     public function show(Registration $registration)
     {
         $registration->load([
@@ -326,6 +398,27 @@ class RegistrationAdminController extends Controller
 
         return view('admin.registrations.show', compact('registration'));
     }
+
+    public function destroy(Registration $registration)
+    {
+        $filePaths = $registration->documents()
+            ->whereNotNull('file_path')
+            ->pluck('file_path')
+            ->toArray();
+
+        DB::transaction(function () use ($registration) {
+            $registration->delete();
+        });
+
+        foreach ($filePaths as $path) {
+            if ($path && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        return back()->with('success', 'Data pendaftaran berhasil dihapus.');
+    }
+
     public function setGraduation(Request $request, Registration $registration)
     {
         $data = $request->validate([
