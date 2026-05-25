@@ -1008,6 +1008,7 @@
 
                     <div class="hero-actions">
                         <a class="btn btn-primary" href="{{ url('register') }}">Daftar Santri Baru</a>
+                        <a class="btn btn-ghost" href="{{ route('ppdb.info') }}">Menu PPDB</a>
                         <a class="btn btn-ghost" href="#kontak">Kontak</a>
                     </div>
 

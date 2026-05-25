@@ -24,6 +24,7 @@
 
             <div>
                 <h5>Navigasi</h5>
+                <a href="{{ route('ppdb.info') }}">PPDB</a>
                 <a href="{{ url('/#visimisi') }}">Visi & Misi</a>
                 <a href="{{ url('/#fasilitas') }}">Fasilitas</a>
                 <a href="{{ url('/#pilar') }}">3 Pilar</a>
@@ -58,4 +59,3 @@
         </div>
     </div>
 </footer>
-

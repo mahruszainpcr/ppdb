@@ -19,6 +19,7 @@ use App\Http\Controllers\Auth\PasswordController;
 
 Route::get('/psb', fn() => view('public.psb.index'));
 Route::get('/psb/syarat', fn() => view('public.psb.syarat'));
+Route::get('/ppdb', [LandingController::class, 'ppdbInfo'])->name('ppdb.info');
 
 // Parent App
 Route::middleware(['auth', 'role:parent'])->prefix('app')->group(function () {

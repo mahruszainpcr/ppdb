@@ -12,6 +12,7 @@
                 <span class="material-symbols-outlined">menu</span>
             </button>
             <nav class="menu" aria-label="Navigasi">
+                <a href="{{ route('ppdb.info') }}">PPDB</a>
                 <a href="{{ url('/#visimisi') }}">Visi & Misi</a>
                 <a href="{{ url('/#fasilitas') }}">Fasilitas</a>
                 <a href="{{ url('/#pilar') }}">3 Pilar</a>
@@ -41,6 +42,7 @@
         </div>
         <div id="landingMobileMenu" class="mobile-menu" hidden>
             <nav class="mobile-links" aria-label="Navigasi Mobile">
+                <a href="{{ route('ppdb.info') }}">PPDB</a>
                 <a href="{{ url('/#visimisi') }}">Visi & Misi</a>
                 <a href="{{ url('/#fasilitas') }}">Fasilitas</a>
                 <a href="{{ url('/#pilar') }}">3 Pilar</a>
