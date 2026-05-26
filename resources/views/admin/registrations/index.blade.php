@@ -91,6 +91,7 @@
                             <th>No</th>
                             <th>No. Pendaftaran</th>
                             <th>Nama Santri</th>
+                            <th>Nama Wali</th>
                             <th>Ikhwan/Akhwat</th>
                             <th>Asal SD</th>
                             <th>Status Pendaftaran</th>
@@ -134,6 +135,7 @@
                     { data: 'row_no', orderable: false, searchable: false },
                     { data: 'registration_no' },
                     { data: 'student_name', orderable: false },
+                    { data: 'parent_name', orderable: false },
                     { data: 'gender_group' },
                     { data: 'school_origin', orderable: false },
                     { data: 'completion_status', orderable: false, searchable: false },

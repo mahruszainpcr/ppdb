@@ -114,6 +114,7 @@ class RegistrationAdminController extends Controller
                 'row_no' => $start + $index + 1,
                 'registration_no' => e($r->registration_no ?? '-'),
                 'student_name' => $studentName,
+                'parent_name' => e(optional($r->user)->name ?? '-'),
                 'gender_group' => e($this->genderGroupLabel($r->gender)),
                 'school_origin' => e(optional($r->studentProfile)->school_origin ?? '-'),
                 'completion_status' => '<div><span class="badge ' . $completionBadgeClass . '">' . e($completionStatus) . '</span><div class="small text-muted mt-1">' . $progress . '%</div></div>',
