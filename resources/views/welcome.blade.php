@@ -11,25 +11,22 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
     <title>@yield('title', 'Ma’had Darussalam Al-Islami Rumbai')</title>
-    <meta name="description"
-        content="Ma’had Darussalam Al-Islami Rumbai (Palas) — pendidikan beradab berbasis Al-Qur’an & As-Sunnah, program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter." />
-    <meta name="keywords"
-        content="mahad darussalam palas, darussalam al-islami rumbai, pondok pesantren palas, tahfidz, diniyah, bahasa arab, rumbai" />
+    <meta name="description" content="@yield('meta_description', 'Ma’had Darussalam Al-Islami Rumbai (Palas) — pendidikan beradab berbasis Al-Qur’an & As-Sunnah, program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter.')" />
+    <meta name="keywords" content="@yield('meta_keywords', 'mahad darussalam palas, darussalam al-islami rumbai, pondok pesantren palas, tahfidz, diniyah, bahasa arab, rumbai, mahad, pondok pesantren, pesantren pekanbaru, pondok pesantren pekanbaru, pesantren rumbai')" />
     <meta name="author" content="Ma’had Darussalam Al-Islami Rumbai" />
-    <link rel="canonical" href="{{ url('/') }}" />
+    <link rel="canonical" href="@yield('meta_url', url()->current())" />
 
-    <meta property="og:title" content="Ma’had Darussalam Al-Islami Rumbai" />
-    <meta property="og:description"
-        content="Pendidikan beradab berbasis Al-Qur’an & As-Sunnah. Program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="{{ url('/') }}" />
-    <meta property="og:image" content="https://mahaddarussalampalas.ponpes.id/logo.png" />
+    <meta property="og:title" content="@yield('meta_title', 'Ma’had Darussalam Al-Islami Rumbai')" />
+    <meta property="og:description" content="@yield('meta_description', 'Pendidikan beradab berbasis Al-Qur’an & As-Sunnah. Program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter.')" />
+    <meta property="og:type" content="@yield('meta_type', 'website')" />
+    <meta property="og:url" content="@yield('meta_url', url()->current())" />
+    <meta property="og:image" content="@yield('meta_image', 'https://mahaddarussalampalas.ponpes.id/logo.png')" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Ma’had Darussalam Al-Islami Rumbai" />
-    <meta name="twitter:description"
-        content="Pendidikan beradab berbasis Al-Qur’an & As-Sunnah. Program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter." />
-    <meta name="twitter:image" content="https://mahaddarussalampalas.ponpes.id/logo.png" />
+    <meta name="twitter:title" content="@yield('meta_title', 'Ma’had Darussalam Al-Islami Rumbai')" />
+    <meta name="twitter:description" content="@yield('meta_description', 'Pendidikan beradab berbasis Al-Qur’an & As-Sunnah. Program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter.')" />
+    <meta name="twitter:image" content="@yield('meta_image', 'https://mahaddarussalampalas.ponpes.id/logo.png')" />
+    @stack('meta')
 
     <meta name="robots" content="index, follow" />
     <link rel="icon" href="https://mahaddarussalampalas.ponpes.id/logo.png" type="image/png" />

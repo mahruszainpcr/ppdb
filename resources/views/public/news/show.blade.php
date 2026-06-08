@@ -7,8 +7,24 @@
     $shareImage = $post->thumbnail_url ?? asset('assets/images/welcome.png');
 @endphp
 
-@section('meta_title', $post->title)
+@php
+    $metaKeywords = collect([
+        $post->title,
+        $post->category?->name,
+        'Pondok Pesantren Pekanbaru',
+        'Mahad Darussalam',
+        'Mahad Darussalam Rumbai',
+        'Pondok Pesantren Rumbai',
+        'Berita Pondok',
+        'Berita Mahad'
+    ])->filter()->unique()->implode(', ');
+@endphp
+
+@section('meta_title', $post->title . ' - Mahad Darussalam Rumbai')
 @section('meta_description', $shareDescription)
+@section('meta_keywords', $metaKeywords)
+@section('meta_url', url()->current())
+@section('meta_type', 'article')
 @section('meta_image', $shareImage)
 
 @push('styles')
