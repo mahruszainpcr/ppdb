@@ -6,6 +6,21 @@
     <title>@yield('title', 'PSB Mahad Darussalam')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    {{-- Open Graph / Social Meta --}}
+    <meta name="description" content="@yield('meta_description', 'Penerimaan Siswa Baru - PSB Mahad Darussalam')">
+    <meta property="og:title" content="@yield('meta_title', config('app.name'))">
+    <meta property="og:description" content="@yield('meta_description', 'Penerimaan Siswa Baru - PSB Mahad Darussalam')">
+    <meta property="og:type" content="@yield('meta_type', 'website')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="@yield('meta_image', asset('assets/images/welcome.png'))">
+    <link rel="image_src" href="@yield('meta_image', asset('assets/images/welcome.png'))">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('meta_title', config('app.name'))">
+    <meta name="twitter:description" content="@yield('meta_description', 'Penerimaan Siswa Baru - PSB Mahad Darussalam')">
+    <meta name="twitter:image" content="@yield('meta_image', asset('assets/images/welcome.png'))">
+    @stack('meta')
+
     @include('partials.styles')
     @stack('styles')
 
