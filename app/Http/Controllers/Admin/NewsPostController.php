@@ -141,7 +141,7 @@ class NewsPostController extends Controller
         }
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail_path'] = $request->file('thumbnail')->store('news', 'public');
+            $data['thumbnail_path'] = $this->storeThumbnailFile($request->file('thumbnail'), $data['title']);
         }
 
         NewsPost::create($data);
@@ -205,7 +205,7 @@ class NewsPostController extends Controller
             if ($newsPost->thumbnail_path) {
                 Storage::disk('public')->delete($newsPost->thumbnail_path);
             }
-            $data['thumbnail_path'] = $request->file('thumbnail')->store('news', 'public');
+            $data['thumbnail_path'] = $this->storeThumbnailFile($request->file('thumbnail'), $data['title']);
         }
 
         $newsPost->update($data);
@@ -242,6 +242,18 @@ class NewsPostController extends Controller
         }
 
         return $slug;
+    }
+
+    private function storeThumbnailFile(\Illuminate\Http\UploadedFile $file, string $title): string
+    {
+        $name = Str::slug($title ?: pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+        if (empty($name)) {
+            $name = 'news-thumbnail';
+        }
+
+        $filename = sprintf('%s-%s.%s', $name, now()->format('YmdHis'), $file->getClientOriginalExtension());
+
+        return $file->storeAs('news', $filename, 'public');
     }
 
     private function normalizeYoutubeEmbedUrl(string $url): string
