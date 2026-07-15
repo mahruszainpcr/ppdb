@@ -2,6 +2,16 @@
 
 @section('title', 'Wizard PSB - Tahap 1')
 
+@php
+    $wizardMode = $wizardMode ?? 'parent';
+    $wizardTitle = $wizardTitle ?? 'Pendaftaran Santri Baru';
+    $step1Action = $step1Action ?? route('psb.step1');
+    $listUrl = $listUrl ?? route('app.dashboard', ['registration' => $registration->id]);
+    $detailUrl = $detailUrl ?? null;
+    $deleteUrl = $deleteUrl ?? null;
+    $showDeleteButton = $showDeleteButton ?? false;
+@endphp
+
 @section('content')
     <div class="row">
         <div class="col-12">
@@ -25,13 +35,27 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                         <div>
-                            <h5 class="mb-1">Pendaftaran Santri Baru</h5>
+                            <h5 class="mb-1">{{ $wizardTitle }}</h5>
                             <div class="text-muted small">
                                 Nomor Pendaftaran: <span class="fw-semibold">{{ $registration->registration_no }}</span>
                             </div>
                         </div>
 
                         <div class="d-flex gap-2">
+                            @if ($wizardMode === 'admin')
+                                <a href="{{ $listUrl }}" class="btn btn-outline-light btn-sm">Kembali</a>
+                                @if ($detailUrl)
+                                    <a href="{{ $detailUrl }}" class="btn btn-outline-light btn-sm">Detail</a>
+                                @endif
+                                @if ($showDeleteButton && $deleteUrl)
+                                    <form method="POST" action="{{ $deleteUrl }}"
+                                        onsubmit="return confirm('Yakin hapus data pendaftaran ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Hapus</button>
+                                    </form>
+                                @endif
+                            @endif
                             <span class="badge rounded-pill text-bg-secondary">Step 1</span>
                             <span class="badge rounded-pill text-bg-dark">Draft</span>
                         </div>
@@ -50,7 +74,7 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('psb.step1') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ $step1Action }}" enctype="multipart/form-data">
                 @csrf
 
                 {{-- Card: Program --}}

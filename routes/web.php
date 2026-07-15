@@ -53,7 +53,12 @@ Route::prefix('admin')->group(function () {
         Route::get('/registrations/data', [RegistrationAdminController::class, 'data'])->name('admin.registrations.data');
         Route::get('/registrations/export', [RegistrationAdminController::class, 'export'])->name('admin.registrations.export');
         Route::delete('/registrations/{registration}', [RegistrationAdminController::class, 'destroy'])->name('admin.registrations.destroy');
+        Route::get('/registrations/{registration}/edit', [RegistrationAdminController::class, 'edit'])->name('admin.registrations.edit');
+        Route::post('/registrations/{registration}/step-1', [RegistrationAdminController::class, 'saveStep1'])->name('admin.registrations.step1');
+        Route::post('/registrations/{registration}/step-2', [RegistrationAdminController::class, 'saveStep2'])->name('admin.registrations.step2');
+        Route::post('/registrations/{registration}/step-3', [RegistrationAdminController::class, 'saveStep3'])->name('admin.registrations.step3');
         Route::get('/registrations/{registration}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.show');
+        Route::get('/wilayah/options', [WilayahController::class, 'options'])->name('admin.wilayah.options');
         Route::post(
             'registrations/{registration}/graduation',
             [\App\Http\Controllers\Admin\RegistrationAdminController::class, 'setGraduation']

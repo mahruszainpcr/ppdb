@@ -1,6 +1,19 @@
 @extends('layouts.app')
 @section('title', 'Wizard PSB - Step 3')
 
+@php
+    $wizardMode = $wizardMode ?? 'parent';
+    $wizardTitle = $wizardTitle ?? 'Wizard PSB';
+    $step2Url = $step2Url ?? route('psb.wizard', ['step' => 2, 'registration' => $registration->id]);
+    $step3Action = $step3Action ?? route('psb.step3.submit');
+    $listUrl = $listUrl ?? route('app.dashboard', ['registration' => $registration->id]);
+    $detailUrl = $detailUrl ?? null;
+    $deleteUrl = $deleteUrl ?? null;
+    $showDeleteButton = $showDeleteButton ?? false;
+    $step3SubmitLabel = $step3SubmitLabel ?? 'Submit Final';
+    $wilayahOptionsUrl = $wilayahOptionsUrl ?? route('app.wilayah.options');
+@endphp
+
 @section('content')
     @if (session('success'))
         <div class="alert alert-success border-0 rounded-3">
@@ -26,11 +39,27 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
-                    <h5 class="mb-1">Wizard PSB</h5>
+                    <h5 class="mb-1">{{ $wizardTitle }}</h5>
                     <div class="text-muted small">Nomor Pendaftaran: <span
                             class="fw-semibold">{{ $registration->registration_no }}</span></div>
                 </div>
-                <span class="badge rounded-pill text-bg-secondary">Step 3</span>
+                <div class="d-flex gap-2">
+                    @if ($wizardMode === 'admin')
+                        <a href="{{ $listUrl }}" class="btn btn-outline-light btn-sm">Kembali</a>
+                        @if ($detailUrl)
+                            <a href="{{ $detailUrl }}" class="btn btn-outline-light btn-sm">Detail</a>
+                        @endif
+                        @if ($showDeleteButton && $deleteUrl)
+                            <form method="POST" action="{{ $deleteUrl }}"
+                                onsubmit="return confirm('Yakin hapus data pendaftaran ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Hapus</button>
+                            </form>
+                        @endif
+                    @endif
+                    <span class="badge rounded-pill text-bg-secondary">Step 3</span>
+                </div>
             </div>
             <hr class="border-opacity-25">
             <div class="d-flex align-items-center gap-2 small text-muted">
@@ -43,7 +72,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('psb.step3.submit') }}">
+    <form method="POST" action="{{ $step3Action }}">
         @csrf
 
         <div class="card trezo-card mb-3">
@@ -371,8 +400,8 @@ Saya menyetujui Pernyataan Kesanggupan Pembayaran dengan ketentuan SPP di bayark
                 <hr class="border-opacity-25">
 
                 <div class="d-flex justify-content-between">
-                    <a href="{{ route('psb.wizard', ['step' => 2]) }}" class="btn btn-outline-light">Kembali Step 2</a>
-                    <button class="btn btn-success px-4">Submit Final</button>
+                    <a href="{{ $step2Url }}" class="btn btn-outline-light">Kembali Step 2</a>
+                    <button class="btn btn-success px-4">{{ $step3SubmitLabel }}</button>
                 </div>
             </div>
         </div>
@@ -385,7 +414,7 @@ Saya menyetujui Pernyataan Kesanggupan Pembayaran dengan ketentuan SPP di bayark
             const regencySelect = document.getElementById('fatherRegencySelect');
             const districtSelect = document.getElementById('fatherDistrictSelect');
             const villageSelect = document.getElementById('fatherVillageSelect');
-            const optionsUrl = @json(route('app.wilayah.options'));
+            const optionsUrl = @json($wilayahOptionsUrl);
 
             const state = {
                 provinceName: @json(old('father_province', $pp->father_province ?? '')),

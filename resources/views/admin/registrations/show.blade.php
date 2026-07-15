@@ -64,6 +64,15 @@
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.registrations.index') }}" class="btn btn-outline-light btn-sm">Kembali</a>
+            <a href="{{ route('admin.registrations.edit', $registration) }}" class="btn btn-primary btn-sm">Edit</a>
+            @if (auth()->user()?->role === 'admin')
+                <form method="POST" action="{{ route('admin.registrations.destroy', $registration) }}"
+                    onsubmit="return confirm('Yakin hapus data pendaftaran ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-outline-danger btn-sm">Hapus</button>
+                </form>
+            @endif
 
             {{-- optional: tombol logout --}}
             <form method="POST" action="{{ route('admin.logout') }}">

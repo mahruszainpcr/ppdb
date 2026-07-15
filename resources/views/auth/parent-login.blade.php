@@ -133,6 +133,30 @@
 
         .parent-auth-page__info-link {
             width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #1E7F5C 0%, #166534 100%);
+            border: 0;
+            color: #fff;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 12px 24px rgba(22, 101, 52, .18);
+            transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+        }
+
+        .parent-auth-page__info-link:hover {
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(22, 101, 52, .22);
+            filter: brightness(1.03);
+        }
+
+        .parent-auth-page__info-link:focus-visible {
+            outline: 0;
+            box-shadow: 0 0 0 4px rgba(30, 127, 92, .16), 0 14px 28px rgba(22, 101, 52, .22);
         }
 
         .parent-auth-page__info-fallback {
@@ -232,7 +256,7 @@
 
 
                         <a href="https://chat.whatsapp.com/FAUOWIpZJSfHiz6JBsRTfB" target="_blank" rel="noopener"
-                            class="btn btn-outline-success parent-auth-page__info-link">
+                            class="parent-auth-page__info-link">
                             Gabung Group WA Info
                         </a>
                 </div>

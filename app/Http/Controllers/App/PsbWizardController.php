@@ -8,6 +8,7 @@ use App\Models\Period;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\StudentProfile;
@@ -502,16 +503,21 @@ class PsbWizardController extends Controller
                 $validatedParent
             );
 
+            $statementData = [
+                'willing_to_serve' => true,
+                'agree_morality' => true,
+                'agree_rules' => true,
+                'agree_payment' => true,
+                'submitted_at' => now(),
+            ];
+
+            if (Schema::hasColumn('statements', 'agree_integrity')) {
+                $statementData['agree_integrity'] = true;
+            }
+
             Statement::updateOrCreate(
                 ['registration_id' => $registration->id],
-                [
-                    'willing_to_serve' => true,
-                    'agree_morality' => true,
-                    'agree_rules' => true,
-                    'agree_integrity' => true,
-                    'agree_payment' => true,
-                    'submitted_at' => now(),
-                ]
+                $statementData
             );
 
             // Submit final
