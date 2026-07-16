@@ -26,6 +26,7 @@ Route::middleware(['auth', 'role:parent'])->prefix('app')->group(function () {
     Route::get('/', [PsbWizardController::class, 'dashboard'])->name('app.dashboard');
     Route::get('/psb/new', [PsbWizardController::class, 'createNew'])->name('psb.new');
     Route::post('/psb/{registration}/delete', [PsbWizardController::class, 'destroyRegistration'])->name('psb.delete');
+    Route::get('/psb/{registration}/qr', [PsbWizardController::class, 'showQr'])->name('psb.qr');
 
     Route::get('/psb/wizard', [PsbWizardController::class, 'show'])->name('psb.wizard');
     Route::post('/psb/step-1', [PsbWizardController::class, 'saveStep1'])->name('psb.step1');
@@ -53,6 +54,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/registrations/data', [RegistrationAdminController::class, 'data'])->name('admin.registrations.data');
         Route::get('/registrations/export', [RegistrationAdminController::class, 'export'])->name('admin.registrations.export');
         Route::delete('/registrations/{registration}', [RegistrationAdminController::class, 'destroy'])->name('admin.registrations.destroy');
+        Route::get('/registrations/scan/{registration:registration_no}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.scan');
         Route::get('/registrations/{registration}/edit', [RegistrationAdminController::class, 'edit'])->name('admin.registrations.edit');
         Route::post('/registrations/{registration}/step-1', [RegistrationAdminController::class, 'saveStep1'])->name('admin.registrations.step1');
         Route::post('/registrations/{registration}/step-2', [RegistrationAdminController::class, 'saveStep2'])->name('admin.registrations.step2');

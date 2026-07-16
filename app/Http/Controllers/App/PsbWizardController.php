@@ -74,6 +74,8 @@ class PsbWizardController extends Controller
 
         // Missing docs list (untuk alert)
         $missingDocs = $registration->missingRequiredDocuments();
+        $activeScanUrl = $registration->admin_scan_url;
+        $activeQrPageUrl = $registration->parent_qr_url;
 
         $registrationHistories = $registrations->map(function (Registration $reg) {
             $step1 = $reg->isStep1Complete();
@@ -101,6 +103,8 @@ class PsbWizardController extends Controller
                 'progress' => $progress,
                 'next_step' => $nextStep,
                 'created_at' => $reg->created_at?->format('d M Y') ?? '-',
+                'scan_url' => $reg->admin_scan_url,
+                'qr_page_url' => $reg->parent_qr_url,
             ];
         });
 
@@ -115,9 +119,25 @@ class PsbWizardController extends Controller
             'nextStep',
             'waLink',
             'missingDocs',
+            'activeScanUrl',
+            'activeQrPageUrl',
             'registrationHistories',
             'activeRegistrationId'
         ));
+    }
+
+    public function showQr(Request $request, Registration $registration)
+    {
+        if ($registration->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $registration->load(['period', 'studentProfile', 'parentProfile', 'statement']);
+
+        return view('app.psb.qr', [
+            'registration' => $registration,
+            'scanUrl' => $registration->admin_scan_url,
+        ]);
     }
 
     public function createNew(Request $request)

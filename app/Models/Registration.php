@@ -110,4 +110,14 @@ class Registration extends Model
     {
         return $query->where('status', 'submitted');
     }
+
+    public function getAdminScanUrlAttribute(): string
+    {
+        return route('admin.registrations.scan', ['registration' => $this->registration_no]);
+    }
+
+    public function getParentQrUrlAttribute(): string
+    {
+        return route('psb.qr', $this);
+    }
 }
