@@ -19,3 +19,4 @@
 <script src="{{ url('/assets/js/custom/apexcharts.js') }}"></script>
 <script src="{{ url('/assets/js/custom/echarts.js') }}"></script>
 <script src="{{ url('/assets/js/custom/custom.js') }}"></script>
+<script src="{{ url('/assets/js/material-symbols-fallback.js') }}"></script>

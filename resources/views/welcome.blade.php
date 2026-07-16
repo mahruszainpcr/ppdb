@@ -4,12 +4,6 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
     <title>@yield('title', 'Ma’had Darussalam Al-Islami Rumbai')</title>
     <meta name="description" content="@yield('meta_description', 'Ma’had Darussalam Al-Islami Rumbai (Palas) — pendidikan beradab berbasis Al-Qur’an & As-Sunnah, program tahfidz, diniyah, bahasa Arab, dan pembinaan karakter.')" />
     <meta name="keywords" content="@yield('meta_keywords', 'mahad darussalam palas, darussalam al-islami rumbai, pondok pesantren palas, tahfidz, diniyah, bahasa arab, rumbai, mahad, pondok pesantren, pesantren pekanbaru, pondok pesantren pekanbaru, pesantren rumbai')" />
@@ -30,6 +24,8 @@
 
     <meta name="robots" content="index, follow" />
     <link rel="icon" href="https://mahaddarussalampalas.ponpes.id/logo.png" type="image/png" />
+    <link rel="stylesheet" href="{{ url('/assets/css/google-icon.css') }}">
+    <link rel="stylesheet" href="{{ url('/assets/css/remixicon.css') }}">
     <style>
         :root {
             --bg: #0b2f23;
@@ -1411,6 +1407,7 @@
 
     @show
 
+    <script src="{{ url('/assets/js/material-symbols-fallback.js') }}"></script>
     @stack('scripts')
 </body>
 
