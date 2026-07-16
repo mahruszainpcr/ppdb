@@ -263,10 +263,10 @@
 
                 <hr class="parent-auth-page__divider">
 
-                <div class="parent-auth-page__foot">
+                {{-- <div class="parent-auth-page__foot">
                     <span>Belum punya akun?</span>
                     <a href="{{ url('/register') }}">Registrasi</a>
-                </div>
+                </div> --}}
             </div>
         </div>
     </section>
