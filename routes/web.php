@@ -53,8 +53,11 @@ Route::prefix('admin')->group(function () {
         Route::get('/registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
         Route::get('/registrations/data', [RegistrationAdminController::class, 'data'])->name('admin.registrations.data');
         Route::get('/registrations/export', [RegistrationAdminController::class, 'export'])->name('admin.registrations.export');
+        Route::middleware(['role:admin'])->group(function () {
+            Route::get('/registrations/scan', [RegistrationAdminController::class, 'scanPage'])->name('admin.registrations.scan.page');
+            Route::get('/registrations/scan/{registration:registration_no}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.scan');
+        });
         Route::delete('/registrations/{registration}', [RegistrationAdminController::class, 'destroy'])->name('admin.registrations.destroy');
-        Route::get('/registrations/scan/{registration:registration_no}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.scan');
         Route::get('/registrations/{registration}/edit', [RegistrationAdminController::class, 'edit'])->name('admin.registrations.edit');
         Route::post('/registrations/{registration}/step-1', [RegistrationAdminController::class, 'saveStep1'])->name('admin.registrations.step1');
         Route::post('/registrations/{registration}/step-2', [RegistrationAdminController::class, 'saveStep2'])->name('admin.registrations.step2');

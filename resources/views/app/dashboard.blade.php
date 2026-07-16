@@ -83,11 +83,11 @@
                     <h5 class="mb-2">QR Code Pendaftaran Aktif</h5>
                     <p class="text-muted mb-3">
                         QR ini terhubung ke detail formulir pendaftaran <span
-                            class="fw-semibold">{{ $registration->registration_no }}</span>. Admin, guru, atau ustadz
-                        yang sudah login bisa scan untuk melihat isi form lengkap.
+                            class="fw-semibold">{{ $registration->registration_no }}</span>. Hanya admin yang sudah login
+                        yang bisa membuka hasil scan untuk melihat isi form lengkap.
                     </p>
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ $activeQrPageUrl }}" class="btn btn-primary btn-sm">Lihat QR Penuh</a>
+                        {{-- <a href="{{ $activeQrPageUrl }}" class="btn btn-primary btn-sm">Lihat QR Penuh</a> --}}
                         <span class="btn btn-outline-secondary btn-sm disabled">ID: {{ $registration->registration_no }}</span>
                     </div>
                 </div>

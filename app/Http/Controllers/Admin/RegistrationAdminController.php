@@ -415,6 +415,11 @@ class RegistrationAdminController extends Controller
         return view('admin.registrations.show', compact('registration'));
     }
 
+    public function scanPage()
+    {
+        return view('admin.registrations.scan');
+    }
+
     public function edit(Request $request, Registration $registration)
     {
         $step = (int) $request->query('step', 1);

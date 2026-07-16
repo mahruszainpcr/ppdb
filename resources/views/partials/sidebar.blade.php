@@ -64,6 +64,15 @@
                         <span class="title">Data Pendaftar</span>
                     </a>
                 </li>
+                @if (auth()->user()->role === 'admin')
+                    <li class="menu-item">
+                        <a href="{{ route('admin.registrations.scan.page') }}"
+                            class="menu-link {{ Request::is('admin/registrations/scan*') ? 'active' : '' }}">
+                            <span class="material-symbols-outlined menu-icon">qr_code_scanner</span>
+                            <span class="title">Scan QR Pendaftaran</span>
+                        </a>
+                    </li>
+                @endif
 
                 <li class="menu-title small text-uppercase">
                     <span class="menu-title-text">Konten</span>
