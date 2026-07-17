@@ -76,9 +76,10 @@ class PsbWizardController extends Controller
 
         // Missing docs list (untuk alert)
         $missingDocs = $registration->missingRequiredDocuments();
-        $activeScanUrl = $registration->admin_scan_url;
-        $activeQrPageUrl = $registration->parent_qr_url;
-        $activeProofPdfUrl = route('psb.proof.pdf', $registration);
+        $canShowActiveQr = $progressPercent === 100;
+        $activeScanUrl = $canShowActiveQr ? $registration->admin_scan_url : null;
+        $activeQrPageUrl = $canShowActiveQr ? $registration->parent_qr_url : null;
+        $activeProofPdfUrl = $canShowActiveQr ? route('psb.proof.pdf', $registration) : null;
 
         $registrationHistories = $registrations->map(function (Registration $reg) {
             $step1 = $reg->isStep1Complete();
@@ -98,6 +99,8 @@ class PsbWizardController extends Controller
                 $nextStep = 3;
             }
 
+            $canShowQr = $progress === 100;
+
             return [
                 'id' => $reg->id,
                 'registration_no' => $reg->registration_no,
@@ -106,9 +109,10 @@ class PsbWizardController extends Controller
                 'progress' => $progress,
                 'next_step' => $nextStep,
                 'created_at' => $reg->created_at?->format('d M Y') ?? '-',
-                'scan_url' => $reg->admin_scan_url,
-                'qr_page_url' => $reg->parent_qr_url,
-                'proof_pdf_url' => route('psb.proof.pdf', $reg),
+                'scan_url' => $canShowQr ? $reg->admin_scan_url : null,
+                'qr_page_url' => $canShowQr ? $reg->parent_qr_url : null,
+                'proof_pdf_url' => $canShowQr ? route('psb.proof.pdf', $reg) : null,
+                'can_show_qr' => $canShowQr,
             ];
         });
 
@@ -123,6 +127,7 @@ class PsbWizardController extends Controller
             'nextStep',
             'waLink',
             'missingDocs',
+            'canShowActiveQr',
             'activeScanUrl',
             'activeQrPageUrl',
             'activeProofPdfUrl',
@@ -139,6 +144,12 @@ class PsbWizardController extends Controller
 
         $registration->load(['period', 'studentProfile', 'parentProfile', 'statement']);
 
+        if (!$this->registrationProgressIsComplete($registration)) {
+            return redirect()
+                ->route('app.dashboard', ['registration' => $registration->id])
+                ->withErrors(['qr' => 'QR bukti pendaftaran hanya tersedia setelah pendaftaran 100% lengkap.']);
+        }
+
         return view('app.psb.qr', [
             'registration' => $registration,
             'scanUrl' => $registration->admin_scan_url,
@@ -152,6 +163,12 @@ class PsbWizardController extends Controller
         }
 
         $registration->load(['period', 'studentProfile', 'parentProfile', 'statement']);
+
+        if (!$this->registrationProgressIsComplete($registration)) {
+            return redirect()
+                ->route('app.dashboard', ['registration' => $registration->id])
+                ->withErrors(['qr' => 'PDF bukti pendaftaran hanya tersedia setelah pendaftaran 100% lengkap.']);
+        }
 
         return Pdf::loadView('pdf.registration-proof', $this->registrationProofViewData($registration))
             ->setPaper('a4', 'portrait')
@@ -655,5 +672,13 @@ class PsbWizardController extends Controller
             'qrImage' => 'data:image/svg+xml;base64,' . base64_encode($qrSvg),
             'downloadedAt' => now(),
         ];
+    }
+
+    private function registrationProgressIsComplete(Registration $registration): bool
+    {
+        return $registration->isStep1Complete()
+            && (bool) $registration->studentProfile
+            && (bool) $registration->parentProfile
+            && (bool) $registration->statement;
     }
 }

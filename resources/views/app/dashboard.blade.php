@@ -72,38 +72,35 @@
         </div>
     </div>
 
-    <div class="card trezo-card mb-3">
-        <div class="card-body">
-            <div class="row g-4 align-items-center">
-                <div class="col-lg-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge text-bg-primary">Bukti Pendaftaran</span>
-                        <span class="text-muted small">Tunjukkan saat wawancara atau verifikasi.</span>
-                    </div>
-                    <h5 class="mb-2">QR Code Pendaftaran Aktif</h5>
-                    {{-- <p class="text-muted mb-3">
-                        QR ini terhubung ke detail formulir pendaftaran <span
-                            class="fw-semibold">{{ $registration->registration_no }}</span>. Hanya admin yang sudah login
-                        yang bisa membuka hasil scan untuk melihat isi form lengkap.
-                    </p> --}}
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ $activeQrPageUrl }}" class="btn btn-primary btn-sm">Lihat QR Penuh</a>
-                        <a href="{{ $activeProofPdfUrl }}" class="btn btn-outline-success btn-sm">Download PDF</a>
-                        <span class="btn btn-outline-secondary btn-sm disabled">ID: {{ $registration->registration_no }}</span>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="border rounded-4 p-3 bg-light text-center">
-                        <div class="d-inline-block bg-white p-3 rounded-4 shadow-sm">
-                            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(190)->margin(1)->generate($activeScanUrl) !!}
+    @if ($canShowActiveQr)
+        <div class="card trezo-card mb-3">
+            <div class="card-body">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-8">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge text-bg-primary">Bukti Pendaftaran</span>
+                            <span class="text-muted small">Tunjukkan saat wawancara atau verifikasi.</span>
                         </div>
-                        <div class="small text-muted mt-3">Scan menuju detail pendaftaran petugas</div>
-                        <div class="fw-semibold small mt-1">{{ $registration->registration_no }}</div>
+                        <h5 class="mb-2">QR Code Pendaftaran Aktif</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ $activeQrPageUrl }}" class="btn btn-primary btn-sm">Lihat QR Penuh</a>
+                            <a href="{{ $activeProofPdfUrl }}" class="btn btn-outline-success btn-sm">Download PDF</a>
+                            <span class="btn btn-outline-secondary btn-sm disabled">ID: {{ $registration->registration_no }}</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="border rounded-4 p-3 bg-light text-center">
+                            <div class="d-inline-block bg-white p-3 rounded-4 shadow-sm">
+                                {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(190)->margin(1)->generate($activeScanUrl) !!}
+                            </div>
+                            <div class="small text-muted mt-3">Scan menuju detail pendaftaran petugas</div>
+                            <div class="fw-semibold small mt-1">{{ $registration->registration_no }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
     @if (!empty($missingDocs))
         <div class="card trezo-card mb-3">
@@ -176,12 +173,14 @@
                                         class="btn btn-primary btn-sm">
                                         Lanjutkan
                                     </a>
-                                    <a href="{{ $item['qr_page_url'] }}" class="btn btn-outline-dark btn-sm">
-                                        QR
-                                    </a>
-                                    <a href="{{ $item['proof_pdf_url'] }}" class="btn btn-outline-success btn-sm">
-                                        Download PDF
-                                    </a>
+                                    @if ($item['can_show_qr'])
+                                        <a href="{{ $item['qr_page_url'] }}" class="btn btn-outline-dark btn-sm">
+                                            QR
+                                        </a>
+                                        <a href="{{ $item['proof_pdf_url'] }}" class="btn btn-outline-success btn-sm">
+                                            Download PDF
+                                        </a>
+                                    @endif
                                     @if ($item['status'] === 'draft')
                                         <form action="{{ route('psb.delete', $item['id']) }}" method="POST" class="d-inline"
                                             onsubmit="return confirm('Yakin hapus draft pendaftaran ini?')">
