@@ -46,6 +46,22 @@
                                         <div class="fw-semibold">{{ $registration->studentProfile?->full_name ?? '-' }}</div>
                                     </div>
                                     <div class="mb-3">
+                                        <div class="text-muted small">Asal Sekolah</div>
+                                        <div class="fw-semibold">{{ $registration->studentProfile?->school_origin ?? '-' }}</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Jenis Pendaftar</div>
+                                        <div class="fw-semibold">{{ $registration->funding_type_label }}</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Jenis Kelamin</div>
+                                        <div class="fw-semibold">{{ $registration->gender_label }}</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Jenjang</div>
+                                        <div class="fw-semibold">{{ $registration->education_level_label }}</div>
+                                    </div>
+                                    <div class="mb-3">
                                         <div class="text-muted small">Status Pendaftaran</div>
                                         <span class="badge text-bg-secondary">{{ ucfirst($registration->status) }}</span>
                                     </div>
@@ -53,14 +69,14 @@
                                         <div class="text-muted small">Periode</div>
                                         <div class="fw-semibold">{{ $registration->period?->academic_year ?? '-' }}</div>
                                     </div>
-                                    <div class="mb-4">
+                                    {{-- <div class="mb-4">
                                         <div class="text-muted small">Link Scan Petugas</div>
                                         <div class="small fw-semibold text-break">{{ $scanUrl }}</div>
-                                    </div>
+                                    </div> --}}
                                     <div class="d-flex flex-wrap gap-2">
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="window.print()">
-                                            Cetak / Simpan PDF
-                                        </button>
+                                        <a href="{{ route('psb.proof.pdf', $registration) }}" class="btn btn-primary btn-sm">
+                                            Download PDF
+                                        </a>
                                         <a href="{{ route('psb.wizard', ['step' => 3, 'registration' => $registration->id]) }}"
                                             class="btn btn-outline-secondary btn-sm">
                                             Edit Pendaftaran

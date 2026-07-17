@@ -81,13 +81,14 @@
                         <span class="text-muted small">Tunjukkan saat wawancara atau verifikasi.</span>
                     </div>
                     <h5 class="mb-2">QR Code Pendaftaran Aktif</h5>
-                    <p class="text-muted mb-3">
+                    {{-- <p class="text-muted mb-3">
                         QR ini terhubung ke detail formulir pendaftaran <span
                             class="fw-semibold">{{ $registration->registration_no }}</span>. Hanya admin yang sudah login
                         yang bisa membuka hasil scan untuk melihat isi form lengkap.
-                    </p>
+                    </p> --}}
                     <div class="d-flex flex-wrap gap-2">
-                        {{-- <a href="{{ $activeQrPageUrl }}" class="btn btn-primary btn-sm">Lihat QR Penuh</a> --}}
+                        <a href="{{ $activeQrPageUrl }}" class="btn btn-primary btn-sm">Lihat QR Penuh</a>
+                        <a href="{{ $activeProofPdfUrl }}" class="btn btn-outline-success btn-sm">Download PDF</a>
                         <span class="btn btn-outline-secondary btn-sm disabled">ID: {{ $registration->registration_no }}</span>
                     </div>
                 </div>
@@ -177,6 +178,9 @@
                                     </a>
                                     <a href="{{ $item['qr_page_url'] }}" class="btn btn-outline-dark btn-sm">
                                         QR
+                                    </a>
+                                    <a href="{{ $item['proof_pdf_url'] }}" class="btn btn-outline-success btn-sm">
+                                        Download PDF
                                     </a>
                                     @if ($item['status'] === 'draft')
                                         <form action="{{ route('psb.delete', $item['id']) }}" method="POST" class="d-inline"

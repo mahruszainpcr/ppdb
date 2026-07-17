@@ -2,12 +2,33 @@
 @section('title', 'Data Pendaftar')
 
 @section('content')
+    @if (session('success'))
+        <div class="alert alert-success border-0 rounded-3">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert alert-danger border-0 rounded-3">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-0">Data Pendaftar</h4>
             <div class="text-muted">Cari, filter, dan buka detail pendaftar.</div>
         </div>
-        <div>
+        <div class="d-flex gap-2">
+            @if (auth()->user()->role === 'admin')
+                <a href="{{ route('admin.registrations.proofs.download') }}" class="btn btn-primary btn-sm">
+                    Download Bukti 100%
+                </a>
+            @endif
             <button class="btn btn-outline-light btn-sm" id="registrationsExportBtn">
                 Download Excel
             </button>

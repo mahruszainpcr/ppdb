@@ -14,8 +14,10 @@ use Illuminate\Support\Str;
 use App\Models\StudentProfile;
 use App\Models\ParentProfile;
 use App\Models\Statement;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PsbWizardController extends Controller
 {
@@ -76,6 +78,7 @@ class PsbWizardController extends Controller
         $missingDocs = $registration->missingRequiredDocuments();
         $activeScanUrl = $registration->admin_scan_url;
         $activeQrPageUrl = $registration->parent_qr_url;
+        $activeProofPdfUrl = route('psb.proof.pdf', $registration);
 
         $registrationHistories = $registrations->map(function (Registration $reg) {
             $step1 = $reg->isStep1Complete();
@@ -105,6 +108,7 @@ class PsbWizardController extends Controller
                 'created_at' => $reg->created_at?->format('d M Y') ?? '-',
                 'scan_url' => $reg->admin_scan_url,
                 'qr_page_url' => $reg->parent_qr_url,
+                'proof_pdf_url' => route('psb.proof.pdf', $reg),
             ];
         });
 
@@ -121,6 +125,7 @@ class PsbWizardController extends Controller
             'missingDocs',
             'activeScanUrl',
             'activeQrPageUrl',
+            'activeProofPdfUrl',
             'registrationHistories',
             'activeRegistrationId'
         ));
@@ -138,6 +143,19 @@ class PsbWizardController extends Controller
             'registration' => $registration,
             'scanUrl' => $registration->admin_scan_url,
         ]);
+    }
+
+    public function downloadProofPdf(Request $request, Registration $registration)
+    {
+        if ($registration->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $registration->load(['period', 'studentProfile', 'parentProfile', 'statement']);
+
+        return Pdf::loadView('pdf.registration-proof', $this->registrationProofViewData($registration))
+            ->setPaper('a4', 'portrait')
+            ->download('bukti-pendaftaran-' . $registration->registration_no . '.pdf');
     }
 
     public function createNew(Request $request)
@@ -622,5 +640,20 @@ class PsbWizardController extends Controller
             'is_verified' => false,
             'note' => null,
         ]);
+    }
+
+    private function registrationProofViewData(Registration $registration): array
+    {
+        $student = $registration->studentProfile;
+        $scanUrl = $registration->admin_scan_url;
+        $qrSvg = QrCode::format('svg')->size(280)->margin(1)->generate($scanUrl);
+
+        return [
+            'registration' => $registration,
+            'student' => $student,
+            'scanUrl' => $scanUrl,
+            'qrImage' => 'data:image/svg+xml;base64,' . base64_encode($qrSvg),
+            'downloadedAt' => now(),
+        ];
     }
 }

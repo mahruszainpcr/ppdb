@@ -16,6 +16,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\ParentAuthController;
 use App\Http\Controllers\Auth\PasswordController;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/psb', fn() => view('public.psb.index'));
 Route::get('/psb/syarat', fn() => view('public.psb.syarat'));
@@ -27,6 +28,7 @@ Route::middleware(['auth', 'role:parent'])->prefix('app')->group(function () {
     Route::get('/psb/new', [PsbWizardController::class, 'createNew'])->name('psb.new');
     Route::post('/psb/{registration}/delete', [PsbWizardController::class, 'destroyRegistration'])->name('psb.delete');
     Route::get('/psb/{registration}/qr', [PsbWizardController::class, 'showQr'])->name('psb.qr');
+    Route::get('/psb/{registration}/proof-pdf', [PsbWizardController::class, 'downloadProofPdf'])->name('psb.proof.pdf');
 
     Route::get('/psb/wizard', [PsbWizardController::class, 'show'])->name('psb.wizard');
     Route::post('/psb/step-1', [PsbWizardController::class, 'saveStep1'])->name('psb.step1');
@@ -56,8 +58,10 @@ Route::prefix('admin')->group(function () {
         Route::middleware(['role:admin'])->group(function () {
             Route::get('/registrations/scan', [RegistrationAdminController::class, 'scanPage'])->name('admin.registrations.scan.page');
             Route::get('/registrations/scan/{registration:registration_no}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.scan');
+            Route::get('/registrations/proofs/download', [RegistrationAdminController::class, 'downloadCompleteProofs'])->name('admin.registrations.proofs.download');
         });
         Route::delete('/registrations/{registration}', [RegistrationAdminController::class, 'destroy'])->name('admin.registrations.destroy');
+        Route::get('/registrations/{registration}/proof-pdf', [RegistrationAdminController::class, 'downloadProofPdf'])->name('admin.registrations.proof.pdf');
         Route::get('/registrations/{registration}/edit', [RegistrationAdminController::class, 'edit'])->name('admin.registrations.edit');
         Route::post('/registrations/{registration}/step-1', [RegistrationAdminController::class, 'saveStep1'])->name('admin.registrations.step1');
         Route::post('/registrations/{registration}/step-2', [RegistrationAdminController::class, 'saveStep2'])->name('admin.registrations.step2');

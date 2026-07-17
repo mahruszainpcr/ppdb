@@ -9,11 +9,14 @@ use App\Models\ParentProfile;
 use App\Models\Registration;
 use App\Models\Statement;
 use App\Models\StudentProfile;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use ZipArchive;
 
 class RegistrationAdminController extends Controller
 {
@@ -110,6 +113,7 @@ class RegistrationAdminController extends Controller
             $detailUrl = route('admin.registrations.show', $r);
             $editUrl = route('admin.registrations.edit', $r);
             $deleteUrl = route('admin.registrations.destroy', $r);
+            $proofPdfUrl = route('admin.registrations.proof.pdf', $r);
             $progress = $this->registrationProgressPercent($r);
             $completionStatus = $this->registrationCompletionStatus($progress);
             $completionBadgeClass = match ($completionStatus) {
@@ -120,7 +124,8 @@ class RegistrationAdminController extends Controller
 
             $actions = '<div class="d-flex justify-content-end gap-2">'
                 . '<a class="btn btn-sm btn-outline-light" href="' . $detailUrl . '">Detail</a>'
-                . '<a class="btn btn-sm btn-outline-primary" href="' . $editUrl . '">Edit</a>';
+                . '<a class="btn btn-sm btn-outline-primary" href="' . $editUrl . '">Edit</a>'
+                . '<a class="btn btn-sm btn-outline-success" href="' . $proofPdfUrl . '">PDF</a>';
 
             if ($canDelete) {
                 $actions .= '<form method="POST" action="' . $deleteUrl . '" onsubmit="return confirm(\'Yakin hapus data pendaftaran ini?\')">'
@@ -420,6 +425,66 @@ class RegistrationAdminController extends Controller
         return view('admin.registrations.scan');
     }
 
+    public function downloadProofPdf(Registration $registration)
+    {
+        $registration->load([
+            'user',
+            'period',
+            'studentProfile',
+            'parentProfile',
+            'statement',
+            'documents',
+        ]);
+
+        return Pdf::loadView('pdf.registration-proof', $this->registrationProofViewData($registration))
+            ->setPaper('a4', 'portrait')
+            ->download('bukti-pendaftaran-' . $registration->registration_no . '.pdf');
+    }
+
+    public function downloadCompleteProofs()
+    {
+        $registrations = Registration::query()
+            ->with(['user', 'period', 'studentProfile', 'parentProfile', 'statement', 'documents'])
+            ->orderBy('registration_no')
+            ->get()
+            ->filter(fn(Registration $registration) => $this->registrationProgressPercent($registration) === 100)
+            ->values();
+
+        if ($registrations->isEmpty()) {
+            return back()->withErrors([
+                'proofs' => 'Belum ada pendaftar yang lengkap 100% untuk diunduh.',
+            ]);
+        }
+
+        $zipPath = storage_path('app/temp-bukti-pendaftaran-' . now()->format('Ymd-His') . '.zip');
+        $zip = new ZipArchive();
+        $opened = $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        if ($opened !== true) {
+            return back()->withErrors([
+                'proofs' => 'Gagal menyiapkan file ZIP bukti pendaftaran.',
+            ]);
+        }
+
+        foreach ($registrations as $registration) {
+            $pdfBinary = Pdf::loadView('pdf.registration-proof', $this->registrationProofViewData($registration))
+                ->setPaper('a4', 'portrait')
+                ->output();
+
+            $zip->addFromString(
+                'bukti-pendaftaran-' . $registration->registration_no . '.pdf',
+                $pdfBinary
+            );
+        }
+
+        $zip->close();
+
+        return response()->download(
+            $zipPath,
+            'bukti-pendaftaran-lengkap-' . now()->format('Ymd-His') . '.zip'
+        )->deleteFileAfterSend(true);
+    }
+
     public function edit(Request $request, Registration $registration)
     {
         $step = (int) $request->query('step', 1);
@@ -681,6 +746,21 @@ class RegistrationAdminController extends Controller
             'is_verified' => false,
             'note' => null,
         ]);
+    }
+
+    private function registrationProofViewData(Registration $registration): array
+    {
+        $student = $registration->studentProfile;
+        $scanUrl = $registration->admin_scan_url;
+        $qrSvg = QrCode::format('svg')->size(280)->margin(1)->generate($scanUrl);
+
+        return [
+            'registration' => $registration,
+            'student' => $student,
+            'scanUrl' => $scanUrl,
+            'qrImage' => 'data:image/svg+xml;base64,' . base64_encode($qrSvg),
+            'downloadedAt' => now(),
+        ];
     }
 
     private function adminWizardViewData(Registration $registration, int $step): array

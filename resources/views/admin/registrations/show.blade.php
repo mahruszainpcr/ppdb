@@ -64,6 +64,9 @@
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.registrations.index') }}" class="btn btn-outline-light btn-sm">Kembali</a>
+            <a href="{{ route('admin.registrations.proof.pdf', $registration) }}" class="btn btn-outline-success btn-sm">
+                Download PDF
+            </a>
             <a href="{{ route('admin.registrations.edit', $registration) }}" class="btn btn-primary btn-sm">Edit</a>
             @if (auth()->user()?->role === 'admin')
                 <form method="POST" action="{{ route('admin.registrations.destroy', $registration) }}"

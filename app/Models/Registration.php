@@ -120,4 +120,31 @@ class Registration extends Model
     {
         return route('psb.qr', $this);
     }
+
+    public function getFundingTypeLabelAttribute(): string
+    {
+        return match ($this->funding_type) {
+            'beasiswa' => 'Beasiswa',
+            'mandiri' => 'Mandiri',
+            default => '-',
+        };
+    }
+
+    public function getGenderLabelAttribute(): string
+    {
+        return match ($this->gender) {
+            'male' => 'Laki-laki',
+            'female' => 'Perempuan',
+            default => '-',
+        };
+    }
+
+    public function getEducationLevelLabelAttribute(): string
+    {
+        return match ($this->education_level) {
+            'SMP_NEW' => 'SMP',
+            'SMA_NEW', 'SMA_OLD' => 'SMA',
+            default => '-',
+        };
+    }
 }
