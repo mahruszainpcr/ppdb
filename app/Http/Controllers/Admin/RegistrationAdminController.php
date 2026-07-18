@@ -485,6 +485,42 @@ class RegistrationAdminController extends Controller
         )->deleteFileAfterSend(true);
     }
 
+    public function printQrCardsPdf()
+    {
+        $registrations = Registration::query()
+            ->with(['user', 'period', 'studentProfile', 'parentProfile', 'statement', 'documents'])
+            ->orderBy('registration_no')
+            ->get()
+            ->filter(fn(Registration $registration) => (bool) $registration->studentProfile)
+            ->values();
+
+        if ($registrations->isEmpty()) {
+            return back()->withErrors([
+                'qr_cards' => 'Belum ada peserta yang bisa dibuatkan kartu QR.',
+            ]);
+        }
+
+        $cards = $registrations->map(function (Registration $registration) {
+            $scanUrl = $registration->admin_scan_url;
+            $qrSvg = QrCode::format('svg')->size(180)->margin(1)->generate($scanUrl);
+
+            return [
+                'registration' => $registration,
+                'student' => $registration->studentProfile,
+                'scanUrl' => $scanUrl,
+                'qrImage' => 'data:image/svg+xml;base64,' . base64_encode($qrSvg),
+                'logoImage' => $this->pdfLogoImage(),
+            ];
+        });
+
+        return Pdf::loadView('pdf.registration-qr-cards', [
+            'cards' => $cards,
+            'printedAt' => now(),
+        ])
+            ->setPaper('a4', 'portrait')
+            ->download('kartu-qr-pendaftar-' . now()->format('Ymd-His') . '.pdf');
+    }
+
     public function edit(Request $request, Registration $registration)
     {
         $step = (int) $request->query('step', 1);
@@ -759,8 +795,35 @@ class RegistrationAdminController extends Controller
             'student' => $student,
             'scanUrl' => $scanUrl,
             'qrImage' => 'data:image/svg+xml;base64,' . base64_encode($qrSvg),
+            'logoImage' => public_path('logo.png'),
             'downloadedAt' => now(),
         ];
+    }
+
+    private function pdfLogoImage(): string
+    {
+        $candidates = [
+            public_path('logo.png'),
+        ];
+
+        foreach ($candidates as $path) {
+            if (is_file($path)) {
+                $contents = file_get_contents($path);
+
+                if ($contents !== false) {
+                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                    $mime = match ($extension) {
+                        'svg' => 'image/svg+xml',
+                        'jpg', 'jpeg' => 'image/jpeg',
+                        default => 'image/png',
+                    };
+
+                    return 'data:' . $mime . ';base64,' . base64_encode($contents);
+                }
+            }
+        }
+
+        return '';
     }
 
     private function adminWizardViewData(Registration $registration, int $step): array

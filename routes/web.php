@@ -59,6 +59,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/registrations/scan', [RegistrationAdminController::class, 'scanPage'])->name('admin.registrations.scan.page');
             Route::get('/registrations/scan/{registration:registration_no}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.scan');
             Route::get('/registrations/proofs/download', [RegistrationAdminController::class, 'downloadCompleteProofs'])->name('admin.registrations.proofs.download');
+            Route::get('/registrations/qr-cards/print', [RegistrationAdminController::class, 'printQrCardsPdf'])->name('admin.registrations.qr-cards.print');
         });
         Route::delete('/registrations/{registration}', [RegistrationAdminController::class, 'destroy'])->name('admin.registrations.destroy');
         Route::get('/registrations/{registration}/proof-pdf', [RegistrationAdminController::class, 'downloadProofPdf'])->name('admin.registrations.proof.pdf');

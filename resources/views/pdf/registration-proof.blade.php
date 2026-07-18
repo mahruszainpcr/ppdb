@@ -10,25 +10,25 @@
         }
 
         body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 12px;
-            color: #163020;
             margin: 0;
-            padding: 24px;
+            padding: 10px;
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 11px;
+            color: #173324;
             background: #f4f8f5;
         }
 
         .sheet {
             background: #ffffff;
-            border: 1px solid #d7e5dc;
-            border-radius: 18px;
+            border: 1px solid #d8e6dd;
+            border-radius: 14px;
             overflow: hidden;
         }
 
         .hero {
-            padding: 24px 28px;
+            padding: 12px 14px 10px;
             color: #ffffff;
-            background: linear-gradient(135deg, #14532d 0%, #198754 60%, #9bd3b2 100%);
+            background: linear-gradient(135deg, #14532d 0%, #198754 60%, #99ceb0 100%);
         }
 
         .hero-table,
@@ -38,134 +38,178 @@
             border-collapse: collapse;
         }
 
-        .brand-wrap {
-            width: 100%;
-        }
-
-        .brand-logo-cell {
-            width: 72px;
+        .logo-cell {
+            width: 50px;
             vertical-align: top;
         }
 
-        .brand-logo {
-            width: 58px;
-            height: 58px;
-            border-radius: 14px;
+        .logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.22);
-            padding: 6px;
+            padding: 3px;
+        }
+
+        .eyebrow {
+            margin: 0 0 2px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            color: #eef9f2;
         }
 
         .brand-name {
-            font-size: 20px;
+            margin: 0 0 2px;
+            font-size: 15px;
             font-weight: 700;
-            margin: 0 0 4px;
+            line-height: 1.15;
         }
 
-        .brand-subtitle {
-            font-size: 11px;
-            line-height: 1.5;
-            color: rgba(255, 255, 255, 0.92);
+        .brand-address {
+            margin: 0 0 2px;
+            font-size: 8.4px;
+            line-height: 1.3;
+            color: rgba(255, 255, 255, 0.93);
         }
 
-        .hero-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin: 0 0 6px;
+        .brand-meta {
+            margin: 0;
+            font-size: 8px;
+            line-height: 1.25;
+            color: rgba(255, 255, 255, 0.84);
         }
 
-        .hero-subtitle {
-            font-size: 12px;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.92);
-        }
-
-        .badge {
+        .summary-chip {
             display: inline-block;
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.16);
-            border: 1px solid rgba(255, 255, 255, 0.24);
+            margin-top: 7px;
+            padding: 3px 8px;
             border-radius: 999px;
-            font-size: 10px;
-            letter-spacing: .8px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.14);
+            font-size: 7.8px;
+            font-weight: 700;
+            letter-spacing: .5px;
             text-transform: uppercase;
-            margin-bottom: 14px;
-        }
-
-        .content {
-            padding: 28px;
-        }
-
-        .qr-box {
-            width: 250px;
-            border: 1px solid #d7e5dc;
-            border-radius: 16px;
-            padding: 14px;
-            text-align: center;
-            background: #f8fbf9;
-        }
-
-        .qr-box img {
-            width: 190px;
-            height: 190px;
-        }
-
-        .qr-note {
-            margin-top: 10px;
-            font-size: 10px;
-            color: #557062;
-            line-height: 1.5;
         }
 
         .summary-title {
-            font-size: 15px;
+            margin: 6px 0 2px;
+            font-size: 13px;
             font-weight: 700;
-            margin: 0 0 14px;
-            color: #163020;
+            line-height: 1.15;
         }
 
-        .data-card {
-            border: 1px solid #e3eee7;
-            border-radius: 14px;
-            padding: 16px;
+        .summary-note {
+            margin: 0;
+            font-size: 8.4px;
+            line-height: 1.32;
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .side-box {
+            padding: 9px 10px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.12);
+            text-align: right;
+        }
+
+        .side-label {
+            margin-bottom: 3px;
+            font-size: 7.8px;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .side-value {
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        .side-value:last-child {
+            margin-bottom: 0;
+        }
+
+        .content {
+            padding: 12px 14px;
+        }
+
+        .qr-wrap {
+            width: 180px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #d7e5dc;
+            border-radius: 12px;
+            background: #f8fbf9;
+        }
+
+        .qr-wrap img {
+            width: 132px;
+            height: 132px;
+        }
+
+        .qr-note {
+            margin-top: 5px;
+            font-size: 7.8px;
+            line-height: 1.22;
+            color: #5c7468;
+        }
+
+        .section-title {
+            margin: 0 0 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #173324;
+        }
+
+        .name-card {
+            margin-bottom: 8px;
+            padding: 10px;
+            border: 1px solid #e2ede6;
+            border-radius: 10px;
             background: #fbfdfc;
         }
 
         .label {
-            font-size: 10px;
+            margin-bottom: 3px;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: .45px;
             text-transform: uppercase;
-            letter-spacing: .6px;
-            color: #5f7568;
-            margin-bottom: 4px;
+            color: #61776b;
         }
 
         .value {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 700;
-            color: #163020;
+            color: #173324;
         }
 
         .value.small {
-            font-size: 13px;
+            font-size: 10.6px;
             font-weight: 600;
         }
 
         .meta-table td {
             width: 50%;
-            padding: 0 8px 14px 0;
+            padding: 0 8px 7px 0;
             vertical-align: top;
         }
 
         .footer {
-            padding: 0 28px 24px;
-            color: #567163;
-            font-size: 10px;
-            line-height: 1.7;
+            padding: 0 14px 12px;
+            font-size: 8px;
+            line-height: 1.34;
+            color: #5e7569;
         }
 
         .scan-link {
-            font-size: 10px;
-            color: #2b4f3d;
+            font-size: 8px;
+            color: #294b3b;
             word-break: break-all;
         }
     </style>
@@ -177,32 +221,33 @@
             <table class="hero-table">
                 <tr>
                     <td style="width:72%; vertical-align:top;">
-                        <table class="brand-wrap" style="margin-bottom: 14px;">
+                        <table style="width:100%; border-collapse:collapse;">
                             <tr>
-                                <td class="brand-logo-cell">
-                                    <img src="https://mahaddarussalampalas.ponpes.id/logo.png" alt="Logo Mahad"
-                                        class="brand-logo">
+                                <td class="logo-cell">
+                                    <img src="{{ $logoImage }}" alt="Logo Mahad" class="logo">
                                 </td>
-                                <td style="vertical-align: top;">
-                                    <div class="brand-name">Mahad Darussalam Palas</div>
-                                    <div class="brand-subtitle">
-                                        Pondok pesantren berbasis Al-Qur'an, adab, dan pembinaan karakter santri.
-                                    </div>
+                                <td style="vertical-align:top;">
+                                    <div class="eyebrow">Bukti pendaftaran</div>
+                                    <div class="brand-name">Ma'had Darussalam Al-Islami</div>
+                                    <div class="brand-address">Jl. Perjuangan, Kelurahan Palas, Kecamatan Rumbai, Pekanbaru, Riau</div>
+                                    <div class="brand-meta">NPSN 70034877 • NSPP 510014710047</div>
                                 </td>
                             </tr>
                         </table>
-                        <div class="badge">Bukti Pendaftaran Resmi PPDB</div>
-                        <div class="hero-title">Bukti Pendaftaran Calon Santri</div>
-                        <div class="hero-subtitle">
-                            Dokumen ini menjadi bukti pendaftaran calon santri dan dapat dipindai oleh admin untuk
-                            membuka detail formulir pendaftaran saat proses wawancara atau verifikasi.
+
+                        <div class="summary-chip">Dokumen Resmi PPDB</div>
+                        <div class="summary-title">Bukti Pendaftaran Calon Santri</div>
+                        <div class="summary-note">
+                            Dokumen ini menjadi bukti pendaftaran dan dapat dipindai admin saat proses wawancara atau verifikasi.
                         </div>
                     </td>
-                    <td style="width:28%; text-align:right; vertical-align:top;">
-                        <div style="font-size:11px; color:rgba(255,255,255,.85); margin-bottom: 10px;">Tahun Ajaran</div>
-                        <div style="font-size:18px; font-weight:700; margin-bottom: 12px;">2027/2028</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,.85);">No. Pendaftaran</div>
-                        <div style="font-size:20px; font-weight:700;">{{ $registration->registration_no }}</div>
+                    <td style="width:28%; vertical-align:top;">
+                        <div class="side-box">
+                            <div class="side-label">Tahun Ajaran</div>
+                            <div class="side-value">2027/2028</div>
+                            <div class="side-label">No. Pendaftaran</div>
+                            <div class="side-value">{{ $registration->registration_no }}</div>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -211,18 +256,18 @@
         <div class="content">
             <table class="content-table">
                 <tr>
-                    <td style="width:36%; vertical-align:top; padding-right:20px;">
-                        <div class="qr-box">
+                    <td style="width:29%; vertical-align:top; padding-right:12px;">
+                        <div class="qr-wrap">
                             <img src="{{ $qrImage }}" alt="QR Pendaftaran">
                             <div class="qr-note">
                                 Scan QR ini dengan akun admin yang sudah login untuk membuka detail pendaftaran.
                             </div>
                         </div>
                     </td>
-                    <td style="width:64%; vertical-align:top;">
-                        <div class="summary-title">Data Inti Pendaftar</div>
+                    <td style="width:71%; vertical-align:top;">
+                        <div class="section-title">Data Inti Pendaftar</div>
 
-                        <div class="data-card" style="margin-bottom:16px;">
+                        <div class="name-card">
                             <div class="label">Nama Calon Santri</div>
                             <div class="value">{{ $student?->full_name ?? '-' }}</div>
                         </div>
@@ -275,7 +320,9 @@
         </div>
 
         <div class="footer">
-            <div style="margin-top:10px;">
+            <div><strong>Link scan admin:</strong></div>
+            <div class="scan-link">{{ $scanUrl }}</div>
+            <div style="margin-top:6px;">
                 Simpan dokumen ini sebagai bukti pendaftaran. QR code di atas hanya dapat membuka detail formulir melalui
                 akun admin yang sudah login pada sistem PPDB.
             </div>

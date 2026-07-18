@@ -25,6 +25,9 @@
         </div>
         <div class="d-flex gap-2">
             @if (auth()->user()->role === 'admin')
+                <a href="{{ route('admin.registrations.qr-cards.print') }}" class="btn btn-outline-primary btn-sm">
+                    Print Kartu QR
+                </a>
                 <a href="{{ route('admin.registrations.proofs.download') }}" class="btn btn-primary btn-sm">
                     Download Bukti 100%
                 </a>

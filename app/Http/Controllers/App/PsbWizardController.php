@@ -670,6 +670,7 @@ class PsbWizardController extends Controller
             'student' => $student,
             'scanUrl' => $scanUrl,
             'qrImage' => 'data:image/svg+xml;base64,' . base64_encode($qrSvg),
+            'logoImage' => $this->pdfLogoImage(),
             'downloadedAt' => now(),
         ];
     }
@@ -680,5 +681,34 @@ class PsbWizardController extends Controller
             && (bool) $registration->studentProfile
             && (bool) $registration->parentProfile
             && (bool) $registration->statement;
+    }
+
+    private function pdfLogoImage(): string
+    {
+        $candidates = [
+            public_path('logo.png'),
+            public_path('assets/images/logo-icon.png'),
+            public_path('assets/images/logo.svg'),
+            public_path('assets/images/landing/logo.svg'),
+        ];
+
+        foreach ($candidates as $path) {
+            if (is_file($path)) {
+                $contents = file_get_contents($path);
+
+                if ($contents !== false) {
+                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                    $mime = match ($extension) {
+                        'svg' => 'image/svg+xml',
+                        'jpg', 'jpeg' => 'image/jpeg',
+                        default => 'image/png',
+                    };
+
+                    return 'data:' . $mime . ';base64,' . base64_encode($contents);
+                }
+            }
+        }
+
+        return '';
     }
 }
