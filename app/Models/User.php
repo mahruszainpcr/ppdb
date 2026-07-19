@@ -33,6 +33,11 @@ class User extends Authenticatable
         return $this->hasMany(Registration::class);
     }
 
+    public function scannedEventAttendances(): HasMany
+    {
+        return $this->hasMany(EventAttendance::class, 'scanned_by');
+    }
+
     // Helper: ambil pendaftaran terbaru
     public function latestRegistration()
     {

@@ -64,6 +64,13 @@
                         <span class="title">Data Pendaftar</span>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.events.index') }}"
+                        class="menu-link {{ Request::is('admin/events*') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined menu-icon">event</span>
+                        <span class="title">Event & Absensi</span>
+                    </a>
+                </li>
                 @if (auth()->user()->role === 'admin')
                     <li class="menu-item">
                         <a href="{{ route('admin.registrations.scan.page') }}"

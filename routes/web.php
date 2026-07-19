@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\StaffAdminController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\NewsCategoryController;
 use App\Http\Controllers\Admin\NewsPostController;
+use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\ParentAuthController;
@@ -116,6 +117,15 @@ Route::prefix('admin')->group(function () {
         Route::get('/news-posts/{newsPost}/edit', [NewsPostController::class, 'edit'])->name('admin.news-posts.edit');
         Route::put('/news-posts/{newsPost}', [NewsPostController::class, 'update'])->name('admin.news-posts.update');
         Route::delete('/news-posts/{newsPost}', [NewsPostController::class, 'destroy'])->name('admin.news-posts.destroy');
+
+        Route::get('/events', [EventController::class, 'index'])->name('admin.events.index');
+        Route::get('/events/create', [EventController::class, 'create'])->name('admin.events.create');
+        Route::post('/events', [EventController::class, 'store'])->name('admin.events.store');
+        Route::get('/events/{event}', [EventController::class, 'show'])->name('admin.events.show');
+        Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
+        Route::put('/events/{event}', [EventController::class, 'update'])->name('admin.events.update');
+        Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('admin.events.destroy');
+        Route::post('/events/{event}/scan-attendance', [EventController::class, 'scanAttendance'])->name('admin.events.scan-attendance');
     });
 });
 

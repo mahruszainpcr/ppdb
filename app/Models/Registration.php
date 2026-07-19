@@ -61,6 +61,11 @@ class Registration extends Model
         return $this->hasMany(Document::class);
     }
 
+    public function eventAttendances(): HasMany
+    {
+        return $this->hasMany(EventAttendance::class);
+    }
+
     /* ===================== HELPERS ===================== */
 
     public function documentByType(string $type): ?Document
