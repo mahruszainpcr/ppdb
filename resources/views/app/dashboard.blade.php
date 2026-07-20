@@ -31,7 +31,7 @@
                 <div class="text-end">
                     <div class="text-muted small mb-1">Progress Pengisian</div>
                     <div class="fw-bold fs-4">{{ $progressPercent }}%</div>
-                    <a href="{{ route('psb.wizard', ['step' => $nextStep, 'registration' => $registration->id]) }}"
+                    <a href="{{ $continueUrl }}"
                         class="btn btn-primary btn-sm mt-2">
                         Lanjutkan Pengisian
                     </a>
@@ -46,7 +46,7 @@
             <div class="row g-2 mt-2">
                 <div class="col-md-4">
                     <div class="border rounded p-2">
-                        <div class="fw-semibold">Step 1</div>
+                        <div class="fw-semibold">{{ $registration->education_level === 'SMA_OLD' ? 'Form Lanjutan' : 'Step 1' }}</div>
                         <div class="{{ $step1Complete ? 'text-success' : 'text-muted' }}">
                             {{ $step1Complete ? 'Selesai' : 'Belum lengkap' }}
                         </div>
@@ -54,7 +54,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="border rounded p-2">
-                        <div class="fw-semibold">Step 2</div>
+                        <div class="fw-semibold">{{ $registration->education_level === 'SMA_OLD' ? 'Surat Siap' : 'Step 2' }}</div>
                         <div class="{{ $step2Complete ? 'text-success' : 'text-muted' }}">
                             {{ $step2Complete ? 'Selesai' : 'Belum lengkap' }}
                         </div>
@@ -62,7 +62,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="border rounded p-2">
-                        <div class="fw-semibold">Step 3</div>
+                        <div class="fw-semibold">{{ $registration->education_level === 'SMA_OLD' ? 'QR Aktif' : 'Step 3' }}</div>
                         <div class="{{ $step3Complete ? 'text-success' : 'text-muted' }}">
                             {{ $step3Complete ? 'Selesai' : 'Belum lengkap' }}
                         </div>
@@ -132,7 +132,13 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0">Riwayat Pendaftaran Calon Santri</h5>
-                <a href="{{ route('psb.new') }}" class="btn btn-success btn-sm">Tambah Pendaftaran Baru</a>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('psb.create.choice') }}" class="btn btn-success btn-sm">Tambah Pendaftaran</a>
+                    <form action="{{ route('psb.continuation.new') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button class="btn btn-outline-warning btn-sm">Form Santri Lama</button>
+                    </form>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -169,7 +175,7 @@
                                         class="btn btn-outline-secondary btn-sm {{ $activeRegistrationId === $item['id'] ? 'disabled' : '' }}">
                                         Pilih
                                     </a>
-                                    <a href="{{ route('psb.wizard', ['step' => $item['next_step'], 'registration' => $item['id']]) }}"
+                                    <a href="{{ $item['continue_url'] }}"
                                         class="btn btn-primary btn-sm">
                                         Lanjutkan
                                     </a>

@@ -55,6 +55,11 @@ class Registration extends Model
         return $this->hasOne(Statement::class);
     }
 
+    public function santriContinuation(): HasOne
+    {
+        return $this->hasOne(SantriContinuation::class);
+    }
+
     // dokumen 1-N (unik per type)
     public function documents(): HasMany
     {
@@ -75,18 +80,11 @@ class Registration extends Model
 
     public function requiredDocumentTypes(): array
     {
-        // wajib selalu
-        $required = ['PAYMENT_PROOF', 'KK', 'BIRTH_CERT', 'KTP_FATHER', 'KTP_MOTHER'];
-
-        // kondisional
-        if ($this->funding_type === 'beasiswa') {
-            $required[] = 'SKTM';
-        }
-        if ($this->education_level === 'SMA_NEW') {
-            $required[] = 'GOOD_BEHAVIOR';
+        if ($this->education_level === 'SMA_OLD') {
+            return [];
         }
 
-        return $required;
+        return ['PAYMENT_PROOF', 'KK', 'BIRTH_CERT', 'KTP_FATHER', 'KTP_MOTHER'];
     }
 
     public function missingRequiredDocuments(): array
@@ -103,7 +101,16 @@ class Registration extends Model
 
     public function isStep1Complete(): bool
     {
+        if ($this->education_level === 'SMA_OLD') {
+            return true;
+        }
+
         return count($this->missingRequiredDocuments()) === 0;
+    }
+
+    public function isSantriContinuationComplete(): bool
+    {
+        return $this->education_level === 'SMA_OLD' && (bool) $this->santriContinuation;
     }
 
     public function scopeDraft($query)

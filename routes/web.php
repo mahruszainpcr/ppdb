@@ -26,10 +26,14 @@ Route::get('/ppdb', [LandingController::class, 'ppdbInfo'])->name('ppdb.info');
 // Parent App
 Route::middleware(['auth', 'role:parent'])->prefix('app')->group(function () {
     Route::get('/', [PsbWizardController::class, 'dashboard'])->name('app.dashboard');
+    Route::get('/psb/create', [PsbWizardController::class, 'createChoice'])->name('psb.create.choice');
     Route::get('/psb/new', [PsbWizardController::class, 'createNew'])->name('psb.new');
+    Route::post('/psb/continuation/new', [PsbWizardController::class, 'createContinuation'])->name('psb.continuation.new');
     Route::post('/psb/{registration}/delete', [PsbWizardController::class, 'destroyRegistration'])->name('psb.delete');
     Route::get('/psb/{registration}/qr', [PsbWizardController::class, 'showQr'])->name('psb.qr');
     Route::get('/psb/{registration}/proof-pdf', [PsbWizardController::class, 'downloadProofPdf'])->name('psb.proof.pdf');
+    Route::get('/psb/{registration}/continuation', [PsbWizardController::class, 'showContinuationForm'])->name('psb.continuation.form');
+    Route::post('/psb/{registration}/continuation', [PsbWizardController::class, 'saveContinuationForm'])->name('psb.continuation.save');
 
     Route::get('/psb/wizard', [PsbWizardController::class, 'show'])->name('psb.wizard');
     Route::post('/psb/step-1', [PsbWizardController::class, 'saveStep1'])->name('psb.step1');
@@ -64,6 +68,8 @@ Route::prefix('admin')->group(function () {
         });
         Route::delete('/registrations/{registration}', [RegistrationAdminController::class, 'destroy'])->name('admin.registrations.destroy');
         Route::get('/registrations/{registration}/proof-pdf', [RegistrationAdminController::class, 'downloadProofPdf'])->name('admin.registrations.proof.pdf');
+        Route::get('/registrations/{registration}/continuation', [RegistrationAdminController::class, 'editContinuation'])->name('admin.registrations.continuation.edit');
+        Route::post('/registrations/{registration}/continuation', [RegistrationAdminController::class, 'saveContinuation'])->name('admin.registrations.continuation.update');
         Route::get('/registrations/{registration}/edit', [RegistrationAdminController::class, 'edit'])->name('admin.registrations.edit');
         Route::post('/registrations/{registration}/step-1', [RegistrationAdminController::class, 'saveStep1'])->name('admin.registrations.step1');
         Route::post('/registrations/{registration}/step-2', [RegistrationAdminController::class, 'saveStep2'])->name('admin.registrations.step2');

@@ -126,7 +126,7 @@
                         @forelse ($recentAttendances as $attendance)
                             <tr>
                                 <td class="fw-semibold">{{ $attendance->registration->registration_no }}</td>
-                                <td>{{ $attendance->registration->studentProfile?->full_name ?? '-' }}</td>
+                                <td>{{ $attendance->registration->studentProfile?->full_name ?? $attendance->registration->santriContinuation?->full_name ?? '-' }}</td>
                                 <td>{{ $attendance->registration->user?->name ?? '-' }}</td>
                                 <td>{{ optional($attendance->scanned_at)->format('d M Y H:i:s') ?? '-' }}</td>
                                 <td>{{ $attendance->scanner?->name ?? '-' }}</td>

@@ -9,6 +9,7 @@ use App\Models\ParentProfile;
 use App\Models\Registration;
 use App\Models\Statement;
 use App\Models\StudentProfile;
+use App\Models\SantriContinuation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -37,7 +38,7 @@ class RegistrationAdminController extends Controller
 
     public function data(Request $request)
     {
-        $baseQuery = Registration::query()->with(['user', 'studentProfile', 'parentProfile', 'statement', 'documents']);
+        $baseQuery = Registration::query()->with(['user', 'studentProfile', 'parentProfile', 'statement', 'documents', 'santriContinuation']);
         $recordsTotal = (clone $baseQuery)->count();
         $globalStatsRegistrations = Registration::query()
             ->with(['studentProfile', 'parentProfile', 'statement', 'documents'])
@@ -69,6 +70,7 @@ class RegistrationAdminController extends Controller
             $baseQuery->where(function ($q) use ($s) {
                 $q->where('registration_no', 'like', "%{$s}%")
                     ->orWhereHas('studentProfile', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
+                    ->orWhereHas('santriContinuation', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
                     ->orWhereHas('user', fn($qq) => $qq->where('name', 'like', "%{$s}%"))
                     ->orWhereHas('user', fn($qq) => $qq->where('phone', 'like', "%{$s}%"));
             });
@@ -109,7 +111,7 @@ class RegistrationAdminController extends Controller
         $canDelete = $request->user()?->role === 'admin';
 
         $data = $registrations->values()->map(function (Registration $r, int $index) use ($start, $canDelete) {
-            $studentName = e(optional($r->studentProfile)->full_name ?? '-');
+            $studentName = e(optional($r->studentProfile)->full_name ?? optional($r->santriContinuation)->full_name ?? '-');
             $detailUrl = route('admin.registrations.show', $r);
             $editUrl = route('admin.registrations.edit', $r);
             $deleteUrl = route('admin.registrations.destroy', $r);
@@ -143,7 +145,7 @@ class RegistrationAdminController extends Controller
                 'student_name' => $studentName,
                 'parent_name' => e(optional($r->user)->name ?? '-'),
                 'gender_group' => e($this->genderGroupLabel($r->gender)),
-                'school_origin' => e(optional($r->studentProfile)->school_origin ?? '-'),
+                'school_origin' => e(optional($r->studentProfile)->school_origin ?? 'Darussalam'),
                 'completion_status' => '<div><span class="badge ' . $completionBadgeClass . '">' . e($completionStatus) . '</span><div class="small text-muted mt-1">' . $progress . '%</div></div>',
                 'registered_at' => e(optional($r->created_at)->format('d-m-Y H:i') ?? '-'),
                 'actions' => $actions,
@@ -173,6 +175,7 @@ class RegistrationAdminController extends Controller
             $baseQuery->where(function ($q) use ($s) {
                 $q->where('registration_no', 'like', "%{$s}%")
                     ->orWhereHas('studentProfile', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
+                    ->orWhereHas('santriContinuation', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
                     ->orWhereHas('user', fn($qq) => $qq->where('phone', 'like', "%{$s}%"));
             });
         }
@@ -288,9 +291,9 @@ class RegistrationAdminController extends Controller
 
                     $row = [
                         $r->registration_no ?? '',
-                        optional($student)->full_name ?? '',
+                        optional($student)->full_name ?? optional($r->santriContinuation)->full_name ?? '',
                         $this->genderGroupLabel($r->gender),
-                        optional($student)->school_origin ?? '',
+                        optional($student)->school_origin ?? 'Darussalam',
                         $this->registrationCompletionStatus($this->registrationProgressPercent($r)),
                         $this->registrationProgressPercent($r),
                         optional($student)->nisn ?? '',
@@ -299,7 +302,7 @@ class RegistrationAdminController extends Controller
                         optional(optional($student)->birth_date)->format('Y-m-d'),
                         $r->gender ?? '',
                         $r->education_level ?? '',
-                        optional($student)->school_origin ?? '',
+                        optional($student)->school_origin ?? 'Darussalam',
                         optional($student)->hobby ?? '',
                         optional($student)->ambition ?? '',
                         optional($student)->religion ?? '',
@@ -377,6 +380,14 @@ class RegistrationAdminController extends Controller
 
     private function registrationProgressPercent(Registration $registration): int
     {
+        if ($registration->education_level === 'SMA_OLD') {
+            return $registration->santriContinuation
+                && $registration->santriContinuation?->payment_proof_path
+                && $registration->santriContinuation?->signature_path
+                ? 100
+                : 0;
+        }
+
         $step1Complete = $registration->isStep1Complete();
         $step2Complete = (bool) $registration->studentProfile;
         $step3Complete = (bool) $registration->parentProfile && (bool) $registration->statement;
@@ -414,6 +425,7 @@ class RegistrationAdminController extends Controller
             'studentProfile',
             'parentProfile',
             'statement',
+            'santriContinuation',
             'documents' => fn($q) => $q->orderBy('type'),
         ]);
 
@@ -436,7 +448,15 @@ class RegistrationAdminController extends Controller
             'documents',
         ]);
 
-        return Pdf::loadView('pdf.registration-proof', $this->registrationProofViewData($registration))
+        $view = $registration->education_level === 'SMA_OLD'
+            ? 'pdf.santri-continuation-letter'
+            : 'pdf.registration-proof';
+
+        $data = $registration->education_level === 'SMA_OLD'
+            ? $this->santriContinuationLetterViewData($registration)
+            : $this->registrationProofViewData($registration);
+
+        return Pdf::loadView($view, $data)
             ->setPaper('a4', 'portrait')
             ->download('bukti-pendaftaran-' . $registration->registration_no . '.pdf');
     }
@@ -444,7 +464,7 @@ class RegistrationAdminController extends Controller
     public function downloadCompleteProofs()
     {
         $registrations = Registration::query()
-            ->with(['user', 'period', 'studentProfile', 'parentProfile', 'statement', 'documents'])
+            ->with(['user', 'period', 'studentProfile', 'parentProfile', 'statement', 'documents', 'santriContinuation'])
             ->orderBy('registration_no')
             ->get()
             ->filter(fn(Registration $registration) => $this->registrationProgressPercent($registration) === 100)
@@ -467,7 +487,14 @@ class RegistrationAdminController extends Controller
         }
 
         foreach ($registrations as $registration) {
-            $pdfBinary = Pdf::loadView('pdf.registration-proof', $this->registrationProofViewData($registration))
+            $view = $registration->education_level === 'SMA_OLD'
+                ? 'pdf.santri-continuation-letter'
+                : 'pdf.registration-proof';
+            $data = $registration->education_level === 'SMA_OLD'
+                ? $this->santriContinuationLetterViewData($registration)
+                : $this->registrationProofViewData($registration);
+
+            $pdfBinary = Pdf::loadView($view, $data)
                 ->setPaper('a4', 'portrait')
                 ->output();
 
@@ -488,10 +515,10 @@ class RegistrationAdminController extends Controller
     public function printQrCardsPdf()
     {
         $registrations = Registration::query()
-            ->with(['user', 'period', 'studentProfile', 'parentProfile', 'statement', 'documents'])
+            ->with(['user', 'period', 'studentProfile', 'parentProfile', 'statement', 'documents', 'santriContinuation'])
             ->orderBy('registration_no')
             ->get()
-            ->filter(fn(Registration $registration) => (bool) $registration->studentProfile)
+            ->filter(fn(Registration $registration) => (bool) $registration->studentProfile || (bool) $registration->santriContinuation)
             ->values();
 
         if ($registrations->isEmpty()) {
@@ -507,6 +534,7 @@ class RegistrationAdminController extends Controller
             return [
                 'registration' => $registration,
                 'student' => $registration->studentProfile,
+                'continuation' => $registration->santriContinuation,
                 'scanUrl' => $scanUrl,
                 'qrImage' => 'data:image/svg+xml;base64,' . base64_encode($qrSvg),
                 'logoImage' => $this->pdfLogoImage(),
@@ -531,7 +559,12 @@ class RegistrationAdminController extends Controller
             'studentProfile',
             'parentProfile',
             'statement',
+            'santriContinuation',
         ]);
+
+        if ($registration->education_level === 'SMA_OLD' && $step > 1) {
+            return redirect()->route('admin.registrations.continuation.edit', $registration);
+        }
 
         $viewData = $this->adminWizardViewData($registration, $step);
 
@@ -593,6 +626,12 @@ class RegistrationAdminController extends Controller
                 }
             }
         });
+
+        if ($registration->education_level === 'SMA_OLD') {
+            return redirect()
+                ->route('admin.registrations.continuation.edit', $registration)
+                ->with('success', 'Pilihan program berhasil disimpan. Lanjutkan form lanjutan santri.');
+        }
 
         return redirect()
             ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2])
@@ -742,6 +781,13 @@ class RegistrationAdminController extends Controller
             ->pluck('file_path')
             ->toArray();
 
+        if ($registration->santriContinuation?->signature_path) {
+            $filePaths[] = $registration->santriContinuation->signature_path;
+        }
+        if ($registration->santriContinuation?->payment_proof_path) {
+            $filePaths[] = $registration->santriContinuation->payment_proof_path;
+        }
+
         DB::transaction(function () use ($registration) {
             $registration->delete();
         });
@@ -800,6 +846,92 @@ class RegistrationAdminController extends Controller
         ];
     }
 
+    public function editContinuation(Registration $registration)
+    {
+        if ($registration->education_level !== 'SMA_OLD') {
+            return redirect()->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2]);
+        }
+
+        $registration->load(['period', 'santriContinuation']);
+
+        return view('app.psb.continuation.form', $this->continuationFormViewData($registration));
+    }
+
+    public function saveContinuation(Request $request, Registration $registration)
+    {
+        if ($registration->education_level !== 'SMA_OLD') {
+            return redirect()->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2]);
+        }
+
+        $validated = $request->validate([
+            'full_name' => ['required', 'string', 'max:255'],
+            'gender' => ['required', Rule::in(['male', 'female'])],
+            'last_class' => ['required', 'string', 'max:100'],
+            'dormitory' => ['required', 'string', 'max:255'],
+            'father_name' => ['required', 'string', 'max:255'],
+            'father_phone' => ['required', 'string', 'max:30'],
+            'mother_name' => ['required', 'string', 'max:255'],
+            'mother_phone' => ['required', 'string', 'max:30'],
+            'continue_to_ulya' => ['accepted'],
+            'agree_rules' => ['accepted'],
+            'agree_programs' => ['accepted'],
+            'agree_administration' => ['accepted'],
+            'bedding_option' => ['required', Rule::in(['buy', 'not_buy'])],
+            'payment_proof' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
+            'signature_data' => ['required', 'string'],
+        ], [
+            'signature_data.required' => 'Tanda tangan orang tua / wali wajib diisi.',
+        ]);
+
+        DB::transaction(function () use ($request, $registration, $validated) {
+            $continuation = SantriContinuation::query()->firstOrNew([
+                'registration_id' => $registration->id,
+            ]);
+
+            $signaturePath = $this->storeSignatureImage(
+                $validated['signature_data'],
+                $registration->registration_no,
+                $continuation->signature_path
+            );
+
+            $paymentProofPath = $continuation->payment_proof_path;
+            if ($request->hasFile('payment_proof')) {
+                $paymentProofPath = $this->storeContinuationPaymentProof(
+                    $request->file('payment_proof'),
+                    $registration->registration_no,
+                    $continuation->payment_proof_path
+                );
+            }
+
+            $continuation->fill([
+                'full_name' => $validated['full_name'],
+                'last_class' => $validated['last_class'],
+                'dormitory' => $validated['dormitory'],
+                'father_name' => $validated['father_name'],
+                'father_phone' => $validated['father_phone'],
+                'mother_name' => $validated['mother_name'],
+                'mother_phone' => $validated['mother_phone'],
+                'continue_to_ulya' => true,
+                'agree_rules' => true,
+                'agree_programs' => true,
+                'agree_administration' => true,
+                'bedding_option' => $validated['bedding_option'],
+                'payment_proof_path' => $paymentProofPath,
+                'signature_path' => $signaturePath,
+                'submitted_at' => now(),
+            ])->save();
+
+            $registration->update([
+                'gender' => $validated['gender'],
+                'status' => 'submitted',
+            ]);
+        });
+
+        return redirect()
+            ->route('admin.registrations.show', $registration)
+            ->with('success', 'Formulir lanjutan santri berhasil diperbarui.');
+    }
+
     private function pdfLogoImage(): string
     {
         $candidates = [
@@ -846,6 +978,77 @@ class RegistrationAdminController extends Controller
             'showDeleteButton' => auth()->user()?->role === 'admin',
             'step3SubmitLabel' => 'Simpan Perubahan',
             'wilayahOptionsUrl' => route('admin.wilayah.options'),
+        ];
+    }
+
+    private function continuationFormViewData(Registration $registration): array
+    {
+        return [
+            'registration' => $registration,
+            'activePeriod' => $registration->period,
+            'continuation' => $registration->santriContinuation,
+            'formAction' => route('admin.registrations.continuation.update', $registration),
+            'backUrl' => route('admin.registrations.show', $registration),
+            'downloadUrl' => route('admin.registrations.proof.pdf', $registration),
+            'pageTitle' => 'Edit Formulir Lanjutan Santri',
+            'pageSubtitle' => 'Admin - SMA Santri Lama (SMP di Darussalam)',
+            'submitLabel' => 'Simpan Perubahan',
+            'isAdminMode' => true,
+        ];
+    }
+
+    private function storeSignatureImage(string $dataUrl, string $registrationNo, ?string $existingPath = null): string
+    {
+        if (!str_starts_with($dataUrl, 'data:image/png;base64,')) {
+            abort(422, 'Format tanda tangan tidak valid.');
+        }
+
+        $binary = base64_decode(substr($dataUrl, strlen('data:image/png;base64,')), true);
+
+        if ($binary === false) {
+            abort(422, 'Tanda tangan tidak dapat diproses.');
+        }
+
+        if ($existingPath && Storage::disk('public')->exists($existingPath)) {
+            Storage::disk('public')->delete($existingPath);
+        }
+
+        $path = 'psb-signatures/' . $registrationNo . '-continuation-signature.png';
+        Storage::disk('public')->put($path, $binary);
+
+        return $path;
+    }
+
+    private function storeContinuationPaymentProof(\Illuminate\Http\UploadedFile $file, string $registrationNo, ?string $existingPath = null): string
+    {
+        if ($existingPath && Storage::disk('public')->exists($existingPath)) {
+            Storage::disk('public')->delete($existingPath);
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension()) ?: $file->extension() ?: 'jpg';
+        $path = 'psb-continuation-payments/' . $registrationNo . '-payment-proof.' . $extension;
+
+        Storage::disk('public')->putFileAs(
+            'psb-continuation-payments',
+            $file,
+            basename($path)
+        );
+
+        return $path;
+    }
+
+    private function santriContinuationLetterViewData(Registration $registration): array
+    {
+        $continuation = $registration->santriContinuation;
+
+        return [
+            'registration' => $registration,
+            'continuation' => $continuation,
+            'logoImage' => $this->pdfLogoImage(),
+            'signatureImage' => $continuation?->signature_path && Storage::disk('public')->exists($continuation->signature_path)
+                ? 'data:image/png;base64,' . base64_encode(Storage::disk('public')->get($continuation->signature_path))
+                : '',
+            'downloadedAt' => now(),
         ];
     }
 

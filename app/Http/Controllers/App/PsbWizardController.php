@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use App\Models\StudentProfile;
 use App\Models\ParentProfile;
 use App\Models\Statement;
+use App\Models\SantriContinuation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
@@ -27,13 +28,13 @@ class PsbWizardController extends Controller
 
         $registrations = \App\Models\Registration::query()
             ->where('user_id', $request->user()->id)
-            ->with(['period', 'documents', 'studentProfile', 'parentProfile', 'statement'])
+            ->with(['period', 'documents', 'studentProfile', 'parentProfile', 'statement', 'santriContinuation'])
             ->latest('id')
             ->get();
 
         // Jika belum ada pendaftaran sama sekali: arahkan ke wizard step 1 (auto create di show())
         if ($registrations->isEmpty()) {
-            return redirect()->route('psb.new');
+            return redirect()->route('psb.create.choice');
         }
 
         // optional: pilih registration dari query (?registration=ID)
@@ -47,21 +48,14 @@ class PsbWizardController extends Controller
         $request->session()->put('active_registration_id', $registration->id);
 
         // Hitung progress
-        $step1Complete = $registration->isStep1Complete();
-        $step2Complete = (bool) $registration->studentProfile;
-        $step3Complete = (bool) $registration->parentProfile && (bool) $registration->statement;
-
-        $stepsDone = collect([$step1Complete, $step2Complete, $step3Complete])->filter()->count();
-        $progressPercent = (int) round(($stepsDone / 3) * 100);
-
-        // Next step
-        $nextStep = 1;
-        if ($step1Complete)
-            $nextStep = 2;
-        if ($step1Complete && $step2Complete)
-            $nextStep = 3;
-        if ($step1Complete && $step2Complete && $step3Complete)
-            $nextStep = 3; // sudah lengkap, step 3 jadi review
+        [
+            'step1Complete' => $step1Complete,
+            'step2Complete' => $step2Complete,
+            'step3Complete' => $step3Complete,
+            'progressPercent' => $progressPercent,
+            'nextStep' => $nextStep,
+            'continueUrl' => $continueUrl,
+        ] = $this->registrationProgressSnapshot($registration);
 
         // WA group berdasarkan gender, hanya tampil jika progress sudah 100%
         $waLink = null;
@@ -82,32 +76,17 @@ class PsbWizardController extends Controller
         $activeProofPdfUrl = $canShowActiveQr ? route('psb.proof.pdf', $registration) : null;
 
         $registrationHistories = $registrations->map(function (Registration $reg) {
-            $step1 = $reg->isStep1Complete();
-            $step2 = (bool) $reg->studentProfile;
-            $step3 = (bool) $reg->parentProfile && (bool) $reg->statement;
-            $done = collect([$step1, $step2, $step3])->filter()->count();
-            $progress = (int) round(($done / 3) * 100);
-
-            $nextStep = 1;
-            if ($step1) {
-                $nextStep = 2;
-            }
-            if ($step1 && $step2) {
-                $nextStep = 3;
-            }
-            if ($step1 && $step2 && $step3) {
-                $nextStep = 3;
-            }
-
-            $canShowQr = $progress === 100;
+            $snapshot = $this->registrationProgressSnapshot($reg);
+            $canShowQr = $snapshot['progressPercent'] === 100;
 
             return [
                 'id' => $reg->id,
                 'registration_no' => $reg->registration_no,
-                'student_name' => $reg->studentProfile?->full_name ?? '-',
+                'student_name' => $reg->studentProfile?->full_name ?? $reg->santriContinuation?->full_name ?? '-',
                 'status' => $reg->status,
-                'progress' => $progress,
-                'next_step' => $nextStep,
+                'progress' => $snapshot['progressPercent'],
+                'next_step' => $snapshot['nextStep'],
+                'continue_url' => $snapshot['continueUrl'],
                 'created_at' => $reg->created_at?->format('d M Y') ?? '-',
                 'scan_url' => $canShowQr ? $reg->admin_scan_url : null,
                 'qr_page_url' => $canShowQr ? $reg->parent_qr_url : null,
@@ -125,6 +104,7 @@ class PsbWizardController extends Controller
             'step3Complete',
             'progressPercent',
             'nextStep',
+            'continueUrl',
             'waLink',
             'missingDocs',
             'canShowActiveQr',
@@ -142,7 +122,7 @@ class PsbWizardController extends Controller
             abort(403);
         }
 
-        $registration->load(['period', 'studentProfile', 'parentProfile', 'statement']);
+        $registration->load(['period', 'studentProfile', 'parentProfile', 'statement', 'santriContinuation']);
 
         if (!$this->registrationProgressIsComplete($registration)) {
             return redirect()
@@ -162,7 +142,7 @@ class PsbWizardController extends Controller
             abort(403);
         }
 
-        $registration->load(['period', 'studentProfile', 'parentProfile', 'statement']);
+        $registration->load(['period', 'studentProfile', 'parentProfile', 'statement', 'santriContinuation']);
 
         if (!$this->registrationProgressIsComplete($registration)) {
             return redirect()
@@ -170,7 +150,15 @@ class PsbWizardController extends Controller
                 ->withErrors(['qr' => 'PDF bukti pendaftaran hanya tersedia setelah pendaftaran 100% lengkap.']);
         }
 
-        return Pdf::loadView('pdf.registration-proof', $this->registrationProofViewData($registration))
+        $view = $registration->education_level === 'SMA_OLD'
+            ? 'pdf.santri-continuation-letter'
+            : 'pdf.registration-proof';
+
+        $data = $registration->education_level === 'SMA_OLD'
+            ? $this->santriContinuationLetterViewData($registration)
+            : $this->registrationProofViewData($registration);
+
+        return Pdf::loadView($view, $data)
             ->setPaper('a4', 'portrait')
             ->download('bukti-pendaftaran-' . $registration->registration_no . '.pdf');
     }
@@ -196,6 +184,32 @@ class PsbWizardController extends Controller
             ->with('success', 'Draft pendaftaran baru berhasil dibuat. Silakan lengkapi data calon santri.');
     }
 
+    public function createChoice()
+    {
+        return view('app.psb.create-choice');
+    }
+
+    public function createContinuation(Request $request)
+    {
+        $activePeriod = Period::query()->where('is_active', true)->latest('id')->first();
+
+        $registration = Registration::create([
+            'user_id' => $request->user()->id,
+            'period_id' => $activePeriod?->id,
+            'registration_no' => $this->generateRegistrationNo(),
+            'funding_type' => 'mandiri',
+            'education_level' => 'SMA_OLD',
+            'status' => 'draft',
+            'graduation_status' => 'pending',
+        ]);
+
+        $request->session()->put('active_registration_id', $registration->id);
+
+        return redirect()
+            ->route('psb.continuation.form', $registration)
+            ->with('success', 'Formulir lanjutan santri berhasil dibuat. Silakan lengkapi data santri lama.');
+    }
+
     public function destroyRegistration(Request $request, Registration $registration)
     {
         if ($registration->user_id !== $request->user()->id) {
@@ -210,6 +224,13 @@ class PsbWizardController extends Controller
             ->whereNotNull('file_path')
             ->pluck('file_path')
             ->toArray();
+
+        if ($registration->santriContinuation?->signature_path) {
+            $filePaths[] = $registration->santriContinuation->signature_path;
+        }
+        if ($registration->santriContinuation?->payment_proof_path) {
+            $filePaths[] = $registration->santriContinuation->payment_proof_path;
+        }
 
         DB::transaction(function () use ($registration) {
             $registration->delete();
@@ -245,7 +266,7 @@ class PsbWizardController extends Controller
         $registration = \App\Models\Registration::query()
             ->where('user_id', $request->user()->id)
             ->latest('id')
-            ->with(['period', 'documents', 'studentProfile', 'parentProfile', 'statement'])
+            ->with(['period', 'documents', 'studentProfile', 'parentProfile', 'statement', 'santriContinuation'])
             ->first();
 
         if (!$registration) {
@@ -309,7 +330,11 @@ class PsbWizardController extends Controller
 
         // Load documents for UI
         $registration->load('documents');
-        $registration->load(['documents', 'studentProfile', 'parentProfile', 'statement', 'period']);
+        $registration->load(['documents', 'studentProfile', 'parentProfile', 'statement', 'period', 'santriContinuation']);
+
+        if ($registration->education_level === 'SMA_OLD' && $step > 1) {
+            return redirect()->route('psb.continuation.form', $registration);
+        }
 
         if ($step === 2) {
             return view('app.psb.wizard.step2', compact('registration', 'activePeriod', 'step'));
@@ -370,12 +395,9 @@ class PsbWizardController extends Controller
                 // period_id tetap dari periode aktif (bisa disesuaikan: pilih gelombang -> period_id)
             ]);
 
-            // Update required docs berdasarkan kondisi
-            // SKTM required jika beasiswa (tapi boleh menyusul: kita tandai required=true, tapi verifikasi admin nanti)
-            $this->setDocumentRequired($registration, 'SKTM', $registration->funding_type === 'beasiswa');
-
-            // Good behavior required jika SMA_NEW (dari luar Darussalam) - interpretasi paling aman untuk MVP
-            $this->setDocumentRequired($registration, 'GOOD_BEHAVIOR', $registration->education_level === 'SMA_NEW');
+            // Dokumen ini tetap opsional dan boleh menyusul.
+            $this->setDocumentRequired($registration, 'SKTM', false);
+            $this->setDocumentRequired($registration, 'GOOD_BEHAVIOR', false);
 
             // Upload mapping
             $map = [
@@ -395,7 +417,12 @@ class PsbWizardController extends Controller
             }
         });
 
-        // Redirect ke step 2 nanti (belum kita buat sekarang)
+        if ($registration->education_level === 'SMA_OLD') {
+            return redirect()
+                ->route('psb.continuation.form', $registration)
+                ->with('success', 'Pilihan program berhasil disimpan. Silakan lengkapi formulir lanjutan santri.');
+        }
+
         return redirect()->route('psb.wizard', ['step' => 2])
             ->with('success', 'Step 1 berhasil disimpan. Lanjutkan ke Step 2 (Data Calon Santri).');
     }
@@ -586,6 +613,114 @@ class PsbWizardController extends Controller
             ->with('success', 'Pendaftaran berhasil disubmit. Silakan bergabung ke grup calon peserta ujian.');
     }
 
+    public function showContinuationForm(Request $request, Registration $registration)
+    {
+        if ($registration->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        if ($registration->education_level !== 'SMA_OLD') {
+            return redirect()->route('psb.wizard', ['step' => 2, 'registration' => $registration->id]);
+        }
+
+        $registration->load(['period', 'santriContinuation']);
+        $request->session()->put('active_registration_id', $registration->id);
+
+        return view('app.psb.continuation.form', $this->continuationFormViewData($registration));
+    }
+
+    public function saveContinuationForm(Request $request, Registration $registration)
+    {
+        if ($registration->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        if ($registration->education_level !== 'SMA_OLD') {
+            return redirect()->route('psb.wizard', ['step' => 2, 'registration' => $registration->id]);
+        }
+
+        $existingContinuation = $registration->santriContinuation;
+
+        $validated = $request->validate([
+            'full_name' => ['required', 'string', 'max:255'],
+            'gender' => ['required', Rule::in(['male', 'female'])],
+            'last_class' => ['required', 'string', 'max:100'],
+            'dormitory' => ['required', 'string', 'max:255'],
+            'father_name' => ['required', 'string', 'max:255'],
+            'father_phone' => ['required', 'string', 'max:30'],
+            'mother_name' => ['required', 'string', 'max:255'],
+            'mother_phone' => ['required', 'string', 'max:30'],
+            'continue_to_ulya' => ['accepted'],
+            'agree_rules' => ['accepted'],
+            'agree_programs' => ['accepted'],
+            'agree_administration' => ['accepted'],
+            'bedding_option' => ['required', Rule::in(['buy', 'not_buy'])],
+            'payment_proof' => [
+                $existingContinuation?->payment_proof_path ? 'nullable' : 'required',
+                'file',
+                'mimes:jpg,jpeg,png,pdf',
+                'max:10240'
+            ],
+            'signature_data' => ['required', 'string'],
+        ], [
+            'continue_to_ulya.accepted' => 'Pilih persetujuan melanjutkan pendidikan di Ulya.',
+            'agree_rules.accepted' => 'Komitmen menaati peraturan wajib disetujui.',
+            'agree_programs.accepted' => 'Komitmen mengikuti seluruh program wajib disetujui.',
+            'agree_administration.accepted' => 'Komitmen administrasi wajib disetujui.',
+            'payment_proof.required' => 'Bukti transfer pembayaran Rp150.000 wajib diunggah.',
+            'signature_data.required' => 'Tanda tangan orang tua / wali wajib diisi.',
+        ]);
+
+        DB::transaction(function () use ($request, $registration, $validated, $existingContinuation) {
+            $continuation = SantriContinuation::query()->firstOrNew([
+                'registration_id' => $registration->id,
+            ]);
+
+            $signaturePath = $this->storeSignatureImage(
+                $validated['signature_data'],
+                $registration->registration_no,
+                $continuation->signature_path
+            );
+            $paymentProofPath = $continuation->payment_proof_path;
+            if ($request->hasFile('payment_proof')) {
+                $paymentProofPath = $this->storeContinuationPaymentProof(
+                    $request->file('payment_proof'),
+                    $registration->registration_no,
+                    $continuation->payment_proof_path
+                );
+            }
+
+            $continuation->fill([
+                'full_name' => $validated['full_name'],
+                'last_class' => $validated['last_class'],
+                'dormitory' => $validated['dormitory'],
+                'father_name' => $validated['father_name'],
+                'father_phone' => $validated['father_phone'],
+                'mother_name' => $validated['mother_name'],
+                'mother_phone' => $validated['mother_phone'],
+                'continue_to_ulya' => true,
+                'agree_rules' => true,
+                'agree_programs' => true,
+                'agree_administration' => true,
+                'bedding_option' => $validated['bedding_option'],
+                'payment_proof_path' => $paymentProofPath,
+                'signature_path' => $signaturePath,
+                'submitted_at' => now(),
+            ])->save();
+
+            $registration->update([
+                'gender' => $validated['gender'],
+                'status' => 'submitted',
+            ]);
+        });
+
+        $registration->refresh()->load(['period', 'santriContinuation']);
+
+        return Pdf::loadView('pdf.santri-continuation-letter', $this->santriContinuationLetterViewData($registration))
+            ->setPaper('a4', 'portrait')
+            ->download('formulir-lanjutan-' . $registration->registration_no . '.pdf');
+    }
+
 
     private function generateRegistrationNo(): string
     {
@@ -677,10 +812,132 @@ class PsbWizardController extends Controller
 
     private function registrationProgressIsComplete(Registration $registration): bool
     {
+        if ($registration->education_level === 'SMA_OLD') {
+            return (bool) $registration->santriContinuation?->payment_proof_path
+                && (bool) $registration->santriContinuation?->signature_path
+                && (bool) $registration->santriContinuation;
+        }
+
         return $registration->isStep1Complete()
             && (bool) $registration->studentProfile
             && (bool) $registration->parentProfile
             && (bool) $registration->statement;
+    }
+
+    private function registrationProgressSnapshot(Registration $registration): array
+    {
+        if ($registration->education_level === 'SMA_OLD') {
+            $complete = (bool) $registration->santriContinuation
+                && (bool) $registration->santriContinuation?->payment_proof_path
+                && (bool) $registration->santriContinuation?->signature_path;
+
+            return [
+                'step1Complete' => $complete,
+                'step2Complete' => $complete,
+                'step3Complete' => $complete,
+                'progressPercent' => $complete ? 100 : 0,
+                'nextStep' => 1,
+                'continueUrl' => route('psb.continuation.form', $registration),
+            ];
+        }
+
+        $step1Complete = $registration->isStep1Complete();
+        $step2Complete = (bool) $registration->studentProfile;
+        $step3Complete = (bool) $registration->parentProfile && (bool) $registration->statement;
+
+        $stepsDone = collect([$step1Complete, $step2Complete, $step3Complete])->filter()->count();
+        $progressPercent = (int) round(($stepsDone / 3) * 100);
+
+        $nextStep = 1;
+        if ($step1Complete) {
+            $nextStep = 2;
+        }
+        if ($step1Complete && $step2Complete) {
+            $nextStep = 3;
+        }
+        if ($step1Complete && $step2Complete && $step3Complete) {
+            $nextStep = 3;
+        }
+
+        return [
+            'step1Complete' => $step1Complete,
+            'step2Complete' => $step2Complete,
+            'step3Complete' => $step3Complete,
+            'progressPercent' => $progressPercent,
+            'nextStep' => $nextStep,
+            'continueUrl' => route('psb.wizard', ['step' => $nextStep, 'registration' => $registration->id]),
+        ];
+    }
+
+    private function continuationFormViewData(Registration $registration, array $overrides = []): array
+    {
+        return array_merge([
+            'registration' => $registration,
+            'activePeriod' => $registration->period,
+            'continuation' => $registration->santriContinuation,
+            'formAction' => route('psb.continuation.save', $registration),
+            'backUrl' => route('app.dashboard', ['registration' => $registration->id]),
+            'downloadUrl' => $registration->santriContinuation ? route('psb.proof.pdf', $registration) : null,
+            'pageTitle' => 'Formulir Lanjutan Santri Ulya',
+            'pageSubtitle' => 'Khusus SMA - Santri Lama (SMP di Darussalam)',
+            'submitLabel' => 'Simpan & Download Surat',
+            'isAdminMode' => false,
+        ], $overrides);
+    }
+
+    private function storeSignatureImage(string $dataUrl, string $registrationNo, ?string $existingPath = null): string
+    {
+        if (!str_starts_with($dataUrl, 'data:image/png;base64,')) {
+            abort(422, 'Format tanda tangan tidak valid.');
+        }
+
+        $binary = base64_decode(substr($dataUrl, strlen('data:image/png;base64,')), true);
+
+        if ($binary === false) {
+            abort(422, 'Tanda tangan tidak dapat diproses.');
+        }
+
+        if ($existingPath && Storage::disk('public')->exists($existingPath)) {
+            Storage::disk('public')->delete($existingPath);
+        }
+
+        $path = 'psb-signatures/' . $registrationNo . '-continuation-signature.png';
+        Storage::disk('public')->put($path, $binary);
+
+        return $path;
+    }
+
+    private function storeContinuationPaymentProof(\Illuminate\Http\UploadedFile $file, string $registrationNo, ?string $existingPath = null): string
+    {
+        if ($existingPath && Storage::disk('public')->exists($existingPath)) {
+            Storage::disk('public')->delete($existingPath);
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension()) ?: $file->extension() ?: 'jpg';
+        $path = 'psb-continuation-payments/' . $registrationNo . '-payment-proof.' . $extension;
+
+        Storage::disk('public')->putFileAs(
+            'psb-continuation-payments',
+            $file,
+            basename($path)
+        );
+
+        return $path;
+    }
+
+    private function santriContinuationLetterViewData(Registration $registration): array
+    {
+        $continuation = $registration->santriContinuation;
+
+        return [
+            'registration' => $registration,
+            'continuation' => $continuation,
+            'logoImage' => $this->pdfLogoImage(),
+            'signatureImage' => $continuation?->signature_path && Storage::disk('public')->exists($continuation->signature_path)
+                ? 'data:image/png;base64,' . base64_encode(Storage::disk('public')->get($continuation->signature_path))
+                : '',
+            'downloadedAt' => now(),
+        ];
     }
 
     private function pdfLogoImage(): string

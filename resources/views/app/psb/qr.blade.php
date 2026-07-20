@@ -43,11 +43,11 @@
                                     </div>
                                     <div class="mb-3">
                                         <div class="text-muted small">Nama Calon Santri</div>
-                                        <div class="fw-semibold">{{ $registration->studentProfile?->full_name ?? '-' }}</div>
+                                        <div class="fw-semibold">{{ $registration->studentProfile?->full_name ?? $registration->santriContinuation?->full_name ?? '-' }}</div>
                                     </div>
                                     <div class="mb-3">
                                         <div class="text-muted small">Asal Sekolah</div>
-                                        <div class="fw-semibold">{{ $registration->studentProfile?->school_origin ?? '-' }}</div>
+                                        <div class="fw-semibold">{{ $registration->studentProfile?->school_origin ?? 'Darussalam' }}</div>
                                     </div>
                                     <div class="mb-3">
                                         <div class="text-muted small">Jenis Pendaftar</div>
@@ -77,7 +77,7 @@
                                         <a href="{{ route('psb.proof.pdf', $registration) }}" class="btn btn-primary btn-sm">
                                             Download PDF
                                         </a>
-                                        <a href="{{ route('psb.wizard', ['step' => 3, 'registration' => $registration->id]) }}"
+                                        <a href="{{ $registration->education_level === 'SMA_OLD' ? route('psb.continuation.form', $registration) : route('psb.wizard', ['step' => 3, 'registration' => $registration->id]) }}"
                                             class="btn btn-outline-secondary btn-sm">
                                             Edit Pendaftaran
                                         </a>

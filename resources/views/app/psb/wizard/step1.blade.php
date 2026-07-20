@@ -10,6 +10,7 @@
     $detailUrl = $detailUrl ?? null;
     $deleteUrl = $deleteUrl ?? null;
     $showDeleteButton = $showDeleteButton ?? false;
+    $edu = old('education_level', $registration->education_level) ?? '';
 @endphp
 
 @section('content')
@@ -78,7 +79,7 @@
                 @csrf
 
                 {{-- Card: Program --}}
-                <div class="card trezo-card mb-3">
+                <div class="card trezo-card mb-3 {{ $edu === 'SMA_OLD' ? 'd-none' : '' }}" id="documentUploadCard">
                     <div class="card-body">
                         <h6 class="mb-3">A. Program</h6>
 
@@ -96,7 +97,7 @@
                                         {{ old('funding_type', $registration->funding_type) === 'beasiswa' ? 'selected' : '' }}>
                                         BEASISWA</option>
                                 </select>
-                                <div class="form-text">Beasiswa memerlukan Surat Kurang Mampu (bisa menyusul).</div>
+                                <div class="form-text">Surat kurang mampu untuk beasiswa bersifat opsional dan bisa menyusul.</div>
                             </div>
 
                             <div class="col-md-6">
@@ -251,7 +252,6 @@
                             </div>
 
                             {{-- Good Behavior --}}
-                            @php $edu = old('education_level', $registration->education_level) ?? ''; @endphp
                             <div class="col-12 {{ str_starts_with($edu, 'SMA') ? '' : 'd-none' }}" id="goodBehaviorField">
                                 <div class="d-flex align-items-center justify-content-between gap-2">
                                     <label class="form-label mb-0">
@@ -273,7 +273,7 @@
 
                         <div class="d-flex justify-content-end gap-2">
                             <button type="submit" class="btn btn-primary px-4">
-                                Simpan & Lanjut Step 2
+                                {{ $edu === 'SMA_OLD' ? 'Simpan & Lanjut Form Santri Lama' : 'Simpan & Lanjut Step 2' }}
                             </button>
                         </div>
 
@@ -283,7 +283,7 @@
         </div>
 
         <div class="col-12 col-lg-4">
-            <div class="card trezo-card mb-3">
+            <div class="card trezo-card mb-3 {{ $edu === 'SMA_OLD' ? 'd-none' : '' }}" id="documentChecklistCard">
                 <div class="card-body">
                     <h6 class="mb-2">Checklist Tahap 1</h6>
                     <div class="text-muted small mb-3">Pastikan dokumen wajib sudah diunggah.</div>
@@ -349,17 +349,33 @@
             const educationSelect = document.querySelector('select[name="education_level"]');
             const sktmField = document.getElementById('sktmField');
             const goodBehaviorField = document.getElementById('goodBehaviorField');
+            const documentUploadCard = document.getElementById('documentUploadCard');
+            const documentChecklistCard = document.getElementById('documentChecklistCard');
+            const submitButton = document.querySelector('button[type="submit"]');
 
-            if (!fundingSelect || !educationSelect || !sktmField || !goodBehaviorField) {
+            if (!fundingSelect || !educationSelect || !sktmField || !goodBehaviorField || !submitButton) {
                 return;
             }
 
             const updateDocVisibility = () => {
                 const funding = fundingSelect.value;
                 const education = educationSelect.value || '';
+                const isSantriLama = education === 'SMA_OLD';
 
                 sktmField.classList.toggle('d-none', funding !== 'beasiswa');
-                goodBehaviorField.classList.toggle('d-none', !education.startsWith('SMA'));
+                goodBehaviorField.classList.toggle('d-none', !education.startsWith('SMA') || isSantriLama);
+
+                if (documentUploadCard) {
+                    documentUploadCard.classList.toggle('d-none', isSantriLama);
+                }
+
+                if (documentChecklistCard) {
+                    documentChecklistCard.classList.toggle('d-none', isSantriLama);
+                }
+
+                submitButton.textContent = isSantriLama
+                    ? 'Simpan & Lanjut Form Santri Lama'
+                    : 'Simpan & Lanjut Step 2';
             };
 
             fundingSelect.addEventListener('change', updateDocVisibility);

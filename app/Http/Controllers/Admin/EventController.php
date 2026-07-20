@@ -50,6 +50,7 @@ class EventController extends Controller
         $recentAttendances = EventAttendance::query()
             ->with([
                 'registration.studentProfile',
+                'registration.santriContinuation',
                 'registration.user',
                 'scanner',
             ])
@@ -105,7 +106,7 @@ class EventController extends Controller
         }
 
         $registration = Registration::query()
-            ->with(['studentProfile', 'user'])
+            ->with(['studentProfile', 'santriContinuation', 'user'])
             ->where('registration_no', $registrationNo)
             ->first();
 
@@ -130,7 +131,7 @@ class EventController extends Controller
                 'message' => 'Pendaftar ini sudah melakukan absensi pada event ini.',
                 'attendance' => [
                     'registration_no' => $registration->registration_no,
-                    'student_name' => $registration->studentProfile?->full_name ?? '-',
+                    'student_name' => $registration->studentProfile?->full_name ?? $registration->santriContinuation?->full_name ?? '-',
                     'scanned_at' => optional($existing->scanned_at)->format('d M Y H:i:s'),
                     'scanned_by' => $existing->scanner?->name ?? '-',
                 ],
@@ -154,7 +155,7 @@ class EventController extends Controller
             'attendance' => [
                 'id' => $attendance->id,
                 'registration_no' => $registration->registration_no,
-                'student_name' => $registration->studentProfile?->full_name ?? '-',
+                'student_name' => $registration->studentProfile?->full_name ?? $registration->santriContinuation?->full_name ?? '-',
                 'parent_name' => $registration->user?->name ?? '-',
                 'scanned_at' => optional($attendance->scanned_at)->format('d M Y H:i:s'),
                 'scanned_by' => $request->user()->name ?? '-',

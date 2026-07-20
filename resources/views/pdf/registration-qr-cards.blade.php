@@ -214,6 +214,7 @@
                     @php
                         $registration = $card['registration'];
                         $student = $card['student'];
+                        $continuation = $card['continuation'] ?? null;
                         $position = $index + 1;
                         $isRightColumn = $position % 2 === 0;
                         $isLastRowOnPage = $position > 8;
@@ -244,9 +245,9 @@
                                     </td>
                                     <td class="details-cell">
                                         <div class="registration-no">{{ $registration->registration_no }}</div>
-                                        <div class="student-name">{{ $student?->full_name ?? '-' }}</div>
+                                        <div class="student-name">{{ $student?->full_name ?? $continuation?->full_name ?? '-' }}</div>
                                         <div class="detail-line">
-                                            <span class="detail-label">Asal Sekolah:</span> {{ $student?->school_origin ?? '-' }}
+                                            <span class="detail-label">Asal Sekolah:</span> {{ $student?->school_origin ?? 'Darussalam' }}
                                         </div>
                                         <div class="detail-line">
                                             <span class="detail-label">Jalur:</span> {{ $registration->funding_type_label }}

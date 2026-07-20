@@ -7,6 +7,7 @@
     $sp = $registration->studentProfile;
     $pp = $registration->parentProfile;
     $st = $registration->statement;
+    $continuation = $registration->santriContinuation;
 
     // label map biar dokumen enak dibaca
     $docLabels = [
@@ -91,7 +92,7 @@
             <div class="card trezo-card">
                 <div class="card-body">
                     <div class="text-muted small mb-1">Nama Santri</div>
-                    <div class="fs-6 fw-semibold">{{ $sp?->full_name ?? '-' }}</div>
+                    <div class="fs-6 fw-semibold">{{ $sp?->full_name ?? $continuation?->full_name ?? '-' }}</div>
                     <hr class="opacity-25">
                     <div class="d-flex justify-content-between">
                         <div class="text-muted small">Jenjang</div>
@@ -103,7 +104,7 @@
                     </div>
                     <div class="d-flex justify-content-between mt-1">
                         <div class="text-muted small">Gender</div>
-                        <div class="fw-semibold">{{ $registration->gender }}</div>
+                        <div class="fw-semibold">{{ $registration->gender ?? '-' }}</div>
                     </div>
                 </div>
             </div>
@@ -152,6 +153,57 @@
             </div>
         </div>
     </div>
+
+    @if ($registration->education_level === 'SMA_OLD')
+        <div class="card trezo-card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <h5 class="mb-0">Formulir Lanjutan Santri Ulya</h5>
+                    <a href="{{ route('admin.registrations.continuation.edit', $registration) }}"
+                        class="btn btn-outline-primary btn-sm">Edit Form Lanjutan</a>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="text-muted small">Jenis Kelamin</div>
+                        <div class="fw-semibold">{{ $registration->gender_label }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Kelas Terakhir</div>
+                        <div class="fw-semibold">{{ $continuation?->last_class ?? 'IX Wustho' }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Asrama</div>
+                        <div class="fw-semibold">{{ $continuation?->dormitory ?? '-' }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Pilihan Kasur/Lemari</div>
+                        <div class="fw-semibold">
+                            {{ $continuation?->bedding_option === 'buy' ? 'Membeli paket bedding' : ($continuation?->bedding_option === 'not_buy' ? 'Tidak membeli paket bedding' : '-') }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small">Ayah/Wali</div>
+                        <div class="fw-semibold">{{ $continuation?->father_name ?? '-' }}</div>
+                        <div class="text-muted">{{ $continuation?->father_phone ?? '-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small">Ibu/Wali</div>
+                        <div class="fw-semibold">{{ $continuation?->mother_name ?? '-' }}</div>
+                        <div class="text-muted">{{ $continuation?->mother_phone ?? '-' }}</div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="text-muted small">Bukti Transfer Pendaftaran Rp150.000</div>
+                        @if ($continuation?->payment_proof_path)
+                            <a href="{{ asset('storage/' . $continuation->payment_proof_path) }}" target="_blank"
+                                class="btn btn-outline-success btn-sm mt-1">Lihat Bukti Transfer</a>
+                        @else
+                            <div class="fw-semibold">Belum diunggah</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     {{-- Tabs --}}
     <div class="card trezo-card">
