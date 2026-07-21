@@ -388,9 +388,9 @@ class RegistrationAdminController extends Controller
                 : 0;
         }
 
-        $step1Complete = $registration->isStep1Complete();
-        $step2Complete = (bool) $registration->studentProfile;
-        $step3Complete = (bool) $registration->parentProfile && (bool) $registration->statement;
+        $step1Complete = (bool) $registration->studentProfile;
+        $step2Complete = (bool) $registration->parentProfile && (bool) $registration->statement;
+        $step3Complete = $registration->isStep1Complete();
         $stepsDone = collect([$step1Complete, $step2Complete, $step3Complete])->filter()->count();
 
         return (int) round(($stepsDone / 3) * 100);
@@ -568,11 +568,11 @@ class RegistrationAdminController extends Controller
 
         $viewData = $this->adminWizardViewData($registration, $step);
 
-        if ($step === 2) {
+        if ($step === 1) {
             return view('app.psb.wizard.step2', $viewData);
         }
 
-        if ($step === 3) {
+        if ($step === 2) {
             return view('app.psb.wizard.step3', $viewData);
         }
 
@@ -633,9 +633,29 @@ class RegistrationAdminController extends Controller
                 ->with('success', 'Pilihan program berhasil disimpan. Lanjutkan form lanjutan santri.');
         }
 
+        if ($registration->studentProfile && $registration->parentProfile && $registration->statement) {
+            $registration->update(['status' => 'submitted']);
+
+            return redirect()
+                ->route('admin.registrations.show', $registration)
+                ->with('success', 'Dokumen berhasil disimpan dan pendaftaran selesai diperbarui.');
+        }
+
+        if (!$registration->studentProfile) {
+            return redirect()
+                ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 1])
+                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 1.');
+        }
+
+        if (!$registration->parentProfile || !$registration->statement) {
+            return redirect()
+                ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2])
+                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 2.');
+        }
+
         return redirect()
-            ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2])
-            ->with('success', 'Step 1 berhasil disimpan. Lanjutkan ke Step 2.');
+            ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 3])
+            ->with('success', 'Program dan dokumen berhasil disimpan.');
     }
 
     public function saveStep2(Request $request, Registration $registration)
@@ -682,8 +702,8 @@ class RegistrationAdminController extends Controller
         );
 
         return redirect()
-            ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 3])
-            ->with('success', 'Step 2 berhasil disimpan. Lanjutkan ke Step 3.');
+            ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2])
+            ->with('success', 'Step 1 berhasil disimpan. Lanjutkan ke Step 2.');
     }
 
     public function saveStep3(Request $request, Registration $registration)
@@ -770,8 +790,8 @@ class RegistrationAdminController extends Controller
         });
 
         return redirect()
-            ->route('admin.registrations.show', $registration)
-            ->with('success', 'Data pendaftaran berhasil diperbarui.');
+            ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 3])
+            ->with('success', 'Step 2 berhasil disimpan. Lanjutkan ke Step 3.');
     }
 
     public function destroy(Registration $registration)
@@ -960,6 +980,10 @@ class RegistrationAdminController extends Controller
 
     private function adminWizardViewData(Registration $registration, int $step): array
     {
+        $step1Complete = (bool) $registration->studentProfile;
+        $step2Complete = (bool) $registration->parentProfile && (bool) $registration->statement;
+        $step3Complete = $registration->isStep1Complete();
+
         return [
             'registration' => $registration,
             'activePeriod' => $registration->period,
@@ -978,6 +1002,10 @@ class RegistrationAdminController extends Controller
             'showDeleteButton' => auth()->user()?->role === 'admin',
             'step3SubmitLabel' => 'Simpan Perubahan',
             'wilayahOptionsUrl' => route('admin.wilayah.options'),
+            'wizardStepNumber' => $step,
+            'step1Status' => $step === 1 ? 'active' : ($step1Complete ? 'done' : 'upcoming'),
+            'step2Status' => $step === 2 ? 'active' : ($step2Complete ? 'done' : 'upcoming'),
+            'step3Status' => $step === 3 ? 'active' : ($step3Complete ? 'done' : 'upcoming'),
         ];
     }
 

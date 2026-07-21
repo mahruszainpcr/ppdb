@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Wizard PSB - Step 3')
+@section('title', 'Wizard PSB - Step 2')
 
 @php
     $wizardMode = $wizardMode ?? 'parent';
@@ -12,6 +12,10 @@
     $showDeleteButton = $showDeleteButton ?? false;
     $step3SubmitLabel = $step3SubmitLabel ?? 'Submit Final';
     $wilayahOptionsUrl = $wilayahOptionsUrl ?? route('app.wilayah.options');
+    $wizardStepNumber = $wizardStepNumber ?? 2;
+    $step1Status = $step1Status ?? 'done';
+    $step2Status = $step2Status ?? 'active';
+    $step3Status = $step3Status ?? 'upcoming';
 @endphp
 
 @section('content')

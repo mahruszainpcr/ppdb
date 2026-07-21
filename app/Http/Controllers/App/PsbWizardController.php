@@ -336,13 +336,42 @@ class PsbWizardController extends Controller
             return redirect()->route('psb.continuation.form', $registration);
         }
 
+        if ($step === 1) {
+            return view('app.psb.wizard.step2', [
+                'registration' => $registration,
+                'activePeriod' => $activePeriod,
+                'step' => 1,
+                'wizardStepNumber' => 1,
+                'wizardStepTitle' => 'Step 1',
+                'step1Status' => 'active',
+                'step2Status' => (bool) $registration->parentProfile && (bool) $registration->statement ? 'done' : 'upcoming',
+                'step3Status' => $registration->isStep1Complete() ? 'done' : 'upcoming',
+            ]);
+        }
         if ($step === 2) {
-            return view('app.psb.wizard.step2', compact('registration', 'activePeriod', 'step'));
+            return view('app.psb.wizard.step3', [
+                'registration' => $registration,
+                'activePeriod' => $activePeriod,
+                'step' => 2,
+                'wizardStepNumber' => 2,
+                'wizardStepTitle' => 'Step 2',
+                'step2Url' => route('psb.wizard', ['step' => 1, 'registration' => $registration->id]),
+                'step3SubmitLabel' => 'Simpan & Lanjut Step 3',
+                'step1Status' => (bool) $registration->studentProfile ? 'done' : 'active',
+                'step2Status' => 'active',
+                'step3Status' => $registration->isStep1Complete() ? 'done' : 'upcoming',
+            ]);
         }
-        if ($step === 3) {
-            return view('app.psb.wizard.step3', compact('registration', 'activePeriod', 'step'));
-        }
-        return view('app.psb.wizard.step1', compact('registration', 'activePeriod', 'step'));
+        return view('app.psb.wizard.step1', [
+            'registration' => $registration,
+            'activePeriod' => $activePeriod,
+            'step' => 3,
+            'wizardStepNumber' => 3,
+            'wizardStepTitle' => 'Step 3',
+            'step1Status' => (bool) $registration->studentProfile ? 'done' : 'upcoming',
+            'step2Status' => (bool) $registration->parentProfile && (bool) $registration->statement ? 'done' : 'upcoming',
+            'step3Status' => 'active',
+        ]);
 
     }
 
@@ -423,8 +452,25 @@ class PsbWizardController extends Controller
                 ->with('success', 'Pilihan program berhasil disimpan. Silakan lengkapi formulir lanjutan santri.');
         }
 
-        return redirect()->route('psb.wizard', ['step' => 2])
-            ->with('success', 'Step 1 berhasil disimpan. Lanjutkan ke Step 2 (Data Calon Santri).');
+        if ($registration->studentProfile && $registration->parentProfile && $registration->statement) {
+            $registration->update(['status' => 'submitted']);
+
+            return redirect()->route('app.dashboard', ['registration' => $registration->id])
+                ->with('success', 'Dokumen berhasil disimpan dan pendaftaran selesai disubmit.');
+        }
+
+        if (!$registration->studentProfile) {
+            return redirect()->route('psb.wizard', ['step' => 1])
+                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 1 (Data Calon Santri).');
+        }
+
+        if (!$registration->parentProfile || !$registration->statement) {
+            return redirect()->route('psb.wizard', ['step' => 2])
+                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 2 (Orang Tua & Pernyataan).');
+        }
+
+        return redirect()->route('psb.wizard', ['step' => 3])
+            ->with('success', 'Program dan dokumen berhasil disimpan.');
     }
     public function saveStep2(Request $request)
     {
@@ -493,8 +539,8 @@ class PsbWizardController extends Controller
             $validated
         );
 
-        return redirect()->route('psb.wizard', ['step' => 3])
-            ->with('success', 'Step 2 berhasil disimpan. Lanjutkan ke Step 3 (Orang Tua + Pernyataan).');
+        return redirect()->route('psb.wizard', ['step' => 2])
+            ->with('success', 'Step 1 berhasil disimpan. Lanjutkan ke Step 2 (Orang Tua & Pernyataan).');
     }
     public function saveStep3Submit(Request $request)
     {
@@ -512,17 +558,10 @@ class PsbWizardController extends Controller
             $request->session()->put('active_registration_id', $registration->id);
         }
 
-        // Guard: Step 1 minimal lengkap dokumen wajib
-        $missing = $registration->missingRequiredDocuments();
-        if (!empty($missing)) {
-            return redirect()->route('psb.wizard', ['step' => 1])
-                ->with('success', 'Lengkapi dulu dokumen wajib di Step 1 sebelum submit final.');
-        }
-
-        // Guard: Step 2 harus ada
+        // Guard: Step 1 harus ada
         if (!$registration->studentProfile) {
-            return redirect()->route('psb.wizard', ['step' => 2])
-                ->with('success', 'Lengkapi dulu data calon santri di Step 2 sebelum submit final.');
+            return redirect()->route('psb.wizard', ['step' => 1])
+                ->with('success', 'Lengkapi dulu data calon santri di Step 1 sebelum lanjut.');
         }
 
         $validatedParent = $request->validate([
@@ -602,15 +641,10 @@ class PsbWizardController extends Controller
                 $statementData
             );
 
-            // Submit final
-            $registration->update([
-                'status' => 'submitted',
-            ]);
         });
 
-        // Setelah submit: arahkan ke halaman selesai / dashboard dengan link group WA
-        return redirect()->route('app.dashboard')
-            ->with('success', 'Pendaftaran berhasil disubmit. Silakan bergabung ke grup calon peserta ujian.');
+        return redirect()->route('psb.wizard', ['step' => 3])
+            ->with('success', 'Step 2 berhasil disimpan. Lanjutkan ke Step 3 untuk program dan dokumen.');
     }
 
     public function showContinuationForm(Request $request, Registration $registration)
@@ -841,9 +875,9 @@ class PsbWizardController extends Controller
             ];
         }
 
-        $step1Complete = $registration->isStep1Complete();
-        $step2Complete = (bool) $registration->studentProfile;
-        $step3Complete = (bool) $registration->parentProfile && (bool) $registration->statement;
+        $step1Complete = (bool) $registration->studentProfile;
+        $step2Complete = (bool) $registration->parentProfile && (bool) $registration->statement;
+        $step3Complete = $registration->isStep1Complete();
 
         $stepsDone = collect([$step1Complete, $step2Complete, $step3Complete])->filter()->count();
         $progressPercent = (int) round(($stepsDone / 3) * 100);

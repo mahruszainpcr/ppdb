@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Wizard PSB - Tahap 1')
+@section('title', 'Wizard PSB - Step 3')
 
 @php
     $wizardMode = $wizardMode ?? 'parent';
@@ -11,6 +11,10 @@
     $deleteUrl = $deleteUrl ?? null;
     $showDeleteButton = $showDeleteButton ?? false;
     $edu = old('education_level', $registration->education_level) ?? '';
+    $wizardStepNumber = $wizardStepNumber ?? 3;
+    $step1Status = $step1Status ?? 'done';
+    $step2Status = $step2Status ?? 'done';
+    $step3Status = $step3Status ?? 'active';
 @endphp
 
 @section('content')
