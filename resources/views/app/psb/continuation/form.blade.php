@@ -157,7 +157,7 @@
                                 <input class="form-check-input mt-1" type="checkbox" name="agree_administration"
                                     value="1" @checked(old('agree_administration', $continuation?->agree_administration ?? true))>
                                 <span>Bersedia menyelesaikan administrasi sesuai ketentuan Mahad. Uang masuk sarpras
-                                    Rp1.500.000, seragam dan buku Rp1.750.000, SPP jalur mandiri Rp1.300.000, dan jalur
+                                    Rp1.500.000  hingga 31 agustus. Pendaftaran setelah 31 agustus akan kita kenakan tarif 4.5 juta. Seragam dan buku Rp1.750.000, SPP jalur mandiri Rp1.300.000, dan jalur
                                     beasiswa Rp650.000.</span>
                             </label>
                         </div>
