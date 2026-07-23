@@ -45,11 +45,11 @@
                     <div class="text-muted small mb-2">
                         Pastikan seluruh data & dokumen sudah lengkap untuk memperlancar verifikasi.
                     </div>
-                    <a href="{{ route('psb.wizard', ['step' => 1]) }}" class="btn btn-outline-light btn-sm">Cek
-                        Dokumen</a>
-                    <a href="{{ route('psb.wizard', ['step' => 2]) }}" class="btn btn-outline-light btn-sm">Cek Data
+                    <a href="{{ route('psb.wizard', ['step' => 1, 'registration' => $registration->id]) }}" class="btn btn-outline-light btn-sm">Cek Data
                         Santri</a>
-                    <a href="{{ route('psb.wizard', ['step' => 3]) }}" class="btn btn-outline-light btn-sm">Cek Orang Tua</a>
+                    <a href="{{ route('psb.wizard', ['step' => 2, 'registration' => $registration->id]) }}" class="btn btn-outline-light btn-sm">Cek Orang Tua</a>
+                    <a href="{{ route('psb.wizard', ['step' => 3, 'registration' => $registration->id]) }}" class="btn btn-outline-light btn-sm">Cek
+                        Dokumen</a>
                 </div>
             </div>
         </div>

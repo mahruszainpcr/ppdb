@@ -6,6 +6,7 @@
     $wizardMode = $wizardMode ?? 'parent';
     $wizardTitle = $wizardTitle ?? 'Pendaftaran Santri Baru';
     $step1Action = $step1Action ?? route('psb.step1');
+    $step2Url = $step2Url ?? route('psb.wizard', ['step' => 2, 'registration' => $registration->id]);
     $listUrl = $listUrl ?? route('app.dashboard', ['registration' => $registration->id]);
     $detailUrl = $detailUrl ?? null;
     $deleteUrl = $deleteUrl ?? null;
@@ -15,6 +16,12 @@
     $step1Status = $step1Status ?? 'done';
     $step2Status = $step2Status ?? 'done';
     $step3Status = $step3Status ?? 'active';
+    $statusClass = fn(string $status) => match ($status) {
+        'done' => 'text-bg-success',
+        'active' => 'text-bg-primary',
+        default => 'text-bg-secondary',
+    };
+    $submitLabel = $edu === 'SMA_OLD' ? 'Simpan & Lanjut Form Santri Lama' : 'Submit Final';
 @endphp
 
 @section('content')
@@ -61,7 +68,7 @@
                                     </form>
                                 @endif
                             @endif
-                            <span class="badge rounded-pill text-bg-secondary">Step 1</span>
+                            <span class="badge rounded-pill {{ $statusClass($step3Status) }}">Step {{ $wizardStepNumber }}</span>
                             <span class="badge rounded-pill text-bg-dark">Draft</span>
                         </div>
                     </div>
@@ -70,11 +77,11 @@
 
                     {{-- Stepper mini --}}
                     <div class="d-flex align-items-center gap-2 small text-muted">
-                        <span class="badge text-bg-primary rounded-pill">1</span> Program & Dokumen
+                        <span class="badge {{ $statusClass($step1Status) }} rounded-pill">1</span> Data Santri
                         <span class="mx-1">›</span>
-                        <span class="badge text-bg-secondary rounded-pill">2</span> Data Santri
+                        <span class="badge {{ $statusClass($step2Status) }} rounded-pill">2</span> Orang Tua & Pernyataan
                         <span class="mx-1">›</span>
-                        <span class="badge text-bg-secondary rounded-pill">3</span> Orang Tua & Pernyataan
+                        <span class="badge {{ $statusClass($step3Status) }} rounded-pill">3</span> Program & Dokumen
                     </div>
                 </div>
             </div>
@@ -275,9 +282,10 @@
 
                         <hr class="border-opacity-25 mt-4">
 
-                        <div class="d-flex justify-content-end gap-2">
+                        <div class="d-flex justify-content-between gap-2">
+                            <a href="{{ $step2Url }}" class="btn btn-outline-light">Kembali Step 2</a>
                             <button type="submit" class="btn btn-primary px-4">
-                                {{ $edu === 'SMA_OLD' ? 'Simpan & Lanjut Form Santri Lama' : 'Simpan & Lanjut Step 2' }}
+                                {{ $submitLabel }}
                             </button>
                         </div>
 
@@ -379,7 +387,7 @@
 
                 submitButton.textContent = isSantriLama
                     ? 'Simpan & Lanjut Form Santri Lama'
-                    : 'Simpan & Lanjut Step 2';
+                    : 'Submit Final';
             };
 
             fundingSelect.addEventListener('change', updateDocVisibility);

@@ -644,13 +644,13 @@ class RegistrationAdminController extends Controller
         if (!$registration->studentProfile) {
             return redirect()
                 ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 1])
-                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 1.');
+                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 1 (Data Santri).');
         }
 
         if (!$registration->parentProfile || !$registration->statement) {
             return redirect()
                 ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2])
-                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 2.');
+                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 2 (Orang Tua & Pernyataan).');
         }
 
         return redirect()
@@ -703,7 +703,7 @@ class RegistrationAdminController extends Controller
 
         return redirect()
             ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2])
-            ->with('success', 'Step 1 berhasil disimpan. Lanjutkan ke Step 2.');
+            ->with('success', 'Step 1 berhasil disimpan. Lanjutkan ke Step 2 (Orang Tua & Pernyataan).');
     }
 
     public function saveStep3(Request $request, Registration $registration)
@@ -711,7 +711,7 @@ class RegistrationAdminController extends Controller
         if (!$registration->studentProfile) {
             return redirect()
                 ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2])
-                ->withErrors(['step2' => 'Lengkapi dulu data calon santri di Step 2 sebelum menyimpan Step 3.']);
+                ->withErrors(['step2' => 'Lengkapi dulu data calon santri di Step 1 sebelum menyimpan Step 2.']);
         }
 
         $validatedParent = $request->validate([
@@ -791,7 +791,7 @@ class RegistrationAdminController extends Controller
 
         return redirect()
             ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 3])
-            ->with('success', 'Step 2 berhasil disimpan. Lanjutkan ke Step 3.');
+            ->with('success', 'Step 2 berhasil disimpan. Lanjutkan ke Step 3 (Program & Dokumen).');
     }
 
     public function destroy(Registration $registration)

@@ -77,7 +77,7 @@
                                         <a href="{{ route('psb.proof.pdf', $registration) }}" class="btn btn-primary btn-sm">
                                             Download PDF
                                         </a>
-                                        <a href="{{ $registration->education_level === 'SMA_OLD' ? route('psb.continuation.form', $registration) : route('psb.wizard', ['step' => 3, 'registration' => $registration->id]) }}"
+                                        <a href="{{ $registration->education_level === 'SMA_OLD' ? route('psb.continuation.form', $registration) : route('psb.wizard', ['step' => 1, 'registration' => $registration->id]) }}"
                                             class="btn btn-outline-secondary btn-sm">
                                             Edit Pendaftaran
                                         </a>

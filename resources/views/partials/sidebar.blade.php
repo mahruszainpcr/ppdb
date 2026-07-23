@@ -268,7 +268,7 @@
                 <li class="menu-item">
                     <a href="{{ route('psb.wizard') }}" class="menu-link {{ Request::is('app/psb*') ? 'active' : '' }}">
                         <span class="material-symbols-outlined menu-icon">edit_document</span>
-                        <span class="title">Form Pendaftaran</span>
+                        <span class="title">Form Pendaftaran Santri</span>
                     </a>
                 </li>
 

@@ -461,7 +461,7 @@ class PsbWizardController extends Controller
 
         if (!$registration->studentProfile) {
             return redirect()->route('psb.wizard', ['step' => 1])
-                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 1 (Data Calon Santri).');
+                ->with('success', 'Program dan dokumen berhasil disimpan. Lanjutkan ke Step 1 (Data Santri).');
         }
 
         if (!$registration->parentProfile || !$registration->statement) {
@@ -644,7 +644,7 @@ class PsbWizardController extends Controller
         });
 
         return redirect()->route('psb.wizard', ['step' => 3])
-            ->with('success', 'Step 2 berhasil disimpan. Lanjutkan ke Step 3 untuk program dan dokumen.');
+            ->with('success', 'Step 2 berhasil disimpan. Lanjutkan ke Step 3 (Program & Dokumen).');
     }
 
     public function showContinuationForm(Request $request, Registration $registration)

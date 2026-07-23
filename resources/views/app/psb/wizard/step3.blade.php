@@ -16,6 +16,11 @@
     $step1Status = $step1Status ?? 'done';
     $step2Status = $step2Status ?? 'active';
     $step3Status = $step3Status ?? 'upcoming';
+    $statusClass = fn(string $status) => match ($status) {
+        'done' => 'text-bg-success',
+        'active' => 'text-bg-primary',
+        default => 'text-bg-secondary',
+    };
 @endphp
 
 @section('content')
@@ -62,16 +67,16 @@
                             </form>
                         @endif
                     @endif
-                    <span class="badge rounded-pill text-bg-secondary">Step 3</span>
+                            <span class="badge rounded-pill {{ $statusClass($step2Status) }}">Step {{ $wizardStepNumber }}</span>
                 </div>
             </div>
             <hr class="border-opacity-25">
             <div class="d-flex align-items-center gap-2 small text-muted">
-                <span class="badge text-bg-success rounded-pill">1</span> Program & Dokumen
+                        <span class="badge {{ $statusClass($step1Status) }} rounded-pill">1</span> Data Santri
                 <span class="mx-1">›</span>
-                <span class="badge text-bg-success rounded-pill">2</span> Data Santri
+                        <span class="badge {{ $statusClass($step2Status) }} rounded-pill">2</span> Orang Tua & Pernyataan
                 <span class="mx-1">›</span>
-                <span class="badge text-bg-primary rounded-pill">3</span> Orang Tua & Pernyataan
+                        <span class="badge {{ $statusClass($step3Status) }} rounded-pill">3</span> Program & Dokumen
             </div>
         </div>
     </div>
@@ -404,7 +409,7 @@ Saya menyetujui Pernyataan Kesanggupan Pembayaran dengan ketentuan SPP di bayark
                 <hr class="border-opacity-25">
 
                 <div class="d-flex justify-content-between">
-                    <a href="{{ $step2Url }}" class="btn btn-outline-light">Kembali Step 2</a>
+                    <a href="{{ $step2Url }}" class="btn btn-outline-light">Kembali Step 1</a>
                     <button class="btn btn-success px-4">{{ $step3SubmitLabel }}</button>
                 </div>
             </div>

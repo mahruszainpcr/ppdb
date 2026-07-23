@@ -38,7 +38,7 @@ class ParentAuthController extends Controller
         Auth::login($user);
 
         return redirect()->route('psb.wizard', ['step' => 1])
-            ->with('success', 'Registrasi berhasil. Silakan lanjutkan mengisi Step 1 (Program & Dokumen).');
+            ->with('success', 'Registrasi berhasil. Silakan lanjutkan mengisi Step 1 (Data Santri).');
     }
 
     public function showLogin()
