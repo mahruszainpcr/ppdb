@@ -571,7 +571,7 @@ class RegistrationAdminController extends Controller
             'santriContinuation',
         ]);
 
-        if ($registration->education_level === 'SMA_OLD' && $step > 1) {
+        if ($registration->education_level === 'SMA_OLD') {
             return redirect()->route('admin.registrations.continuation.edit', $registration);
         }
 
