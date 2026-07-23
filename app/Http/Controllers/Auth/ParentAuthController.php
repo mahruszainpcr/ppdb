@@ -53,9 +53,9 @@ class ParentAuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $phone = $this->normalizePhone($validated['phone']);
+        $identifier = $this->normalizeParentLoginIdentifier($validated['phone']);
 
-        if (Auth::attempt(['phone' => $phone, 'password' => $validated['password'], 'role' => 'parent'], true)) {
+        if (Auth::attempt(['phone' => $identifier, 'password' => $validated['password'], 'role' => 'parent'], true)) {
             $request->session()->regenerate();
             return redirect()->route('app.dashboard');
         }
@@ -63,6 +63,17 @@ class ParentAuthController extends Controller
         return back()->withErrors([
             'phone' => 'Nomor WhatsApp atau password salah.',
         ])->withInput();
+    }
+
+    private function normalizeParentLoginIdentifier(string $value): string
+    {
+        $value = trim($value);
+
+        if (preg_match('/[a-zA-Z]/', $value)) {
+            return strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $value) ?? $value);
+        }
+
+        return $this->normalizePhone($value);
     }
 
     public function logout(Request $request)

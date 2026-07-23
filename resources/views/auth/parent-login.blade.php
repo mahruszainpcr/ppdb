@@ -204,7 +204,7 @@
             <div class="parent-auth-page__card">
                 <h1 class="parent-auth-page__title">Login Orang Tua / Wali</h1>
                 <div class="parent-auth-page__subtitle">
-                    Masuk untuk melanjutkan pengisian dan melihat status/kelulusan.
+                    Masuk untuk melanjutkan pengisian dan melihat status/kelulusan. Bisa memakai nomor WhatsApp atau username login.
                 </div>
 
                 @if ($errors->any())
@@ -222,9 +222,9 @@
 
                     <div class="parent-auth-page__group">
                         <label class="parent-auth-page__label">
-                            Nomor WhatsApp <span class="parent-auth-page__req">*</span>
+                            Nomor WhatsApp / Username <span class="parent-auth-page__req">*</span>
                         </label>
-                        <input name="phone" class="parent-auth-page__input" placeholder="contoh: 08xxxxxxxxxx"
+                        <input name="phone" class="parent-auth-page__input" placeholder="contoh: 08xxxxxxxxxx atau aisyahnurrahma"
                             value="{{ old('phone') }}" required>
                     </div>
 
