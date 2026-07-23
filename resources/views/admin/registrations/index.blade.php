@@ -62,6 +62,13 @@
                     </select>
                 </div>
                 <div class="col-md-2">
+                    <select name="registration_type" class="form-control form-select">
+                        <option value="">Jenis Pendaftar (Semua)</option>
+                        <option value="regular" @selected(request('registration_type') === 'regular')>Reguler</option>
+                        <option value="continuation" @selected(request('registration_type') === 'continuation')>Lanjutan Ulya Darussalam</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <button class="btn btn-primary w-100">Terapkan</button>
                 </div>
                 <div class="col-md-2">
@@ -153,6 +160,7 @@
                         d.search = form.querySelector('input[name="search"]').value;
                         d.status = form.querySelector('select[name="status"]').value;
                         d.graduation_status = form.querySelector('select[name="graduation_status"]').value;
+                        d.registration_type = form.querySelector('select[name="registration_type"]').value;
                     }
                 },
                 columns: [
@@ -187,10 +195,12 @@
                 const searchValue = form.querySelector('input[name="search"]').value;
                 const statusValue = form.querySelector('select[name="status"]').value;
                 const graduationValue = form.querySelector('select[name="graduation_status"]').value;
+                const registrationTypeValue = form.querySelector('select[name="registration_type"]').value;
 
                 if (searchValue) params.set('search', searchValue);
                 if (statusValue) params.set('status', statusValue);
                 if (graduationValue) params.set('graduation_status', graduationValue);
+                if (registrationTypeValue) params.set('registration_type', registrationTypeValue);
 
                 const baseUrl = @json(route('admin.registrations.export'));
                 const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;

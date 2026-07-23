@@ -40,53 +40,20 @@ class RegistrationAdminController extends Controller
     {
         $baseQuery = Registration::query()->with(['user', 'studentProfile', 'parentProfile', 'statement', 'documents', 'santriContinuation']);
         $recordsTotal = (clone $baseQuery)->count();
-        $globalStatsRegistrations = Registration::query()
-            ->with(['studentProfile', 'parentProfile', 'statement', 'documents'])
-            ->orderBy('id')
-            ->get();
-        $globalStats = [
-            'total' => $globalStatsRegistrations->count(),
-            'lengkap' => 0,
-            'kurang' => 0,
-            'belum_isi' => 0,
-        ];
-        foreach ($globalStatsRegistrations as $item) {
-            $status = $this->registrationCompletionStatus($this->registrationProgressPercent($item));
-            if ($status === 'Lengkap') {
-                $globalStats['lengkap']++;
-            } elseif ($status === 'Kurang') {
-                $globalStats['kurang']++;
-            } else {
-                $globalStats['belum_isi']++;
-            }
-        }
 
         $search = $request->input('search');
         if (is_array($search)) {
             $search = $search['value'] ?? null;
         }
-        if ($search) {
-            $s = trim($search);
-            $baseQuery->where(function ($q) use ($s) {
-                $q->where('registration_no', 'like', "%{$s}%")
-                    ->orWhereHas('studentProfile', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
-                    ->orWhereHas('santriContinuation', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
-                    ->orWhereHas('user', fn($qq) => $qq->where('name', 'like', "%{$s}%"))
-                    ->orWhereHas('user', fn($qq) => $qq->where('phone', 'like', "%{$s}%"));
-            });
-        }
-
-        if ($request->filled('period_id')) {
-            $baseQuery->where('period_id', $request->period_id);
-        }
-        if ($request->filled('status')) {
-            $baseQuery->where('status', $request->status);
-        }
-        if ($request->filled('graduation_status')) {
-            $baseQuery->where('graduation_status', $request->graduation_status);
-        }
+        $this->applyRegistrationFilters($baseQuery, $request, $search);
 
         $recordsFiltered = (clone $baseQuery)->count();
+        $globalStats = $this->buildRegistrationStats(
+            Registration::query()
+                ->with(['studentProfile', 'parentProfile', 'statement', 'documents', 'santriContinuation']),
+            $request,
+            $search
+        );
 
         $columns = [
             1 => 'registration_no',
@@ -170,25 +137,7 @@ class RegistrationAdminController extends Controller
         if (is_array($search)) {
             $search = $search['value'] ?? null;
         }
-        if ($search) {
-            $s = trim($search);
-            $baseQuery->where(function ($q) use ($s) {
-                $q->where('registration_no', 'like', "%{$s}%")
-                    ->orWhereHas('studentProfile', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
-                    ->orWhereHas('santriContinuation', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
-                    ->orWhereHas('user', fn($qq) => $qq->where('phone', 'like', "%{$s}%"));
-            });
-        }
-
-        if ($request->filled('period_id')) {
-            $baseQuery->where('period_id', $request->period_id);
-        }
-        if ($request->filled('status')) {
-            $baseQuery->where('status', $request->status);
-        }
-        if ($request->filled('graduation_status')) {
-            $baseQuery->where('graduation_status', $request->graduation_status);
-        }
+        $this->applyRegistrationFilters($baseQuery, $request, $search);
 
         $fileName = 'pendaftaran-' . now()->format('Ymd-His') . '.csv';
 
@@ -394,6 +343,66 @@ class RegistrationAdminController extends Controller
         $stepsDone = collect([$step1Complete, $step2Complete, $step3Complete])->filter()->count();
 
         return (int) round(($stepsDone / 3) * 100);
+    }
+
+    private function applyRegistrationFilters($query, Request $request, ?string $search = null): void
+    {
+        if ($search) {
+            $s = trim($search);
+            $query->where(function ($q) use ($s) {
+                $q->where('registration_no', 'like', "%{$s}%")
+                    ->orWhereHas('studentProfile', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
+                    ->orWhereHas('santriContinuation', fn($qq) => $qq->where('full_name', 'like', "%{$s}%"))
+                    ->orWhereHas('user', fn($qq) => $qq->where('name', 'like', "%{$s}%"))
+                    ->orWhereHas('user', fn($qq) => $qq->where('phone', 'like', "%{$s}%"));
+            });
+        }
+
+        if ($request->filled('period_id')) {
+            $query->where('period_id', $request->period_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('graduation_status')) {
+            $query->where('graduation_status', $request->graduation_status);
+        }
+
+        if ($request->filled('registration_type')) {
+            if ($request->registration_type === 'continuation') {
+                $query->where('education_level', 'SMA_OLD');
+            } elseif ($request->registration_type === 'regular') {
+                $query->where('education_level', '!=', 'SMA_OLD');
+            }
+        }
+    }
+
+    private function buildRegistrationStats($query, Request $request, ?string $search = null): array
+    {
+        $this->applyRegistrationFilters($query, $request, $search);
+
+        $registrations = $query->orderBy('id')->get();
+        $stats = [
+            'total' => $registrations->count(),
+            'lengkap' => 0,
+            'kurang' => 0,
+            'belum_isi' => 0,
+        ];
+
+        foreach ($registrations as $item) {
+            $status = $this->registrationCompletionStatus($this->registrationProgressPercent($item));
+            if ($status === 'Lengkap') {
+                $stats['lengkap']++;
+            } elseif ($status === 'Kurang') {
+                $stats['kurang']++;
+            } else {
+                $stats['belum_isi']++;
+            }
+        }
+
+        return $stats;
     }
 
     private function registrationCompletionStatus(int $progressPercent): string
