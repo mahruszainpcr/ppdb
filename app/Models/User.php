@@ -38,6 +38,11 @@ class User extends Authenticatable
         return $this->hasMany(EventAttendance::class, 'scanned_by');
     }
 
+    public function uploadedAdminDocuments(): HasMany
+    {
+        return $this->hasMany(AdminDocument::class, 'uploaded_by');
+    }
+
     // Helper: ambil pendaftaran terbaru
     public function latestRegistration()
     {

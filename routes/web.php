@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\NewsCategoryController;
 use App\Http\Controllers\Admin\NewsPostController;
 use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\AdminDocumentController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Auth\ParentAuthController;
@@ -132,6 +133,16 @@ Route::prefix('admin')->group(function () {
         Route::put('/events/{event}', [EventController::class, 'update'])->name('admin.events.update');
         Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('admin.events.destroy');
         Route::post('/events/{event}/scan-attendance', [EventController::class, 'scanAttendance'])->name('admin.events.scan-attendance');
+
+        Route::get('/documents', [AdminDocumentController::class, 'index'])->name('admin.documents.index');
+        Route::get('/documents/create', [AdminDocumentController::class, 'create'])->name('admin.documents.create');
+        Route::post('/documents', [AdminDocumentController::class, 'store'])->name('admin.documents.store');
+        Route::get('/documents/{document}', [AdminDocumentController::class, 'show'])->name('admin.documents.show');
+        Route::get('/documents/{document}/edit', [AdminDocumentController::class, 'edit'])->name('admin.documents.edit');
+        Route::put('/documents/{document}', [AdminDocumentController::class, 'update'])->name('admin.documents.update');
+        Route::delete('/documents/{document}', [AdminDocumentController::class, 'destroy'])->name('admin.documents.destroy');
+        Route::get('/documents/{document}/preview', [AdminDocumentController::class, 'preview'])->name('admin.documents.preview');
+        Route::get('/documents/{document}/download', [AdminDocumentController::class, 'download'])->name('admin.documents.download');
     });
 });
 
