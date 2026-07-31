@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AdminDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminDocumentController extends Controller
@@ -38,7 +39,7 @@ class AdminDocumentController extends Controller
 
         $document = AdminDocument::create([
             'category' => $data['category'],
-            'custom_category' => $data['category'] === 'lainnya' ? $data['custom_category'] : null,
+            'custom_category' => $data['custom_category'],
             'description' => $data['description'] ?? null,
             'file_path' => $file->store('admin-documents', 'public'),
             'original_name' => $file->getClientOriginalName(),
@@ -75,7 +76,7 @@ class AdminDocumentController extends Controller
         $data = $this->validatedData($request, false);
         $payload = [
             'category' => $data['category'],
-            'custom_category' => $data['category'] === 'lainnya' ? $data['custom_category'] : null,
+            'custom_category' => $data['custom_category'],
             'description' => $data['description'] ?? null,
         ];
 
@@ -141,35 +142,48 @@ class AdminDocumentController extends Controller
 
     private function validatedData(Request $request, bool $isCreate): array
     {
+        $allowedCategories = collect(array_keys(AdminDocument::CATEGORY_OPTIONS))
+            ->merge(AdminDocument::customCategoryOptions())
+            ->unique()
+            ->values()
+            ->all();
+
         $rules = [
-            'category' => ['required', 'string', 'max:120'],
+            'category' => ['required', 'string', 'max:120', Rule::in($allowedCategories)],
             'custom_category' => ['nullable', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:3000'],
             'file' => [$isCreate ? 'required' : 'nullable', 'file', 'mimes:pdf', 'max:10240'],
         ];
 
         $data = $request->validate($rules);
-        $allowedCategories = collect(array_keys(AdminDocument::CATEGORY_OPTIONS))
-            ->merge(AdminDocument::customCategoryOptions())
-            ->all();
 
-        $request->validate([
-            'category' => ['required', 'string', 'in:' . implode(',', $allowedCategories)],
-        ]);
-
-        if (
-            ($data['category'] ?? null) !== 'lainnya'
-            && !array_key_exists($data['category'], AdminDocument::CATEGORY_OPTIONS)
-        ) {
-            $data['custom_category'] = $data['category'];
-            $data['category'] = 'lainnya';
-        }
+        $data = $this->normalizeCategorySelection($data);
 
         if (($data['category'] ?? null) === 'lainnya') {
-            $request->validate([
-                'custom_category' => ['required', 'string', 'max:120'],
-            ]);
+            validator(
+                ['custom_category' => $data['custom_category'] ?? null],
+                ['custom_category' => ['required', 'string', 'max:120']]
+            )->validate();
         }
+
+        return $data;
+    }
+
+    private function normalizeCategorySelection(array $data): array
+    {
+        $selectedCategory = trim((string) ($data['category'] ?? ''));
+
+        if ($selectedCategory !== 'lainnya' && !array_key_exists($selectedCategory, AdminDocument::CATEGORY_OPTIONS)) {
+            $data['category'] = 'lainnya';
+            $data['custom_category'] = $selectedCategory;
+
+            return $data;
+        }
+
+        $data['category'] = $selectedCategory;
+        $data['custom_category'] = $selectedCategory === 'lainnya'
+            ? trim((string) ($data['custom_category'] ?? ''))
+            : null;
 
         return $data;
     }
