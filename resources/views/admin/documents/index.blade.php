@@ -31,7 +31,7 @@
     <div class="card trezo-card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" id="adminDocumentsTable">
                     <thead>
                         <tr>
                             <th>Kategori</th>
@@ -82,3 +82,42 @@
         </div>
     </div>
 @endsection
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.jQuery && $.fn.DataTable) {
+                $('#adminDocumentsTable').DataTable({
+                    searching: true,
+                    lengthChange: true,
+                    pageLength: 10,
+                    ordering: true,
+                    order: [[4, 'desc']],
+                    columnDefs: [
+                        { targets: 5, orderable: false, searchable: false }
+                    ],
+                    language: {
+                        search: 'Cari:',
+                        lengthMenu: 'Tampilkan _MENU_ data',
+                        info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ dokumen',
+                        infoEmpty: 'Belum ada dokumen',
+                        zeroRecords: 'Dokumen tidak ditemukan',
+                        paginate: {
+                            first: 'Awal',
+                            last: 'Akhir',
+                            next: 'Berikutnya',
+                            previous: 'Sebelumnya'
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+@endpush
