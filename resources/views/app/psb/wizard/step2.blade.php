@@ -15,11 +15,18 @@
     $step1Status = $step1Status ?? 'active';
     $step2Status = $step2Status ?? 'upcoming';
     $step3Status = $step3Status ?? 'upcoming';
+    $schoolOriginOptions = $schoolOriginOptions ?? collect();
     $statusClass = fn(string $status) => match ($status) {
         'done' => 'text-bg-success',
         'active' => 'text-bg-primary',
         default => 'text-bg-secondary',
     };
+    $selectedSchoolOrigin = mb_strtoupper(old('school_origin', $sp->school_origin ?? ''));
+    $isKnownSchoolOrigin = filled($selectedSchoolOrigin) && $schoolOriginOptions->contains($selectedSchoolOrigin);
+    $schoolOriginSelectValue = $selectedSchoolOrigin
+        ? ($isKnownSchoolOrigin ? $selectedSchoolOrigin : 'lainnya')
+        : '';
+    $schoolOriginCustomValue = $isKnownSchoolOrigin ? old('school_origin_custom', '') : old('school_origin_custom', $selectedSchoolOrigin);
 @endphp
 
 @section('content')
@@ -165,8 +172,26 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Asal Sekolah <span class="text-danger">*</span></label>
-                        <input name="school_origin" class="form-control"
-                            value="{{ old('school_origin', $sp->school_origin ?? '') }}" required>
+                        <select name="school_origin" id="schoolOriginSelect" class="form-control form-select" required>
+                            <option value="" disabled {{ $schoolOriginSelectValue ? '' : 'selected' }}>Pilih asal sekolah...</option>
+                            @foreach ($schoolOriginOptions as $schoolOriginOption)
+                                <option value="{{ $schoolOriginOption }}" @selected($schoolOriginSelectValue === $schoolOriginOption)>
+                                    {{ $schoolOriginOption }}
+                                </option>
+                            @endforeach
+                            <option value="lainnya" @selected($schoolOriginSelectValue === 'lainnya')>Lainnya</option>
+                        </select>
+                        <div class="mt-2" id="schoolOriginCustomWrap" style="display: none;">
+                            <input name="school_origin_custom" id="schoolOriginCustomInput" class="form-control"
+                                placeholder="Tulis nama sekolah"
+                                value="{{ $schoolOriginCustomValue }}">
+                        </div>
+                        @error('school_origin')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                        @error('school_origin_custom')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Jumlah Saudara Kandung</label>
@@ -298,6 +323,9 @@
             const regencySelect = document.getElementById('regencySelect');
             const districtSelect = document.getElementById('districtSelect');
             const villageSelect = document.getElementById('villageSelect');
+            const schoolOriginSelect = document.getElementById('schoolOriginSelect');
+            const schoolOriginCustomWrap = document.getElementById('schoolOriginCustomWrap');
+            const schoolOriginCustomInput = document.getElementById('schoolOriginCustomInput');
             const optionsUrl = @json($wilayahOptionsUrl);
 
             const state = {
@@ -385,6 +413,15 @@
             const resetVillage = () => {
                 setSelectOptions(villageSelect, [], 'Pilih kecamatan dulu');
                 villageSelect.disabled = true;
+            };
+
+            const syncSchoolOriginInput = () => {
+                const isOther = schoolOriginSelect.value === 'lainnya';
+                schoolOriginCustomWrap.style.display = isOther ? '' : 'none';
+                schoolOriginCustomInput.required = isOther;
+                if (!isOther) {
+                    schoolOriginCustomInput.value = '';
+                }
             };
 
             const loadProvinces = async () => {
@@ -525,6 +562,8 @@
                 state.villageName = selected ? selected.value : '';
             });
 
+            schoolOriginSelect.addEventListener('change', syncSchoolOriginInput);
+            syncSchoolOriginInput();
             loadProvinces();
         });
     </script>

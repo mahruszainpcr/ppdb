@@ -340,6 +340,7 @@ class PsbWizardController extends Controller
             return view('app.psb.wizard.step2', [
                 'registration' => $registration,
                 'activePeriod' => $activePeriod,
+                'schoolOriginOptions' => StudentProfile::schoolOriginOptions(),
                 'step' => 1,
                 'wizardStepNumber' => 1,
                 'wizardStepTitle' => 'Step 1',
@@ -505,6 +506,7 @@ class PsbWizardController extends Controller
             'postal_code' => ['nullable', 'string', 'max:10'],
 
             'school_origin' => ['required', 'string', 'max:255'],
+            'school_origin_custom' => ['nullable', 'string', 'max:255'],
             'hobby' => ['required', 'string', 'max:120'],
             'ambition' => ['required', 'string', 'max:120'],
 
@@ -530,6 +532,12 @@ class PsbWizardController extends Controller
             'birth_place.required' => 'Tempat lahir wajib diisi.',
             'birth_date.required' => 'Tanggal lahir wajib diisi.',
         ]);
+
+        $validated['school_origin'] = $this->normalizeSchoolOrigin(
+            $validated['school_origin'] ?? null,
+            $validated['school_origin_custom'] ?? null,
+        );
+        unset($validated['school_origin_custom']);
 
         // Simpan gender juga ke registrations (dipakai untuk WA group)
         $registration->update(['gender' => $validated['gender']]);
@@ -917,6 +925,18 @@ class PsbWizardController extends Controller
             'submitLabel' => 'Simpan & Download Surat',
             'isAdminMode' => false,
         ], $overrides);
+    }
+
+    private function normalizeSchoolOrigin(?string $selected, ?string $custom): string
+    {
+        $selected = trim((string) $selected);
+        $custom = trim((string) $custom);
+
+        if ($selected === 'lainnya') {
+            return mb_strtoupper($custom);
+        }
+
+        return mb_strtoupper($selected);
     }
 
     private function storeSignatureImage(string $dataUrl, string $registrationNo, ?string $existingPath = null): string

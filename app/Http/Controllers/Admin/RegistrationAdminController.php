@@ -683,6 +683,7 @@ class RegistrationAdminController extends Controller
             'village' => ['required', 'string', 'max:120'],
             'postal_code' => ['nullable', 'string', 'max:10'],
             'school_origin' => ['required', 'string', 'max:255'],
+            'school_origin_custom' => ['nullable', 'string', 'max:255'],
             'hobby' => ['required', 'string', 'max:120'],
             'ambition' => ['required', 'string', 'max:120'],
             'religion' => ['required', 'string', 'max:50'],
@@ -702,6 +703,12 @@ class RegistrationAdminController extends Controller
             'birth_place.required' => 'Tempat lahir wajib diisi.',
             'birth_date.required' => 'Tanggal lahir wajib diisi.',
         ]);
+
+        $validated['school_origin'] = $this->normalizeSchoolOrigin(
+            $validated['school_origin'] ?? null,
+            $validated['school_origin_custom'] ?? null,
+        );
+        unset($validated['school_origin_custom']);
 
         $registration->update(['gender' => $validated['gender']]);
 
@@ -996,6 +1003,7 @@ class RegistrationAdminController extends Controller
         return [
             'registration' => $registration,
             'activePeriod' => $registration->period,
+            'schoolOriginOptions' => StudentProfile::schoolOriginOptions(),
             'step' => $step,
             'wizardMode' => 'admin',
             'wizardTitle' => 'Edit Pendaftaran',
@@ -1016,6 +1024,18 @@ class RegistrationAdminController extends Controller
             'step2Status' => $step === 2 ? 'active' : ($step2Complete ? 'done' : 'upcoming'),
             'step3Status' => $step === 3 ? 'active' : ($step3Complete ? 'done' : 'upcoming'),
         ];
+    }
+
+    private function normalizeSchoolOrigin(?string $selected, ?string $custom): string
+    {
+        $selected = trim((string) $selected);
+        $custom = trim((string) $custom);
+
+        if ($selected === 'lainnya') {
+            return mb_strtoupper($custom);
+        }
+
+        return mb_strtoupper($selected);
     }
 
     private function continuationFormViewData(Registration $registration): array

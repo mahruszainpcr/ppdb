@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 
 class StudentProfile extends Model
 {
@@ -45,5 +46,17 @@ class StudentProfile extends Model
     public function registration(): BelongsTo
     {
         return $this->belongsTo(Registration::class);
+    }
+
+    public static function schoolOriginOptions(): Collection
+    {
+        return static::query()
+            ->whereNotNull('school_origin')
+            ->where('school_origin', '!=', '')
+            ->pluck('school_origin')
+            ->map(fn(string $schoolOrigin) => mb_strtoupper(trim($schoolOrigin)))
+            ->unique()
+            ->sort()
+            ->values();
     }
 }
