@@ -21,6 +21,9 @@ class Period extends Model
         'admin_contact_1',
         'admin_contact_2',
         'information_note',
+        'payment_proof_label',
+        'payment_proof_note',
+        'payment_agreement_note',
     ];
 
     protected $casts = [

@@ -2,6 +2,7 @@
 @section('title', 'Wizard PSB - Step 2')
 
 @php
+    $periodInfo = $registration->period ?? $activePeriod ?? null;
     $wizardMode = $wizardMode ?? 'parent';
     $wizardTitle = $wizardTitle ?? 'Wizard PSB';
     $step2Url = $step2Url ?? route('psb.wizard', ['step' => 2, 'registration' => $registration->id]);
@@ -385,9 +386,7 @@
 
                 <div class="mb-3">
                     <label class="form-label d-block">
-                        Saya bersedia memenuhi kewajiban pembayaran biaya pendidikan sesuai waktu yang ditentukan, termasuk ketentuan tanda jadi, infak, dan aturan pengembalian dana.
-Dengan mencentang, berarti saya telah membaca dan menyetujui seluruh ketentuan. <br>
-Saya menyetujui Pernyataan Kesanggupan Pembayaran dengan ketentuan SPP di bayarkan sebelum tanggal 10 setiap bulannya, uang masuk dibayarkan 50% setelah dinyatakan diterima dan dilunasi paling lambat bulan April 2027 serta buku dan seragam dilunasi bulan januari 2027 dan juga bersedia memenuhi seluruh ketentuan tambahan yang belum tercantum dalam form ini.
+                        <span style="white-space: pre-line;">{{ $periodInfo?->payment_agreement_note ?: "Saya bersedia memenuhi kewajiban pembayaran biaya pendidikan sesuai waktu yang ditentukan, termasuk ketentuan tanda jadi, infak, dan aturan pengembalian dana.\nDengan mencentang, berarti saya telah membaca dan menyetujui seluruh ketentuan pembayaran lainnya yang ditetapkan ma'had." }}</span>
                         <span class="text-danger">*</span>
                     </label>
                     @php $ap = old('agree_payment', isset($st) ? ($st->agree_payment ? 'yes' : 'no') : 'yes'); @endphp

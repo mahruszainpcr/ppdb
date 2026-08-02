@@ -3,6 +3,7 @@
 @section('title', 'Wizard PSB - Step 3')
 
 @php
+    $periodInfo = $registration->period ?? $activePeriod ?? null;
     $wizardMode = $wizardMode ?? 'parent';
     $wizardTitle = $wizardTitle ?? 'Pendaftaran Santri Baru';
     $step1Action = $step1Action ?? route('psb.step1');
@@ -177,11 +178,13 @@
                             <div class="col-12">
                                 <div class="d-flex align-items-center justify-content-between gap-2">
                                     <label class="form-label mb-0">
-                                        Bukti Pembayaran Uang Pendaftaran (Rp. 150.000)
+                                        {{ $periodInfo?->payment_proof_label ?: 'Bukti Pembayaran Uang Pendaftaran (Rp. 150.000)' }}
                                         <span class="text-danger">*</span>
-                                        <div class="text-muted small">
-                                            No Rek. (BSI 7145-1777-28) Kode Bank 451 An. Al Marwa SPP
-                                        </div>
+                                        @if (!empty($periodInfo?->payment_proof_note))
+                                            <div class="text-muted small" style="white-space: pre-line;">
+                                                {{ $periodInfo->payment_proof_note }}
+                                            </div>
+                                        @endif
                                     </label>
                                     <div class="d-flex gap-2">
                                         {!! $statusBadge($docs['PAYMENT_PROOF'] ?? null) !!}

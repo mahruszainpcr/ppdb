@@ -99,6 +99,8 @@ Route::prefix('admin')->group(function () {
 
             Route::get('/periods', [PeriodController::class, 'index'])->name('admin.periods.index');
             Route::post('/periods/save', [PeriodController::class, 'save'])->name('admin.periods.save');
+            Route::post('/periods/{period}/activate', [PeriodController::class, 'activate'])->name('admin.periods.activate');
+            Route::post('/periods/{period}/delete', [PeriodController::class, 'destroy'])->name('admin.periods.destroy');
 
             Route::get('/staff', [StaffAdminController::class, 'index'])->name('admin.staff.index');
             Route::get('/staff/data', [StaffAdminController::class, 'data'])->name('admin.staff.data');
