@@ -28,6 +28,50 @@
         </div>
     </div>
 
+    <div class="card trezo-card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                <div>
+                    <h5 class="mb-1">Template Chat WA Ringkasan Pendaftaran</h5>
+                    <div class="text-muted small">Siap copy-paste untuk laporan cepat ke grup atau pimpinan.</div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="copyWaSummaryBtn">Copy Template</button>
+                    <a href="{{ $registrationSummary['wa_url'] }}" target="_blank" class="btn btn-success btn-sm">Buka WhatsApp</a>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div class="border rounded-3 p-3 h-100">
+                        <div class="text-muted small">Periode</div>
+                        <div class="fw-semibold">{{ $registrationSummary['period_label'] }}</div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <div class="border rounded-3 p-3 h-100">
+                        <div class="text-muted small">Total</div>
+                        <div class="fs-4 fw-semibold">{{ $registrationSummary['total'] }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="border rounded-3 p-3 h-100">
+                        <div class="text-muted small">Lengkap 100%</div>
+                        <div class="fs-4 fw-semibold text-success">{{ $registrationSummary['complete_total'] }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="border rounded-3 p-3 h-100">
+                        <div class="text-muted small">Belum Lengkap</div>
+                        <div class="fs-4 fw-semibold text-warning">{{ $registrationSummary['incomplete_total'] }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <textarea id="waSummaryTemplate" class="form-control" rows="16">{{ $registrationSummary['message'] }}</textarea>
+        </div>
+    </div>
+
     <div class="card trezo-card">
         <div class="card-body">
             <div class="table-responsive">
@@ -93,6 +137,28 @@
     <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const copyWaSummaryBtn = document.getElementById('copyWaSummaryBtn');
+            const waSummaryTemplate = document.getElementById('waSummaryTemplate');
+
+            if (copyWaSummaryBtn && waSummaryTemplate) {
+                copyWaSummaryBtn.addEventListener('click', async function () {
+                    try {
+                        await navigator.clipboard.writeText(waSummaryTemplate.value);
+                        copyWaSummaryBtn.textContent = 'Template Tersalin';
+                        setTimeout(() => {
+                            copyWaSummaryBtn.textContent = 'Copy Template';
+                        }, 1800);
+                    } catch (error) {
+                        waSummaryTemplate.select();
+                        document.execCommand('copy');
+                        copyWaSummaryBtn.textContent = 'Template Tersalin';
+                        setTimeout(() => {
+                            copyWaSummaryBtn.textContent = 'Copy Template';
+                        }, 1800);
+                    }
+                });
+            }
+
             if (window.jQuery && $.fn.DataTable) {
                 $('#adminDocumentsTable').DataTable({
                     searching: true,

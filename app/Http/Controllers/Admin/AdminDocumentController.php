@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminDocument;
+use App\Models\Period;
+use App\Models\Registration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -19,8 +22,18 @@ class AdminDocumentController extends Controller
             ->latest('id')
             ->get();
 
+        $activePeriod = Period::query()->active()->latest('id')->first();
+        $registrations = Registration::query()
+            ->with(['studentProfile', 'santriContinuation', 'documents'])
+            ->when($activePeriod, fn($q) => $q->where('period_id', $activePeriod->id))
+            ->latest('id')
+            ->get();
+
+        $registrationSummary = $this->buildRegistrationSummary($registrations, $activePeriod);
+
         return view('admin.documents.index', [
             'documents' => $documents,
+            'registrationSummary' => $registrationSummary,
         ]);
     }
 
@@ -198,5 +211,87 @@ class AdminDocumentController extends Controller
             AdminDocument::CATEGORY_OPTIONS,
             $customCategories,
         );
+    }
+
+    private function buildRegistrationSummary(Collection $registrations, ?Period $period): array
+    {
+        $rows = $registrations->map(function (Registration $registration) {
+            $studentName = $registration->studentProfile?->full_name
+                ?? $registration->santriContinuation?->full_name
+                ?? '-';
+            $schoolOrigin = $registration->studentProfile?->school_origin ?? '-';
+            $isComplete = $this->registrationIsComplete($registration);
+
+            return [
+                'registration_no' => $registration->registration_no,
+                'student_name' => $studentName,
+                'school_origin' => $schoolOrigin,
+                'is_complete' => $isComplete,
+                'status_label' => $isComplete ? 'Lengkap 100%' : 'Belum Lengkap',
+            ];
+        })->values();
+
+        $completeRows = $rows->where('is_complete', true)->values();
+        $incompleteRows = $rows->where('is_complete', false)->values();
+
+        $periodLabel = $period
+            ? $period->name . ' - Gelombang ' . $period->wave
+            : 'Semua Pendaftar';
+
+        $messageLines = [
+            '*Ringkasan Pendaftaran Santri*',
+            'Periode: ' . $periodLabel,
+            'Tanggal: ' . now()->translatedFormat('d M Y H:i'),
+            '',
+            'Total pendaftar: *' . $rows->count() . '* santri',
+            'Lengkap 100%: *' . $completeRows->count() . '* santri',
+            'Belum lengkap: *' . $incompleteRows->count() . '* santri',
+            '',
+            '*Daftar Santri Lengkap 100%*',
+        ];
+
+        if ($completeRows->isEmpty()) {
+            $messageLines[] = '- Belum ada santri yang lengkap 100%';
+        } else {
+            foreach ($completeRows as $index => $row) {
+                $messageLines[] = ($index + 1) . '. ' . $row['student_name'] . ' - ' . $row['school_origin'];
+            }
+        }
+
+        $messageLines[] = '';
+        $messageLines[] = '*Daftar Santri Belum Lengkap*';
+
+        if ($incompleteRows->isEmpty()) {
+            $messageLines[] = '- Semua santri sudah lengkap';
+        } else {
+            foreach ($incompleteRows as $index => $row) {
+                $messageLines[] = ($index + 1) . '. ' . $row['student_name'] . ' - ' . $row['school_origin'];
+            }
+        }
+
+        return [
+            'period_label' => $periodLabel,
+            'total' => $rows->count(),
+            'complete_total' => $completeRows->count(),
+            'incomplete_total' => $incompleteRows->count(),
+            'complete_rows' => $completeRows,
+            'incomplete_rows' => $incompleteRows,
+            'message' => implode("\n", $messageLines),
+            'wa_url' => 'https://wa.me/?text=' . rawurlencode(implode("\n", $messageLines)),
+        ];
+    }
+
+    private function registrationIsComplete(Registration $registration): bool
+    {
+        if ($registration->education_level === 'SMA_OLD') {
+            return (bool) $registration->santriContinuation
+                && (bool) $registration->santriContinuation?->payment_proof_path
+                && (bool) $registration->santriContinuation?->signature_path;
+        }
+
+        return (bool) $registration->studentProfile
+            && (bool) $registration->parentProfile
+            && (bool) $registration->statement
+            && $registration->isStep1Complete();
     }
 }
