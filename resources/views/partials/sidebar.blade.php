@@ -71,13 +71,7 @@
                         <span class="title">Event & Absensi</span>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="{{ route('admin.documents.index') }}"
-                        class="menu-link {{ Request::is('admin/documents*') ? 'active' : '' }}">
-                        <span class="material-symbols-outlined menu-icon">description</span>
-                        <span class="title">Dokumen Internal</span>
-                    </a>
-                </li>
+
                 @if (auth()->user()->role === 'admin')
                     <li class="menu-item">
                         <a href="{{ route('admin.registrations.scan.page') }}"
@@ -105,7 +99,13 @@
                         <span class="title">Postingan Berita</span>
                     </a>
                 </li>
-
+                <li class="menu-item">
+                    <a href="{{ route('admin.documents.index') }}"
+                        class="menu-link {{ Request::is('admin/documents*') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined menu-icon">description</span>
+                        <span class="title">Dokumen Internal</span>
+                    </a>
+                </li>
                 @if (auth()->user()->role === 'admin')
                     <li class="menu-title small text-uppercase">
                         <span class="menu-title-text">Administrasi</span>
