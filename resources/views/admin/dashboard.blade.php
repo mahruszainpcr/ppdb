@@ -147,6 +147,42 @@
             @endforeach
         </section>
 
+        <section class="dashboard-layout dashboard-layout--wa">
+            <article class="panel panel--wa-summary">
+                <div class="panel__header panel__header--inline">
+                    <div>
+                        <h3>Template Chat WA Ringkasan Pendaftaran</h3>
+                        <p>Ringkasan ini otomatis mengikuti periode yang dipilih pada filter dashboard.</p>
+                    </div>
+                    <div class="wa-period-chip">{{ $registrationSummary['period_label'] }}</div>
+                </div>
+
+                <div class="wa-summary-grid">
+                    <div class="wa-summary-card">
+                        <span>Total Pendaftar</span>
+                        <strong>{{ number_format($registrationSummary['total']) }}</strong>
+                    </div>
+                    <div class="wa-summary-card wa-summary-card--green">
+                        <span>Lengkap 100%</span>
+                        <strong>{{ number_format($registrationSummary['complete_total']) }}</strong>
+                    </div>
+                    <div class="wa-summary-card wa-summary-card--orange">
+                        <span>Belum Lengkap</span>
+                        <strong>{{ number_format($registrationSummary['incomplete_total']) }}</strong>
+                    </div>
+                </div>
+
+                <textarea id="waSummaryTemplate" class="form-control wa-summary-textarea" rows="12" readonly>{{ $registrationSummary['message'] }}</textarea>
+
+                <div class="wa-summary-actions">
+                    <button type="button" class="btn btn-outline-primary" id="copyWaSummaryBtn">Copy Template</button>
+                    <a href="{{ $registrationSummary['wa_url'] }}" target="_blank" rel="noopener" class="btn btn-success">
+                        Buka WhatsApp
+                    </a>
+                </div>
+            </article>
+        </section>
+
         <section class="dashboard-layout dashboard-layout--top">
             <article class="panel panel--trend">
                 <div class="panel__header">
@@ -550,6 +586,11 @@
             margin-bottom: 16px;
         }
 
+        .dashboard-layout--wa {
+            grid-template-columns: 1fr;
+            margin-bottom: 16px;
+        }
+
         .dashboard-layout--middle {
             grid-template-columns: 2.2fr 1fr 1fr 1fr;
             margin-bottom: 16px;
@@ -577,6 +618,13 @@
             margin: 0;
             color: var(--text-soft);
             font-size: 13px;
+        }
+
+        .panel__header--inline {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
         }
 
         .panel__chart {
@@ -636,6 +684,73 @@
             color: var(--blue);
             font-size: 1.35rem;
             margin-top: 4px;
+        }
+
+        .wa-period-chip {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .wa-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .wa-summary-card {
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            border: 1px solid #dbeafe;
+        }
+
+        .wa-summary-card--green {
+            background: linear-gradient(135deg, #ecfdf5, #f7fee7);
+            border-color: #bbf7d0;
+        }
+
+        .wa-summary-card--orange {
+            background: linear-gradient(135deg, #fff7ed, #fffbeb);
+            border-color: #fed7aa;
+        }
+
+        .wa-summary-card span,
+        .wa-summary-card strong {
+            display: block;
+        }
+
+        .wa-summary-card span {
+            color: var(--text-soft);
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .wa-summary-card strong {
+            font-size: 1.9rem;
+            line-height: 1;
+        }
+
+        .wa-summary-textarea {
+            min-height: 320px;
+            border-radius: 18px;
+            border-color: #dbe3ef;
+            background: #f8fbff;
+            resize: vertical;
+            margin-bottom: 14px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .wa-summary-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .dashboard-table thead th {
@@ -813,6 +928,10 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
+            .wa-summary-grid {
+                grid-template-columns: 1fr;
+            }
+
             .map-card {
                 grid-template-columns: 1fr;
             }
@@ -829,6 +948,12 @@
             .hero-filter,
             .hero-account {
                 border-radius: 18px;
+            }
+
+            .panel__header--inline,
+            .wa-summary-actions {
+                flex-direction: column;
+                align-items: stretch;
             }
 
             .completion-ring {
@@ -856,6 +981,31 @@
             const programLabels = @json($programLabelsArr);
             const quranSeries = @json($quranSeries);
             const quranLabels = @json($quranLabelsArr);
+            const copyWaSummaryBtn = document.getElementById('copyWaSummaryBtn');
+            const waSummaryTemplate = document.getElementById('waSummaryTemplate');
+
+            if (copyWaSummaryBtn && waSummaryTemplate) {
+                copyWaSummaryBtn.addEventListener('click', async function () {
+                    try {
+                        await navigator.clipboard.writeText(waSummaryTemplate.value);
+                        copyWaSummaryBtn.textContent = 'Template Tersalin';
+
+                        window.setTimeout(function () {
+                            copyWaSummaryBtn.textContent = 'Copy Template';
+                        }, 1800);
+                    } catch (error) {
+                        waSummaryTemplate.removeAttribute('readonly');
+                        waSummaryTemplate.select();
+                        document.execCommand('copy');
+                        waSummaryTemplate.setAttribute('readonly', 'readonly');
+                        copyWaSummaryBtn.textContent = 'Template Tersalin';
+
+                        window.setTimeout(function () {
+                            copyWaSummaryBtn.textContent = 'Copy Template';
+                        }, 1800);
+                    }
+                });
+            }
 
             const axisColor = '#64748b';
             const gridColor = 'rgba(148, 163, 184, 0.18)';
