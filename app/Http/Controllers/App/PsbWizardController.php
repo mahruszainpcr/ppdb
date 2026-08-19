@@ -393,14 +393,24 @@ class PsbWizardController extends Controller
             $request->session()->put('active_registration_id', $registration->id);
         }
 
+        $activePeriod = Period::query()->where('is_active', true)->latest('id')->first();
+        $isScholarshipAllowed = (int) ($activePeriod?->wave ?? 1) === 1;
+
         // Validasi pilihan program
         $validated = $request->validate([
-            'funding_type' => ['required', 'in:mandiri,beasiswa'],
+            'funding_type' => [
+                'required',
+                'in:mandiri,beasiswa',
+                Rule::when(!$isScholarshipAllowed, 'in:mandiri'),
+            ],
             'education_level' => ['required', 'in:SMP_NEW,SMA_NEW,SMA_OLD'],
             'period_wave' => ['required', 'integer', 'min:1'], // sementara wave saja
         ], [
             'funding_type.required' => 'Jenis pembiayaan wajib dipilih.',
             'education_level.required' => 'Jenjang pendidikan wajib dipilih.',
+            'funding_type.in' => $isScholarshipAllowed
+                ? 'Jenis pembiayaan yang dipilih tidak valid.'
+                : 'Jalur beasiswa hanya tersedia untuk periode 1.',
         ]);
 
         // Validasi file upload (praktik aman 10MB)

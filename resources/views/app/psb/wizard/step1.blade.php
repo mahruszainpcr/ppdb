@@ -22,6 +22,11 @@
         'active' => 'text-bg-primary',
         default => 'text-bg-secondary',
     };
+    $isScholarshipAllowed = (int) ($periodInfo?->wave ?? $activePeriod?->wave ?? 1) === 1;
+    $currentFunding = old('funding_type', $registration->funding_type) ?? 'mandiri';
+    if (!$isScholarshipAllowed && $currentFunding === 'beasiswa') {
+        $currentFunding = 'mandiri';
+    }
     $submitLabel = $edu === 'SMA_OLD' ? 'Simpan & Lanjut Form Santri Lama' : 'Submit Final';
 @endphp
 
@@ -100,16 +105,22 @@
                                 <label class="form-label">Jenis Pembiayaan <span class="text-danger">*</span></label>
                                 <select name="funding_type" class="form-control form-select" required>
                                     <option value="" disabled
-                                        {{ old('funding_type', $registration->funding_type) ? '' : 'selected' }}>Pilih...
+                                        {{ $currentFunding ? '' : 'selected' }}>Pilih...
                                     </option>
                                     <option value="mandiri"
-                                        {{ old('funding_type', $registration->funding_type) === 'mandiri' ? 'selected' : '' }}>
+                                        {{ $currentFunding === 'mandiri' ? 'selected' : '' }}>
                                         MANDIRI (Membayar Full)</option>
-                                    <option value="beasiswa"
-                                        {{ old('funding_type', $registration->funding_type) === 'beasiswa' ? 'selected' : '' }}>
-                                        BEASISWA</option>
+                                    @if ($isScholarshipAllowed)
+                                        <option value="beasiswa"
+                                            {{ $currentFunding === 'beasiswa' ? 'selected' : '' }}>
+                                            BEASISWA</option>
+                                    @endif
                                 </select>
-                                <div class="form-text">Surat kurang mampu untuk beasiswa bersifat opsional dan bisa menyusul.</div>
+                                @if ($isScholarshipAllowed)
+                                    <div class="form-text">Surat kurang mampu untuk beasiswa bersifat opsional dan bisa menyusul.</div>
+                                @else
+                                    <div class="form-text">Jalur beasiswa hanya tersedia pada periode 1.</div>
+                                @endif
                             </div>
 
                             <div class="col-md-6">
@@ -250,7 +261,7 @@
                             </div>
 
                             {{-- SKTM --}}
-                            <div class="col-12 {{ old('funding_type', $registration->funding_type) === 'beasiswa' ? '' : 'd-none' }}"
+                            <div class="col-12 {{ $currentFunding === 'beasiswa' ? '' : 'd-none' }}"
                                 id="sktmField">
                                 <div class="d-flex align-items-center justify-content-between gap-2">
                                     <label class="form-label mb-0">
@@ -376,6 +387,11 @@
                 const funding = fundingSelect.value;
                 const education = educationSelect.value || '';
                 const isSantriLama = education === 'SMA_OLD';
+                const scholarshipAllowed = {{ $isScholarshipAllowed ? 'true' : 'false' }};
+
+                if (!scholarshipAllowed && funding === 'beasiswa') {
+                    fundingSelect.value = 'mandiri';
+                }
 
                 sktmField.classList.toggle('d-none', funding !== 'beasiswa');
                 goodBehaviorField.classList.toggle('d-none', !education.startsWith('SMA') || isSantriLama);
