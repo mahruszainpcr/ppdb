@@ -88,9 +88,9 @@
                 <div class="col-lg-5">
                     <div class="border rounded-4 p-4 bg-light h-100">
                         <h6 class="mb-3">Input Manual / Hasil Scan</h6>
-                        <label class="form-label">Nomor pendaftaran atau link QR</label>
+                        <label class="form-label">Nomor pendaftaran, nomor HP orang tua, atau link QR</label>
                         <input type="text" id="scanPayload" class="form-control mb-3"
-                            placeholder="Contoh: DS-2026-ABCDEFG atau link scan QR">
+                            placeholder="Contoh: DS-2026-ABCDEFG, 0812xxxxxxx, atau link scan QR">
 
                         <button type="button" id="submitScan" class="btn btn-primary w-100 mb-3"
                             @disabled(!$event->is_active)>
@@ -106,9 +106,12 @@
 
     <div class="card trezo-card">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
                 <h5 class="mb-0">Histori Kehadiran</h5>
-                <div class="text-muted small">Terakhir scan tersimpan paling atas.</div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a class="btn btn-sm btn-outline-success" href="{{ route('admin.events.attendances.export', $event) }}">Export Excel</a>
+                    <div class="text-muted small">Terakhir scan tersimpan paling atas.</div>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -129,7 +132,14 @@
                                 <td>{{ $attendance->registration->studentProfile?->full_name ?? $attendance->registration->santriContinuation?->full_name ?? '-' }}</td>
                                 <td>{{ $attendance->registration->user?->name ?? '-' }}</td>
                                 <td>{{ optional($attendance->scanned_at)->format('d M Y H:i:s') ?? '-' }}</td>
-                                <td>{{ $attendance->scanner?->name ?? '-' }}</td>
+                                <td class="d-flex align-items-center justify-content-between gap-2">
+                                    <span>{{ $attendance->scanner?->name ?? '-' }}</span>
+                                    <form method="POST" action="{{ route('admin.events.attendance.destroy', [$event, $attendance]) }}" onsubmit="return confirm('Yakin hapus histori absensi ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-link btn-sm text-danger p-0">Hapus</button>
+                                    </form>
+                                </td>
                             </tr>
                         @empty
                             <tr id="attendanceEmptyRow">
@@ -261,7 +271,7 @@
             });
 
             if (!('BarcodeDetector' in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                setResult('warning', 'Browser ini belum mendukung scan kamera langsung. Gunakan input manual hasil scan QR.');
+                setResult('warning', 'Browser ini belum mendukung scan kamera. Silakan gunakan input manual: nomor pendaftaran, nomor HP orang tua, atau link QR.');
                 return;
             }
 
@@ -308,11 +318,15 @@
                 requestAnimationFrame(scanLoop);
             }
 
-            navigator.mediaDevices.getUserMedia({
+            const cameraConstraints = {
                 video: {
-                    facingMode: 'environment'
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
                 }
-            }).then(function(stream) {
+            };
+
+            navigator.mediaDevices.getUserMedia(cameraConstraints).then(function(stream) {
                 activeStream = stream;
                 video.srcObject = stream;
                 video.onloadedmetadata = function() {
@@ -320,7 +334,22 @@
                     requestAnimationFrame(scanLoop);
                 };
             }).catch(function() {
-                setResult('warning', 'Akses kamera ditolak atau tidak tersedia. Gunakan input manual hasil scan QR.');
+                navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                }).then(function(stream) {
+                    activeStream = stream;
+                    video.srcObject = stream;
+                    video.onloadedmetadata = function() {
+                        video.play();
+                        requestAnimationFrame(scanLoop);
+                    };
+                }).catch(function() {
+                    setResult('warning', 'Akses kamera ditolak. Mohon izinkan akses kamera di browser lalu gunakan input manual jika tetap tidak tersedia.');
+                });
             });
 
             window.addEventListener('beforeunload', stopStream);

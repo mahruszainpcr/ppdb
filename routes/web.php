@@ -134,6 +134,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
         Route::put('/events/{event}', [EventController::class, 'update'])->name('admin.events.update');
         Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('admin.events.destroy');
+        Route::get('/events/{event}/attendances/export', [EventController::class, 'exportAttendances'])->name('admin.events.attendances.export');
+        Route::delete('/events/{event}/attendances/{attendance}', [EventController::class, 'destroyAttendance'])->name('admin.events.attendance.destroy');
         Route::post('/events/{event}/scan-attendance', [EventController::class, 'scanAttendance'])->name('admin.events.scan-attendance');
 
         Route::get('/documents', [AdminDocumentController::class, 'index'])->name('admin.documents.index');

@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EventController extends Controller
 {
@@ -89,33 +90,75 @@ class EventController extends Controller
             ->with('success', 'Event berhasil dihapus.');
     }
 
+    public function exportAttendances(Event $event): StreamedResponse
+    {
+        $attendances = EventAttendance::query()
+            ->with(['registration.studentProfile', 'registration.santriContinuation', 'registration.user', 'scanner'])
+            ->where('event_id', $event->id)
+            ->latest('scanned_at')
+            ->latest('id')
+            ->get();
+
+        $filename = 'histori-kehadiran-' . Str::slug($event->name) . '-' . now()->format('Ymd-His') . '.csv';
+
+        return response()->streamDownload(function () use ($attendances) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'No. Pendaftaran',
+                'Nama Santri',
+                'Nama Orang Tua',
+                'Waktu Scan',
+                'Petugas',
+                'Payload Scan',
+            ]);
+
+            foreach ($attendances as $attendance) {
+                fputcsv($handle, [
+                    $attendance->registration?->registration_no ?? '-',
+                    $attendance->registration?->studentProfile?->full_name
+                        ?? $attendance->registration?->santriContinuation?->full_name
+                        ?? '-',
+                    $attendance->registration?->user?->name ?? '-',
+                    optional($attendance->scanned_at)->format('d-m-Y H:i:s') ?? '-',
+                    $attendance->scanner?->name ?? '-',
+                    $attendance->scan_payload ?? '-',
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    public function destroyAttendance(Event $event, EventAttendance $attendance)
+    {
+        if ($attendance->event_id !== $event->id) {
+            abort(404);
+        }
+
+        $attendance->delete();
+
+        return redirect()
+            ->route('admin.events.show', $event)
+            ->with('success', 'Histori absensi berhasil dihapus.');
+    }
+
     public function scanAttendance(Request $request, Event $event): JsonResponse
     {
         $validated = $request->validate([
             'payload' => ['required', 'string', 'max:1000'],
         ]);
 
-        $registrationNo = $this->extractRegistrationNo($validated['payload']);
-
-        if (!$registrationNo) {
-            return response()->json([
-                'ok' => false,
-                'status' => 'invalid',
-                'message' => 'QR/barcode tidak dikenali sebagai data pendaftaran.',
-            ], 422);
-        }
-
-        $registration = Registration::query()
-            ->with(['studentProfile', 'santriContinuation', 'user'])
-            ->where('registration_no', $registrationNo)
-            ->first();
+        $registration = $this->resolveRegistrationFromPayload($validated['payload']);
 
         if (!$registration) {
             return response()->json([
                 'ok' => false,
-                'status' => 'not_found',
-                'message' => 'Data pendaftar tidak ditemukan untuk barcode tersebut.',
-            ], 404);
+                'status' => 'invalid',
+                'message' => 'QR/barcode atau nomor HP orang tua tidak dikenali sebagai data pendaftaran.',
+            ], 422);
         }
 
         $existing = EventAttendance::query()
@@ -190,6 +233,56 @@ class EventController extends Controller
         }
 
         return $slug;
+    }
+
+    private function resolveRegistrationFromPayload(string $payload): ?Registration
+    {
+        $payload = trim($payload);
+
+        if ($payload === '') {
+            return null;
+        }
+
+        $registrationNo = $this->extractRegistrationNo($payload);
+        if ($registrationNo) {
+            return Registration::query()
+                ->with(['studentProfile', 'santriContinuation', 'user'])
+                ->where('registration_no', $registrationNo)
+                ->first();
+        }
+
+        $phone = $this->normalizePhone($payload);
+        if ($phone === '') {
+            return null;
+        }
+
+        return Registration::query()
+            ->with(['studentProfile', 'santriContinuation', 'user', 'parentProfile'])
+            ->whereHas('user', fn($query) => $query->where('phone', $phone))
+            ->orWhereHas('parentProfile', function ($query) use ($phone) {
+                $query->where('father_phone', $phone)
+                    ->orWhere('mother_phone', $phone);
+            })
+            ->first();
+    }
+
+    private function normalizePhone(string $value): string
+    {
+        $clean = preg_replace('/[^0-9+]/', '', $value) ?? '';
+
+        if ($clean === '') {
+            return '';
+        }
+
+        if (str_starts_with($clean, '+62')) {
+            return '0' . substr($clean, 3);
+        }
+
+        if (str_starts_with($clean, '62')) {
+            return '0' . substr($clean, 2);
+        }
+
+        return $clean;
     }
 
     private function extractRegistrationNo(string $payload): ?string
