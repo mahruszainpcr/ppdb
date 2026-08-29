@@ -53,6 +53,7 @@
                     <div class="col-md-4">
                         <label class="form-label d-block">Status</label>
                         <div class="form-check mt-2">
+                            <input type="hidden" name="is_active" value="0">
                             <input class="form-check-input" type="checkbox" name="is_active" value="1" id="isActive"
                                 @checked(old('is_active', $event->exists ? $event->is_active : true))>
                             <label class="form-check-label" for="isActive">Event aktif dan siap dipakai scan</label>

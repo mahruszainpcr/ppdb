@@ -13,6 +13,31 @@ class EventAttendanceActionsTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_admin_can_update_event_to_inactive(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $event = Event::create([
+            'name' => 'Seleksi PPDB',
+            'slug' => 'seleksi-ppdb',
+            'event_date' => now()->toDateString(),
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('admin.events.update', $event), [
+            'name' => $event->name,
+            'event_date' => now()->toDateString(),
+            'location' => 'Aula',
+            'description' => 'Event nonaktif',
+            'is_active' => false,
+        ]);
+
+        $response->assertRedirect(route('admin.events.show', $event));
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'is_active' => false,
+        ]);
+    }
+
     public function test_admin_can_delete_event_attendance_history(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
