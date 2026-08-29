@@ -66,7 +66,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
         Route::get('/registrations/data', [RegistrationAdminController::class, 'data'])->name('admin.registrations.data');
         Route::get('/registrations/export', [RegistrationAdminController::class, 'export'])->name('admin.registrations.export');
-        Route::middleware(['role:admin'])->group(function () {
+        Route::middleware(['role:admin,ustadz'])->group(function () {
             Route::get('/registrations/scan', [RegistrationAdminController::class, 'scanPage'])->name('admin.registrations.scan.page');
             Route::get('/registrations/scan/{registration:registration_no}', [RegistrationAdminController::class, 'show'])->name('admin.registrations.scan');
             Route::get('/registrations/proofs/download', [RegistrationAdminController::class, 'downloadCompleteProofs'])->name('admin.registrations.proofs.download');
