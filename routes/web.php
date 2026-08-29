@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\AdminDocumentController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\GuestAttendanceController;
 use App\Http\Controllers\Auth\ParentAuthController;
 use App\Http\Controllers\Auth\PasswordController;
 use Illuminate\Support\Facades\Artisan;
@@ -23,6 +24,10 @@ use Illuminate\Support\Facades\Artisan;
 Route::get('/psb', fn() => view('public.psb.index'));
 Route::get('/psb/syarat', fn() => view('public.psb.syarat'));
 Route::get('/ppdb', [LandingController::class, 'ppdbInfo'])->name('ppdb.info');
+Route::get('/absensi', [GuestAttendanceController::class, 'index'])->name('attendance.index');
+Route::get('/absensi/{event:slug}', [GuestAttendanceController::class, 'show'])->name('attendance.event');
+Route::post('/absensi/{event:slug}/lookup', [GuestAttendanceController::class, 'lookup'])->name('attendance.lookup');
+Route::post('/absensi/{event:slug}', [GuestAttendanceController::class, 'store'])->name('attendance.store');
 
 // Parent App
 Route::middleware(['auth', 'role:parent'])->prefix('app')->group(function () {

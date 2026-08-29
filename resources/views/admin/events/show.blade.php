@@ -109,8 +109,13 @@
             <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
                 <h5 class="mb-0">Histori Kehadiran</h5>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div class="input-group input-group-sm" style="width: min(100%, 280px);">
+                        <span class="input-group-text"><i class="material-symbols-outlined">search</i></span>
+                        <input type="search" id="attendanceSearch" class="form-control"
+                            placeholder="Cari peserta, WA, sekolah..." aria-label="Cari histori kehadiran">
+                    </div>
                     <a class="btn btn-sm btn-outline-success" href="{{ route('admin.events.attendances.export', $event) }}">Export Excel</a>
-                    <div class="text-muted small">Terakhir scan tersimpan paling atas.</div>
+                    <div class="text-muted small" id="attendanceSearchStatus">Terakhir scan tersimpan paling atas.</div>
                 </div>
             </div>
 
@@ -121,8 +126,11 @@
                             <th>No. Pendaftaran</th>
                             <th>Nama Santri</th>
                             <th>Nama Wali</th>
+                            <th>No. WA Wali</th>
+                            <th>Asal Sekolah</th>
                             <th>Waktu Scan</th>
                             <th>Petugas</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="attendanceHistoryBody">
@@ -131,19 +139,32 @@
                                 <td class="fw-semibold">{{ $attendance->registration->registration_no }}</td>
                                 <td>{{ $attendance->registration->studentProfile?->full_name ?? $attendance->registration->santriContinuation?->full_name ?? '-' }}</td>
                                 <td>{{ $attendance->registration->user?->name ?? '-' }}</td>
+                                <td>{{ $attendance->registration->user?->phone ?? $attendance->registration->parentProfile?->father_phone ?? $attendance->registration->parentProfile?->mother_phone ?? '-' }}</td>
+                                <td>{{ $attendance->registration->studentProfile?->school_origin ?? '-' }}</td>
                                 <td>{{ optional($attendance->scanned_at)->format('d M Y H:i:s') ?? '-' }}</td>
-                                <td class="d-flex align-items-center justify-content-between gap-2">
-                                    <span>{{ $attendance->scanner?->name ?? '-' }}</span>
-                                    <form method="POST" action="{{ route('admin.events.attendance.destroy', [$event, $attendance]) }}" onsubmit="return confirm('Yakin hapus histori absensi ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-link btn-sm text-danger p-0">Hapus</button>
-                                    </form>
+                                <td>{{ $attendance->scanner?->name ?? 'Mandiri' }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <a href="{{ route('admin.registrations.show', $attendance->registration) }}" class="btn btn-sm btn-outline-primary" title="Lihat detail pendaftaran">
+                                            Detail Pendaftaran
+                                        </a>
+                                        <a href="{{ route('admin.registrations.show', $attendance->registration) }}#pane-dokumen" class="btn btn-sm btn-outline-success" title="Lihat detail berkas">
+                                            Berkas
+                                        </a>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between gap-2">
+                                        <span class="text-muted small">{{ $attendance->scanner?->name ?? 'Mandiri' }}</span>
+                                        <form method="POST" action="{{ route('admin.events.attendance.destroy', [$event, $attendance]) }}" onsubmit="return confirm('Yakin hapus histori absensi ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-link btn-sm text-danger p-0">Hapus</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr id="attendanceEmptyRow">
-                                <td colspan="5" class="text-center text-muted py-4">Belum ada histori absensi.</td>
+                                <td colspan="9" class="text-center text-muted py-4">Belum ada histori absensi.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -166,9 +187,42 @@
             const scannerRoot = document.getElementById('event-scanner');
             const historyBody = document.getElementById('attendanceHistoryBody');
             const attendanceCount = document.getElementById('attendanceCount');
+            const attendanceSearch = document.getElementById('attendanceSearch');
+            const attendanceSearchStatus = document.getElementById('attendanceSearchStatus');
             let isProcessingScan = false;
             let lastScannedPayload = '';
             let lastScannedAt = 0;
+
+            function filterAttendanceRows() {
+                const keyword = attendanceSearch.value.trim().toLowerCase();
+                const rows = Array.from(historyBody.querySelectorAll('tr')).filter(row => row.id !== 'attendanceEmptyRow' && row.id !== 'attendanceNoSearchResult');
+                let visibleCount = 0;
+
+                rows.forEach(function(row) {
+                    const matches = !keyword || row.textContent.toLowerCase().includes(keyword);
+                    row.classList.toggle('d-none', !matches);
+                    if (matches) {
+                        visibleCount++;
+                    }
+                });
+
+                let noResultRow = document.getElementById('attendanceNoSearchResult');
+                if (keyword && rows.length > 0 && visibleCount === 0) {
+                    if (!noResultRow) {
+                        noResultRow = document.createElement('tr');
+                        noResultRow.id = 'attendanceNoSearchResult';
+                        noResultRow.innerHTML = '<td colspan="9" class="text-center text-muted py-4">Tidak ada histori yang cocok dengan pencarian.</td>';
+                        historyBody.appendChild(noResultRow);
+                    }
+                    noResultRow.classList.remove('d-none');
+                } else if (noResultRow) {
+                    noResultRow.classList.add('d-none');
+                }
+
+                attendanceSearchStatus.textContent = keyword
+                    ? `${visibleCount} histori cocok`
+                    : 'Terakhir scan tersimpan paling atas.';
+            }
 
             function setResult(type, message) {
                 resultBox.className = 'alert mb-0';
@@ -188,13 +242,24 @@
                     <td class="fw-semibold">${attendance.registration_no}</td>
                     <td>${attendance.student_name}</td>
                     <td>${attendance.parent_name}</td>
+                    <td>${attendance.parent_phone}</td>
+                    <td>${attendance.school_origin}</td>
                     <td>${attendance.scanned_at}</td>
                     <td>${attendance.scanned_by}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="${attendance.registration_url}" class="btn btn-sm btn-outline-primary">Detail Pendaftaran</a>
+                            <a href="${attendance.documents_url}" class="btn btn-sm btn-outline-success">Berkas</a>
+                        </div>
+                    </td>
                 `;
 
                 historyBody.prepend(row);
                 attendanceCount.textContent = String(Number(attendanceCount.textContent || '0') + 1);
+                filterAttendanceRows();
             }
+
+            attendanceSearch.addEventListener('input', filterAttendanceRows);
 
             async function submitAttendance(payload) {
                 if (!isEventActive) {

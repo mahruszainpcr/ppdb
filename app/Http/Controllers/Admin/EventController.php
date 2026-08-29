@@ -53,6 +53,7 @@ class EventController extends Controller
                 'registration.studentProfile',
                 'registration.santriContinuation',
                 'registration.user',
+                'registration.parentProfile',
                 'scanner',
             ])
             ->where('event_id', $event->id)
@@ -202,6 +203,10 @@ class EventController extends Controller
                 'parent_name' => $registration->user?->name ?? '-',
                 'scanned_at' => optional($attendance->scanned_at)->format('d M Y H:i:s'),
                 'scanned_by' => $request->user()->name ?? '-',
+                'parent_phone' => $registration->user?->phone ?? $registration->parentProfile?->father_phone ?? $registration->parentProfile?->mother_phone ?? '-',
+                'school_origin' => $registration->studentProfile?->school_origin ?? '-',
+                'registration_url' => route('admin.registrations.show', $registration),
+                'documents_url' => route('admin.registrations.show', $registration) . '#pane-dokumen',
             ],
         ]);
     }

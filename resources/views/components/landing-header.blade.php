@@ -18,6 +18,7 @@
                 <a href="{{ url('/#pilar') }}">3 Pilar</a>
                 <a href="{{ url('/#program') }}">Program</a>
                 <a href="{{ route('news.index') }}">Informasi</a>
+                <a href="{{ route('attendance.index') }}">Absensi</a>
                 <a href="{{ url('/#kontak') }}">Kontak</a>
             </nav>
             <div class="cta">
@@ -48,6 +49,7 @@
                 <a href="{{ url('/#pilar') }}">3 Pilar</a>
                 <a href="{{ url('/#program') }}">Program</a>
                 <a href="{{ route('news.index') }}">Informasi</a>
+                <a href="{{ route('attendance.index') }}">Absensi</a>
                 <a href="{{ url('/#kontak') }}">Kontak</a>
             </nav>
             <div class="mobile-cta">

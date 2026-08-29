@@ -33,8 +33,11 @@
                                         <div class="text-center text-white px-4" id="scanner-placeholder">
                                             <div class="fs-5 fw-semibold mb-2">Kamera siap digunakan</div>
                                             <div class="small text-white-50">
-                                                Izinkan akses kamera pada browser untuk mulai scan QR pendaftaran.
+                                                Klik tombol di bawah untuk mengaktifkan kamera dan mulai scan QR.
                                             </div>
+                                            <button type="button" id="start-camera" class="btn btn-success mt-3">
+                                                Aktifkan Kamera
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -79,6 +82,8 @@
             const feedback = document.getElementById('scan-feedback');
             const manualInput = document.getElementById('manual-scan-url');
             const openButton = document.getElementById('open-scan-url');
+            const startCameraButton = document.getElementById('start-camera');
+            const scannerPlaceholder = document.getElementById('scanner-placeholder');
             const allowedPrefix = @json(url('/admin/registrations/scan/'));
 
             function showFeedback(message) {
@@ -113,16 +118,14 @@
                 }
             });
 
-            if (!('BarcodeDetector' in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showFeedback('Browser ini belum mendukung scan kamera langsung. Gunakan kamera HP biasa lalu buka link hasil scan di sini.');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showFeedback('Kamera tidak tersedia. Pastikan halaman dibuka melalui HTTPS atau localhost, lalu gunakan input manual.');
+                startCameraButton.disabled = true;
                 return;
             }
 
-            const detector = new BarcodeDetector({
-                formats: ['qr_code']
-            });
-
             let activeStream = null;
+            let detector = null;
             const video = document.createElement('video');
             video.setAttribute('playsinline', 'true');
             video.autoplay = true;
@@ -131,13 +134,42 @@
             video.style.height = '100%';
             video.style.objectFit = 'cover';
 
-            scannerRoot.innerHTML = '';
-            scannerRoot.appendChild(video);
-
             function stopStream() {
                 if (activeStream) {
                     activeStream.getTracks().forEach(track => track.stop());
                     activeStream = null;
+                }
+            }
+
+            async function startCamera() {
+                startCameraButton.disabled = true;
+                startCameraButton.textContent = 'Meminta Akses Kamera...';
+                feedback.classList.add('d-none');
+
+                try {
+                    activeStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: { ideal: 'environment' } }
+                    });
+
+                    if (!('BarcodeDetector' in window)) {
+                        stopStream();
+                        startCameraButton.disabled = false;
+                        startCameraButton.textContent = 'Aktifkan Kamera';
+                        showFeedback('Kamera berhasil diizinkan, tetapi browser ini belum mendukung pembacaan QR otomatis. Gunakan Chrome/Edge terbaru atau tempel link scan secara manual.');
+                        return;
+                    }
+
+                    detector = new BarcodeDetector({ formats: ['qr_code'] });
+                    scannerPlaceholder.classList.add('d-none');
+                    scannerRoot.appendChild(video);
+                    video.srcObject = activeStream;
+                    await video.play();
+                    startCameraButton.textContent = 'Kamera Aktif';
+                    requestAnimationFrame(scanLoop);
+                } catch (error) {
+                    startCameraButton.disabled = false;
+                    startCameraButton.textContent = 'Coba Aktifkan Lagi';
+                    showFeedback('Akses kamera belum berhasil. Klik ikon kamera di address bar, pilih Izinkan, lalu coba lagi.');
                 }
             }
 
@@ -162,20 +194,7 @@
                 requestAnimationFrame(scanLoop);
             }
 
-            navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment'
-                }
-            }).then(function(stream) {
-                activeStream = stream;
-                video.srcObject = stream;
-                video.onloadedmetadata = function() {
-                    video.play();
-                    requestAnimationFrame(scanLoop);
-                };
-            }).catch(function() {
-                showFeedback('Akses kamera ditolak atau tidak tersedia. Anda masih bisa paste link hasil scan secara manual.');
-            });
+            startCameraButton.addEventListener('click', startCamera);
 
             window.addEventListener('beforeunload', stopStream);
         })();
