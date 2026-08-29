@@ -81,10 +81,48 @@
         </div>
     </div>
 
-    <div class="row g-3 align-items-start">
-        <div class="col-xl-9">
-            <div class="card trezo-card">
-                <div class="card-body p-0">
+    <div class="card trezo-card mb-3">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="material-symbols-outlined text-success">analytics</i>
+                <h5 class="mb-0">Rata-rata Nilai</h5>
+            </div>
+            <p class="text-muted small mb-3">Berdasarkan nilai yang sudah diinput pada hasil filter ini.</p>
+
+            <div class="row g-3">
+                <div class="col-lg-3 col-md-6">
+                    <div class="border rounded-3 p-3 bg-light h-100">
+                        <div class="text-muted small">Rata-rata keseluruhan</div>
+                        <div class="display-6 fw-semibold text-success">{{ $allScores->count() ? number_format($allScores->avg(), 2, ',', '.') : '-' }}</div>
+                        <div class="text-muted small">{{ $allScores->count() }} nilai terisi</div>
+                    </div>
+                </div>
+                @foreach ($scoreAverages as $score)
+                    <div class="col-lg-2 col-md-3 col-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <div class="text-muted small">{{ $score['label'] }}</div>
+                            <div class="fs-4 fw-semibold">{{ $score['count'] ? number_format($score['average'], 2, ',', '.') : '-' }}</div>
+                            <div class="text-muted small">{{ $score['count'] }} nilai terisi</div>
+                        </div>
+                    </div>
+                @endforeach
+                <div class="col-lg-3 col-md-6">
+                    <div class="border rounded-3 p-3 h-100">
+                        <div class="text-muted small mb-2">Rekomendasi wawancara</div>
+                        @foreach (['sangat_direkomendasikan' => 'Sangat Direkomendasikan', 'direkomendasikan' => 'Direkomendasikan', 'tidak_direkomendasikan' => 'Tidak Direkomendasikan'] as $key => $label)
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>{{ $label }}</span>
+                                <span class="fw-semibold">{{ $registrations->where('interview_recommendation', $key)->count() }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card trezo-card">
+        <div class="card-body p-0">
             <form method="POST" action="{{ route('admin.registrations.assessments.save') }}">
                 @csrf
             <div class="table-responsive">
@@ -159,43 +197,6 @@
                 <button class="btn btn-primary" type="submit"><i class="material-symbols-outlined">save</i> Simpan Semua Nilai</button>
             </div>
             </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3">
-            <div class="card trezo-card sticky-xl-top" style="top: 20px;">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                        <i class="material-symbols-outlined text-success">analytics</i>
-                        <h5 class="mb-0">Rata-rata Nilai</h5>
-                    </div>
-                    <p class="text-muted small mb-3">Berdasarkan nilai yang sudah diinput pada hasil filter ini.</p>
-
-                    <div class="border rounded-3 p-3 mb-3 bg-light">
-                        <div class="text-muted small">Rata-rata keseluruhan</div>
-                        <div class="display-6 fw-semibold text-success">{{ $allScores->count() ? number_format($allScores->avg(), 2, ',', '.') : '-' }}</div>
-                        <div class="text-muted small">{{ $allScores->count() }} nilai terisi</div>
-                    </div>
-
-                    @foreach ($scoreAverages as $score)
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <span class="text-muted small">{{ $score['label'] }}</span>
-                            <span class="fw-semibold">{{ $score['count'] ? number_format($score['average'], 2, ',', '.') : '-' }}</span>
-                        </div>
-                    @endforeach
-
-                    <div class="mt-3">
-                        <div class="text-muted small mb-2">Rekomendasi wawancara</div>
-                        @foreach (['sangat_direkomendasikan' => 'Sangat Direkomendasikan', 'direkomendasikan' => 'Direkomendasikan', 'tidak_direkomendasikan' => 'Tidak Direkomendasikan'] as $key => $label)
-                            <div class="d-flex justify-content-between small mb-1">
-                                <span>{{ $label }}</span>
-                                <span class="fw-semibold">{{ $registrations->where('interview_recommendation', $key)->count() }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 @endsection
