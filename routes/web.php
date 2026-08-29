@@ -64,6 +64,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::get('/registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
+        Route::get('/registrations/assessments', [RegistrationAdminController::class, 'assessments'])->name('admin.registrations.assessments');
+        Route::post('/registrations/assessments', [RegistrationAdminController::class, 'saveAssessments'])->name('admin.registrations.assessments.save');
+        Route::post('/registrations/{registration}/assessment', [RegistrationAdminController::class, 'saveAssessment'])->name('admin.registrations.assessment.save');
         Route::get('/registrations/data', [RegistrationAdminController::class, 'data'])->name('admin.registrations.data');
         Route::get('/registrations/export', [RegistrationAdminController::class, 'export'])->name('admin.registrations.export');
         Route::middleware(['role:admin,ustadz'])->group(function () {

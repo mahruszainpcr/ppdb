@@ -152,6 +152,28 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-4">
+            <div class="card trezo-card h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Penilaian Seleksi</div>
+                    <div class="border-top mt-2 pt-2">
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>Tahfidz / Tajwid</span>
+                            <span class="fw-semibold text-dark">{{ $registration->tahfidz_score ?? '-' }} / {{ $registration->tajwid_score ?? '-' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted small mt-1">
+                            <span>Bahasa Arab / TPA</span>
+                            <span class="fw-semibold text-dark">{{ $registration->arabic_score ?? '-' }} / {{ $registration->tpa_score ?? '-' }}</span>
+                        </div>
+                        <div class="text-muted small mt-1">Wawancara: <span class="fw-semibold text-dark">{{ str_replace('_', ' ', ucfirst($registration->interview_recommendation ?? 'belum dinilai')) }}</span></div>
+                    </div>
+                    @if ($registration->oral_exam_notes)
+                        <div class="border-top mt-2 pt-2 text-muted small">{{ $registration->oral_exam_notes }}</div>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
 
     @if ($registration->education_level === 'SMA_OLD')
@@ -693,6 +715,42 @@
 
                     <div class="modal-body">
 
+                            <div class="border rounded-4 p-3 mb-4 bg-light">
+                                <h6 class="mb-3">Catatan Lisan</h6>
+                                <textarea name="oral_exam_notes" class="form-control" rows="3"
+                                    placeholder="Contoh: Tajwid baik, perlu memperbaiki makhraj huruf...">{{ old('oral_exam_notes', $registration->oral_exam_notes) }}</textarea>
+                            </div>
+
+                            <div class="border rounded-4 p-3 mb-4 bg-light">
+                                <h6 class="mb-3">Penilaian Seleksi</h6>
+                                <div class="row g-3">
+                                    @foreach ([
+                                        'tahfidz_score' => 'Tahfidz',
+                                        'tajwid_score' => 'Tajwid',
+                                        'arabic_score' => 'Bahasa Arab',
+                                        'tpa_score' => 'TPA',
+                                    ] as $field => $label)
+                                        <div class="col-md-3 col-6">
+                                            <label class="form-label fw-semibold">{{ $label }}</label>
+                                            <input type="number" name="{{ $field }}" class="form-control" min="0" max="100" step="0.01"
+                                                value="{{ old($field, $registration->{$field}) }}" placeholder="0 - 100">
+                                        </div>
+                                    @endforeach
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Wawancara</label>
+                                        <select name="interview_recommendation" class="form-select" required>
+                                            @foreach ([
+                                                'sangat_direkomendasikan' => 'Sangat Direkomendasikan',
+                                                'direkomendasikan' => 'Direkomendasikan',
+                                                'tidak_direkomendasikan' => 'Tidak Direkomendasikan',
+                                            ] as $key => $text)
+                                                <option value="{{ $key }}" @selected(old('interview_recommendation', $registration->interview_recommendation ?? 'direkomendasikan') === $key)>{{ $text }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
                         <div class="mb-3">
                             <div class="text-muted small">Nomor Pendaftaran</div>
                             <div class="fw-semibold">{{ $registration->registration_no }}</div>
@@ -748,6 +806,18 @@
 @endsection
 
 @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (new URLSearchParams(window.location.search).get('open') !== 'oral-exam') {
+                return;
+            }
+
+            const modalElement = document.getElementById('modalKelulusanNote');
+            if (modalElement && window.bootstrap) {
+                bootstrap.Modal.getOrCreateInstance(modalElement).show();
+            }
+        });
+    </script>
     <script>
         function selectDoc(e, el) {
             e.preventDefault();

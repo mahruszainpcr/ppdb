@@ -24,6 +24,9 @@
 
     <meta name="robots" content="index, follow" />
     <link rel="icon" href="https://mahaddarussalampalas.ponpes.id/logo.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0" rel="stylesheet">
     <link rel="stylesheet" href="{{ url('/assets/css/google-icon.css') }}">
     <link rel="stylesheet" href="{{ url('/assets/css/remixicon.css') }}">
     <style>
@@ -1407,7 +1410,6 @@
 
     @show
 
-    <script src="{{ url('/assets/js/material-symbols-fallback.js') }}"></script>
     @stack('scripts')
 </body>
 

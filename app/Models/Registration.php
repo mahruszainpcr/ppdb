@@ -19,10 +19,19 @@ class Registration extends Model
         'status',             // draft|submitted|verified|revision_requested
         'graduation_status',  // pending|lulus|tidak_lulus|cadangan
         'admin_note',
+        'oral_exam_notes',
+        'tahfidz_score',
+        'tajwid_score',
+        'arabic_score',
+        'tpa_score',
+        'interview_recommendation',
     ];
 
     protected $casts = [
-        // jika nanti pakai enum PHP 8.1 bisa di-upgrade
+        'tahfidz_score' => 'decimal:2',
+        'tajwid_score' => 'decimal:2',
+        'arabic_score' => 'decimal:2',
+        'tpa_score' => 'decimal:2',
     ];
 
     /* ===================== RELATIONS ===================== */

@@ -65,6 +65,13 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a href="{{ route('admin.registrations.assessments') }}"
+                        class="menu-link {{ Request::is('admin/registrations/assessments') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined menu-icon">edit_document</span>
+                        <span class="title">Input Nilai Seleksi</span>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a href="{{ route('admin.events.index') }}"
                         class="menu-link {{ Request::is('admin/events*') ? 'active' : '' }}">
                         <span class="material-symbols-outlined menu-icon">event</span>

@@ -55,7 +55,7 @@
                                     <label for="manual-scan-url" class="form-label fw-semibold">Atau tempel link hasil
                                         scan</label>
                                     <input type="text" id="manual-scan-url" class="form-control mb-3"
-                                        placeholder="https://domain/admin/registrations/scan/DS-2026-XXXXXXX">
+                                        placeholder="https://domain/admin/registrations/scan/DS-26-001">
 
                                     <button type="button" id="open-scan-url" class="btn btn-primary w-100 mb-3">
                                         Buka Detail Pendaftaran

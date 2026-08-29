@@ -36,6 +36,76 @@ class RegistrationAdminController extends Controller
         return view('admin.registrations.index');
     }
 
+    public function assessments(Request $request)
+    {
+        $query = Registration::query()->with(['studentProfile', 'santriContinuation']);
+        $this->applyRegistrationFilters($query, $request, $request->input('search'));
+
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->input('gender'));
+        }
+
+        if ($request->filled('education_level')) {
+            $query->where('education_level', $request->input('education_level'));
+        }
+
+        $registrations = $query->latest('created_at')->latest('id')->get();
+
+        return view('admin.registrations.assessments', compact('registrations'));
+    }
+
+    public function saveAssessment(Request $request, Registration $registration)
+    {
+        $data = $request->validate([
+            'tahfidz_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'tajwid_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'arabic_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'tpa_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'interview_recommendation' => ['required', Rule::in([
+                'sangat_direkomendasikan',
+                'direkomendasikan',
+                'tidak_direkomendasikan',
+            ])],
+            'oral_exam_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $registration->update($data);
+
+        return back()->with('success', 'Nilai seleksi ' . $registration->registration_no . ' berhasil disimpan.');
+    }
+
+    public function saveAssessments(Request $request)
+    {
+        $data = $request->validate([
+            'assessments' => ['required', 'array', 'min:1'],
+            'assessments.*.tahfidz_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'assessments.*.tajwid_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'assessments.*.arabic_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'assessments.*.tpa_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'assessments.*.interview_recommendation' => ['required', Rule::in([
+                'sangat_direkomendasikan',
+                'direkomendasikan',
+                'tidak_direkomendasikan',
+            ])],
+            'assessments.*.oral_exam_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        DB::transaction(function () use ($data) {
+            foreach ($data['assessments'] as $registrationId => $assessment) {
+                Registration::query()->whereKey($registrationId)->update([
+                    'tahfidz_score' => $assessment['tahfidz_score'] ?? null,
+                    'tajwid_score' => $assessment['tajwid_score'] ?? null,
+                    'arabic_score' => $assessment['arabic_score'] ?? null,
+                    'tpa_score' => $assessment['tpa_score'] ?? null,
+                    'interview_recommendation' => $assessment['interview_recommendation'],
+                    'oral_exam_notes' => $assessment['oral_exam_notes'] ?? null,
+                ]);
+            }
+        });
+
+        return back()->with('success', count($data['assessments']) . ' penilaian berhasil disimpan.');
+    }
+
     public function data(Request $request)
     {
         $baseQuery = Registration::query()->with(['user', 'studentProfile', 'parentProfile', 'statement', 'documents', 'santriContinuation']);
@@ -80,6 +150,7 @@ class RegistrationAdminController extends Controller
         $data = $registrations->values()->map(function (Registration $r, int $index) use ($start, $canDelete) {
             $studentName = e(optional($r->studentProfile)->full_name ?? optional($r->santriContinuation)->full_name ?? '-');
             $detailUrl = route('admin.registrations.show', $r);
+            $oralExamUrl = $detailUrl . '?open=oral-exam#modalKelulusanNote';
             $editUrl = route('admin.registrations.edit', $r);
             $deleteUrl = route('admin.registrations.destroy', $r);
             $proofPdfUrl = route('admin.registrations.proof.pdf', $r);
@@ -93,6 +164,7 @@ class RegistrationAdminController extends Controller
 
             $actions = '<div class="d-flex justify-content-end gap-2">'
                 . '<a class="btn btn-sm btn-outline-light" href="' . $detailUrl . '">Detail</a>'
+                . '<a class="btn btn-sm btn-outline-info" href="' . $oralExamUrl . '">Ujian Lisan</a>'
                 . '<a class="btn btn-sm btn-outline-primary" href="' . $editUrl . '">Edit</a>'
                 . '<a class="btn btn-sm btn-outline-success" href="' . $proofPdfUrl . '">PDF</a>';
 
@@ -1124,11 +1196,27 @@ class RegistrationAdminController extends Controller
         $data = $request->validate([
             'graduation_status' => ['required', Rule::in(['pending', 'lulus', 'tidak_lulus', 'cadangan'])],
             'admin_note' => ['nullable', 'string', 'max:2000'],
+            'oral_exam_notes' => ['nullable', 'string', 'max:2000'],
+            'tahfidz_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'tajwid_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'arabic_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'tpa_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'interview_recommendation' => ['required', Rule::in([
+                'sangat_direkomendasikan',
+                'direkomendasikan',
+                'tidak_direkomendasikan',
+            ])],
         ]);
 
         $registration->update([
             'graduation_status' => $data['graduation_status'],
             'admin_note' => $data['admin_note'] ?? null,
+            'oral_exam_notes' => $data['oral_exam_notes'] ?? null,
+            'tahfidz_score' => $data['tahfidz_score'] ?? null,
+            'tajwid_score' => $data['tajwid_score'] ?? null,
+            'arabic_score' => $data['arabic_score'] ?? null,
+            'tpa_score' => $data['tpa_score'] ?? null,
+            'interview_recommendation' => $data['interview_recommendation'],
         ]);
 
         // (opsional) jika mau otomatis update status dokumen/verifikasi

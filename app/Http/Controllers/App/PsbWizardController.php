@@ -776,9 +776,10 @@ class PsbWizardController extends Controller
 
     private function generateRegistrationNo(): string
     {
-        // contoh: DS-2026-ABCDEFG
-        $year = date('Y');
-        return 'DS-' . $year . '-' . strtoupper(Str::random(7));
+        $year = date('y');
+        $nextId = ((int) Registration::query()->max('id')) + 1;
+
+        return sprintf('DS-%s-%03d', $year, $nextId);
     }
 
     private function seedDefaultDocuments(Registration $registration): void

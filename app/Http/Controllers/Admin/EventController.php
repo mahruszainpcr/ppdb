@@ -294,7 +294,7 @@ class EventController extends Controller
     {
         $payload = trim($payload);
 
-        if (preg_match('/(DS-\d{4}-[A-Z0-9]+)/i', $payload, $matches)) {
+        if (preg_match('/(DS-(?:\d{2}-\d{3}|\d{4}-[A-Z0-9]+))/i', $payload, $matches)) {
             return strtoupper($matches[1]);
         }
 
@@ -302,7 +302,7 @@ class EventController extends Controller
         $segments = array_values(array_filter(explode('/', trim($path, '/'))));
         $lastSegment = end($segments) ?: null;
 
-        if ($lastSegment && preg_match('/^DS-\d{4}-[A-Z0-9]+$/i', $lastSegment)) {
+        if ($lastSegment && preg_match('/^DS-(?:\d{2}-\d{3}|\d{4}-[A-Z0-9]+)$/i', $lastSegment)) {
             return strtoupper($lastSegment);
         }
 
