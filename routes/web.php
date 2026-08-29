@@ -66,6 +66,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
         Route::get('/registrations/assessments', [RegistrationAdminController::class, 'assessments'])->name('admin.registrations.assessments');
         Route::post('/registrations/assessments', [RegistrationAdminController::class, 'saveAssessments'])->name('admin.registrations.assessments.save');
+        Route::post('/registrations/assessments/import', [RegistrationAdminController::class, 'importAssessments'])->name('admin.registrations.assessments.import');
+        Route::get('/registrations/assessments/export', [RegistrationAdminController::class, 'exportAssessments'])->name('admin.registrations.assessments.export');
         Route::post('/registrations/{registration}/assessment', [RegistrationAdminController::class, 'saveAssessment'])->name('admin.registrations.assessment.save');
         Route::get('/registrations/data', [RegistrationAdminController::class, 'data'])->name('admin.registrations.data');
         Route::get('/registrations/export', [RegistrationAdminController::class, 'export'])->name('admin.registrations.export');

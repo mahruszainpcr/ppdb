@@ -45,6 +45,14 @@
             <div class="text-muted">Kelola nilai seluruh calon santri dari satu halaman.</div>
         </div>
         <a href="{{ route('admin.registrations.index') }}" class="btn btn-outline-light btn-sm">Data Pendaftar</a>
+        <div class="d-flex gap-2">
+            <form method="POST" action="{{ route('admin.registrations.assessments.import') }}" enctype="multipart/form-data" class="d-flex gap-2">
+                @csrf
+                <input type="file" name="assessment_file" class="form-control form-control-sm" accept=".csv,.txt" required>
+                <button class="btn btn-outline-success btn-sm" type="submit"><i class="material-symbols-outlined">upload_file</i> Import Excel</button>
+            </form>
+            <a href="{{ route('admin.registrations.assessments.export', request()->query()) }}" class="btn btn-success btn-sm"><i class="material-symbols-outlined">download</i> Export Excel</a>
+        </div>
     </div>
 
     <div class="card trezo-card mb-3">

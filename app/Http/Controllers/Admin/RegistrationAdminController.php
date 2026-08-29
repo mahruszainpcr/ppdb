@@ -106,6 +106,132 @@ class RegistrationAdminController extends Controller
         return back()->with('success', count($data['assessments']) . ' penilaian berhasil disimpan.');
     }
 
+    public function importAssessments(Request $request)
+    {
+        $request->validate([
+            'assessment_file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ]);
+
+        $handle = fopen($request->file('assessment_file')->getRealPath(), 'r');
+        $headers = fgetcsv($handle, 0, ',');
+        $headers = array_map(fn ($header) => strtolower(trim((string) $header)), $headers ?: []);
+        $headerMap = [
+            'no. pendaftar' => 'registration_no',
+            'no pendaftar' => 'registration_no',
+            'nomor pendaftaran' => 'registration_no',
+            'registration_no' => 'registration_no',
+            'tahfidz' => 'tahfidz_score',
+            'tahfidz_score' => 'tahfidz_score',
+            'tajwid' => 'tajwid_score',
+            'tajwid_score' => 'tajwid_score',
+            'bahasa arab' => 'arabic_score',
+            'arabic_score' => 'arabic_score',
+            'tpa' => 'tpa_score',
+            'tpa_score' => 'tpa_score',
+            'wawancara' => 'interview_recommendation',
+            'interview_recommendation' => 'interview_recommendation',
+            'catatan lisan' => 'oral_exam_notes',
+            'oral_exam_notes' => 'oral_exam_notes',
+        ];
+        $columns = array_map(fn ($header) => $headerMap[$header] ?? null, $headers);
+
+        if (!in_array('registration_no', $columns, true)) {
+            fclose($handle);
+            return back()->withErrors(['assessment_file' => 'Kolom No. Pendaftar wajib tersedia pada file import.']);
+        }
+
+        $updated = 0;
+        $skipped = 0;
+        DB::transaction(function () use ($handle, $columns, &$updated, &$skipped) {
+            while (($row = fgetcsv($handle, 0, ',')) !== false) {
+                $values = array_pad($row, count($columns), null);
+                $registrationNo = trim((string) $values[array_search('registration_no', $columns, true)]);
+                $registration = Registration::query()->where('registration_no', $registrationNo)->first();
+
+                if (!$registration) {
+                    $skipped++;
+                    continue;
+                }
+
+                $updates = [];
+                foreach (['tahfidz_score', 'tajwid_score', 'arabic_score', 'tpa_score', 'oral_exam_notes'] as $field) {
+                    $index = array_search($field, $columns, true);
+                    if ($index !== false) {
+                        $updates[$field] = trim((string) ($values[$index] ?? '')) ?: null;
+                    }
+                }
+
+                $recommendationIndex = array_search('interview_recommendation', $columns, true);
+                if ($recommendationIndex !== false) {
+                    $recommendation = strtolower(trim((string) ($values[$recommendationIndex] ?? '')));
+                    $recommendation = match ($recommendation) {
+                        'sangat direkomendasikan', 'sangat_direkomendasikan' => 'sangat_direkomendasikan',
+                        'tidak direkomendasikan', 'tidak_direkomendasikan' => 'tidak_direkomendasikan',
+                        'direkomendasikan' => 'direkomendasikan',
+                        default => null,
+                    };
+                    if ($recommendation) {
+                        $updates['interview_recommendation'] = $recommendation;
+                    }
+                }
+
+                if ($updates) {
+                    $registration->update($updates);
+                    $updated++;
+                }
+            }
+        });
+        fclose($handle);
+
+        return back()->with('success', "Import selesai: {$updated} pendaftar diperbarui, {$skipped} nomor tidak ditemukan.");
+    }
+
+    public function exportAssessments(Request $request)
+    {
+        $query = Registration::query()->with(['studentProfile', 'santriContinuation']);
+        $this->applyRegistrationFilters($query, $request, $request->input('search'));
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->input('gender'));
+        }
+        if ($request->filled('education_level')) {
+            $query->where('education_level', $request->input('education_level'));
+        }
+
+        $registrations = $query->latest('created_at')->latest('id')->get();
+        $averages = $registrations->mapWithKeys(function ($registration) {
+            $scores = collect(['tahfidz_score', 'tajwid_score', 'arabic_score', 'tpa_score'])
+                ->map(fn ($field) => $registration->{$field})
+                ->filter(fn ($value) => $value !== null && $value !== '')
+                ->map(fn ($value) => (float) $value);
+            return [$registration->id => $scores->count() ? $scores->avg() : null];
+        });
+        $ranking = $averages->sortByDesc(fn ($average) => $average ?? -1)->keys()->values()
+            ->mapWithKeys(fn ($id, $position) => [$id => $position + 1]);
+
+        return response()->streamDownload(function () use ($registrations, $averages, $ranking) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['No. Pendaftar', 'Nama Santri', 'Jenjang', 'Kelompok', 'Tahfidz', 'Tajwid', 'Bahasa Arab', 'TPA', 'Wawancara', 'Catatan Lisan', 'Rata-rata', 'Ranking']);
+            foreach ($registrations as $registration) {
+                $name = $registration->studentProfile?->full_name ?? $registration->santriContinuation?->full_name ?? '-';
+                fputcsv($handle, [
+                    $registration->registration_no,
+                    $name,
+                    $registration->education_level,
+                    $registration->gender === 'female' ? 'Akhwat' : 'Ikhwan',
+                    $registration->tahfidz_score,
+                    $registration->tajwid_score,
+                    $registration->arabic_score,
+                    $registration->tpa_score,
+                    $registration->interview_recommendation,
+                    $registration->oral_exam_notes,
+                    $averages->get($registration->id),
+                    $averages->get($registration->id) === null ? '-' : $ranking->get($registration->id),
+                ]);
+            }
+            fclose($handle);
+        }, 'hasil-penilaian-seleksi-' . now()->format('Ymd-His') . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function data(Request $request)
     {
         $baseQuery = Registration::query()->with(['user', 'studentProfile', 'parentProfile', 'statement', 'documents', 'santriContinuation']);

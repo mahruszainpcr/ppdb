@@ -6,7 +6,7 @@
     <title>Kartu QR Pendaftar</title>
     <style>
         @page {
-            margin: 0.65cm 0.75cm;
+            margin: 0.55cm 0.7cm;
         }
 
         * {
@@ -53,8 +53,8 @@
         .card {
             display: inline-block;
             vertical-align: top;
-            width: 8.5cm;
-            height: 5.4cm;
+            width: 8.85cm;
+            height: 5.45cm;
             margin-right: 0.35cm;
             margin-bottom: 0.35cm;
             border: 1px solid #cfe1d5;
@@ -200,12 +200,12 @@
 </head>
 
 <body>
-    @foreach ($cards->chunk(10) as $pageCards)
+    @foreach ($cards->chunk(8) as $pageCards)
         <div class="page">
             <div class="sheet-header">
                 <div class="sheet-title">Kartu QR Pendaftar PPDB 2027/2028</div>
                 <div class="sheet-subtitle">
-                    Ma'had Darussalam Palas • Ukuran kartu 8,5 × 5,4 cm • Format cetak 2 kolom × 5 baris • Dicetak
+                    Ma'had Darussalam Palas • Ukuran kartu 8,85 × 5,45 cm • Format cetak 2 kolom × 4 baris • Dicetak
                     {{ $printedAt->format('d M Y H:i') }}
                 </div>
             </div>
@@ -217,7 +217,7 @@
                         $continuation = $card['continuation'] ?? null;
                         $position = $index + 1;
                         $isRightColumn = $position % 2 === 0;
-                        $isLastRowOnPage = $position > 8;
+                        $isLastRowOnPage = $position > 6;
                     @endphp
                     <div class="card {{ $isRightColumn ? '' : 'cut-right' }} {{ $isLastRowOnPage ? '' : 'cut-bottom' }}">
                         <div class="card-head">
