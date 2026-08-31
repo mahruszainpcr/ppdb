@@ -20,6 +20,10 @@ class Registration extends Model
         'graduation_status',  // pending|lulus|tidak_lulus|cadangan
         'admin_note',
         'oral_exam_notes',
+        'oral_question_1',
+        'oral_question_2',
+        'oral_question_3',
+        'tahsin_status',
         'tahfidz_score',
         'tajwid_score',
         'arabic_score',

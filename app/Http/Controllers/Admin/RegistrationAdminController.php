@@ -67,6 +67,10 @@ class RegistrationAdminController extends Controller
                 'tidak_direkomendasikan',
             ])],
             'oral_exam_notes' => ['nullable', 'string', 'max:2000'],
+            'oral_question_1' => ['nullable', 'string', 'max:2000'],
+            'oral_question_2' => ['nullable', 'string', 'max:2000'],
+            'oral_question_3' => ['nullable', 'string', 'max:2000'],
+            'tahsin_status' => ['nullable', Rule::in(['diterima', 'tidak_diterima', 'pending'])],
         ]);
 
         $registration->update($data);
@@ -88,6 +92,10 @@ class RegistrationAdminController extends Controller
                 'tidak_direkomendasikan',
             ])],
             'assessments.*.oral_exam_notes' => ['nullable', 'string', 'max:2000'],
+            'assessments.*.oral_question_1' => ['nullable', 'string', 'max:2000'],
+            'assessments.*.oral_question_2' => ['nullable', 'string', 'max:2000'],
+            'assessments.*.oral_question_3' => ['nullable', 'string', 'max:2000'],
+            'assessments.*.tahsin_status' => ['nullable', Rule::in(['diterima', 'tidak_diterima', 'pending'])],
         ]);
 
         DB::transaction(function () use ($data) {
@@ -99,6 +107,10 @@ class RegistrationAdminController extends Controller
                     'tpa_score' => $assessment['tpa_score'] ?? null,
                     'interview_recommendation' => $assessment['interview_recommendation'],
                     'oral_exam_notes' => $assessment['oral_exam_notes'] ?? null,
+                    'oral_question_1' => $assessment['oral_question_1'] ?? null,
+                    'oral_question_2' => $assessment['oral_question_2'] ?? null,
+                    'oral_question_3' => $assessment['oral_question_3'] ?? null,
+                    'tahsin_status' => $assessment['tahsin_status'] ?? 'pending',
                 ]);
             }
         });
@@ -132,6 +144,15 @@ class RegistrationAdminController extends Controller
             'interview_recommendation' => 'interview_recommendation',
             'catatan lisan' => 'oral_exam_notes',
             'oral_exam_notes' => 'oral_exam_notes',
+            'soal 1' => 'oral_question_1',
+            'oral_question_1' => 'oral_question_1',
+            'soal 2' => 'oral_question_2',
+            'oral_question_2' => 'oral_question_2',
+            'soal 3' => 'oral_question_3',
+            'oral_question_3' => 'oral_question_3',
+            'tahsin' => 'tahsin_status',
+            'tahsin_status' => 'tahsin_status',
+            'status tahsin' => 'tahsin_status',
         ];
         $columns = array_map(fn ($header) => $headerMap[$header] ?? null, $headers);
 
@@ -154,11 +175,22 @@ class RegistrationAdminController extends Controller
                 }
 
                 $updates = [];
-                foreach (['tahfidz_score', 'tajwid_score', 'arabic_score', 'tpa_score', 'oral_exam_notes'] as $field) {
+                foreach (['tahfidz_score', 'tajwid_score', 'arabic_score', 'tpa_score', 'oral_exam_notes', 'oral_question_1', 'oral_question_2', 'oral_question_3'] as $field) {
                     $index = array_search($field, $columns, true);
                     if ($index !== false) {
                         $updates[$field] = trim((string) ($values[$index] ?? '')) ?: null;
                     }
+                }
+
+                $tahsinIndex = array_search('tahsin_status', $columns, true);
+                if ($tahsinIndex !== false) {
+                    $tahsinStatus = strtolower(trim((string) ($values[$tahsinIndex] ?? '')));
+                    $normalized = match ($tahsinStatus) {
+                        'diterima' => 'diterima',
+                        'tidak diterima', 'tidak_diterima' => 'tidak_diterima',
+                        default => 'pending',
+                    };
+                    $updates['tahsin_status'] = $normalized;
                 }
 
                 $recommendationIndex = array_search('interview_recommendation', $columns, true);
@@ -210,7 +242,7 @@ class RegistrationAdminController extends Controller
 
         return response()->streamDownload(function () use ($registrations, $averages, $ranking) {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['No. Pendaftar', 'Nama Santri', 'Jenjang', 'Kelompok', 'Tahfidz', 'Tajwid', 'Bahasa Arab', 'TPA', 'Wawancara', 'Catatan Lisan', 'Rata-rata', 'Ranking']);
+            fputcsv($handle, ['No. Pendaftar', 'Nama Santri', 'Jenjang', 'Kelompok', 'Tahfidz', 'Tajwid', 'Bahasa Arab', 'TPA', 'Wawancara', 'Soal 1', 'Soal 2', 'Soal 3', 'Status Tahsin', 'Catatan Lisan', 'Rata-rata', 'Ranking']);
             foreach ($registrations as $registration) {
                 $name = $registration->studentProfile?->full_name ?? $registration->santriContinuation?->full_name ?? '-';
                 fputcsv($handle, [
@@ -223,6 +255,10 @@ class RegistrationAdminController extends Controller
                     $registration->arabic_score,
                     $registration->tpa_score,
                     $registration->interview_recommendation,
+                    $registration->oral_question_1,
+                    $registration->oral_question_2,
+                    $registration->oral_question_3,
+                    $registration->tahsin_status ?? 'pending',
                     $registration->oral_exam_notes,
                     $averages->get($registration->id),
                     $averages->get($registration->id) === null ? '-' : $ranking->get($registration->id),
@@ -1323,6 +1359,10 @@ class RegistrationAdminController extends Controller
             'graduation_status' => ['required', Rule::in(['pending', 'lulus', 'tidak_lulus', 'cadangan'])],
             'admin_note' => ['nullable', 'string', 'max:2000'],
             'oral_exam_notes' => ['nullable', 'string', 'max:2000'],
+            'oral_question_1' => ['nullable', 'string', 'max:2000'],
+            'oral_question_2' => ['nullable', 'string', 'max:2000'],
+            'oral_question_3' => ['nullable', 'string', 'max:2000'],
+            'tahsin_status' => ['nullable', Rule::in(['diterima', 'tidak_diterima', 'pending'])],
             'tahfidz_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'tajwid_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'arabic_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
@@ -1338,6 +1378,10 @@ class RegistrationAdminController extends Controller
             'graduation_status' => $data['graduation_status'],
             'admin_note' => $data['admin_note'] ?? null,
             'oral_exam_notes' => $data['oral_exam_notes'] ?? null,
+            'oral_question_1' => $data['oral_question_1'] ?? null,
+            'oral_question_2' => $data['oral_question_2'] ?? null,
+            'oral_question_3' => $data['oral_question_3'] ?? null,
+            'tahsin_status' => $data['tahsin_status'] ?? 'pending',
             'tahfidz_score' => $data['tahfidz_score'] ?? null,
             'tajwid_score' => $data['tajwid_score'] ?? null,
             'arabic_score' => $data['arabic_score'] ?? null,

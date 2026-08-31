@@ -716,9 +716,34 @@
                     <div class="modal-body">
 
                             <div class="border rounded-4 p-3 mb-4 bg-light">
-                                <h6 class="mb-3">Catatan Lisan</h6>
-                                <textarea name="oral_exam_notes" class="form-control" rows="3"
-                                    placeholder="Contoh: Tajwid baik, perlu memperbaiki makhraj huruf...">{{ old('oral_exam_notes', $registration->oral_exam_notes) }}</textarea>
+                                <h6 class="mb-3">Tes Lisan</h6>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Soal 1</label>
+                                        <textarea name="oral_question_1" class="form-control" rows="2" placeholder="Jawaban soal 1...">{{ old('oral_question_1', $registration->oral_question_1) }}</textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Soal 2</label>
+                                        <textarea name="oral_question_2" class="form-control" rows="2" placeholder="Jawaban soal 2...">{{ old('oral_question_2', $registration->oral_question_2) }}</textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Soal 3</label>
+                                        <textarea name="oral_question_3" class="form-control" rows="2" placeholder="Jawaban soal 3...">{{ old('oral_question_3', $registration->oral_question_3) }}</textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Status Tahsin</label>
+                                        <select name="tahsin_status" class="form-select">
+                                            @foreach (['pending' => 'Pending', 'diterima' => 'Diterima', 'tidak_diterima' => 'Tidak Diterima'] as $key => $label)
+                                                <option value="{{ $key }}" @selected(old('tahsin_status', $registration->tahsin_status ?? 'pending') === $key)>{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Catatan Lisan</label>
+                                        <textarea name="oral_exam_notes" class="form-control" rows="3"
+                                            placeholder="Contoh: Tajwid baik, perlu memperbaiki makhraj huruf...">{{ old('oral_exam_notes', $registration->oral_exam_notes) }}</textarea>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="border rounded-4 p-3 mb-4 bg-light">

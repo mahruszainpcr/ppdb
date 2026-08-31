@@ -146,7 +146,10 @@
                             <th>Bahasa Arab</th>
                             <th>TPA</th>
                             <th>Wawancara</th>
-                            <th>Catatan Lisan</th>
+                            <th>Soal 1</th>
+                            <th>Soal 2</th>
+                            <th>Soal 3</th>
+                            <th>Tahsin</th>
                             <th>Rata-rata</th>
                             <th>Ranking</th>
                             <th class="text-end pe-3">Aksi</th>
@@ -173,7 +176,16 @@
                                             @endforeach
                                         </select>
                                     </td>
-                                    <td><textarea name="assessments[{{ $registration->id }}][oral_exam_notes]" class="form-control form-control-sm" rows="1" placeholder="Catatan...">{{ $registration->oral_exam_notes }}</textarea></td>
+                                    <td><textarea name="assessments[{{ $registration->id }}][oral_question_1]" class="form-control form-control-sm" rows="1" placeholder="Soal 1...">{{ $registration->oral_question_1 }}</textarea></td>
+                                    <td><textarea name="assessments[{{ $registration->id }}][oral_question_2]" class="form-control form-control-sm" rows="1" placeholder="Soal 2...">{{ $registration->oral_question_2 }}</textarea></td>
+                                    <td><textarea name="assessments[{{ $registration->id }}][oral_question_3]" class="form-control form-control-sm" rows="1" placeholder="Soal 3...">{{ $registration->oral_question_3 }}</textarea></td>
+                                    <td>
+                                        <select name="assessments[{{ $registration->id }}][tahsin_status]" class="form-select form-select-sm">
+                                            @foreach (['pending' => 'Pending', 'diterima' => 'Diterima', 'tidak_diterima' => 'Tidak Diterima'] as $key => $label)
+                                                <option value="{{ $key }}" @selected(($registration->tahsin_status ?? 'pending') === $key)>{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
                                     @php
                                         $registrationAverage = $rankingByRegistration->has($registration->id)
                                             ? collect(array_keys($scoreFields))->map(fn ($field) => $registration->{$field})->filter(fn ($value) => $value !== null && $value !== '')->map(fn ($value) => (float) $value)->avg()
