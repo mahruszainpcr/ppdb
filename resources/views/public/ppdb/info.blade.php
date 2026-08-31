@@ -576,10 +576,24 @@
                                 (Gelombang {{ $periodWave }})
                             @endif
                         </p>
+                            @php
+                            $registrationClosed = $ppdbPeriod?->isRegistrationClosed() ?? false;
+                        @endphp
                         <div class="ppdb-actions">
-                            <a class="ppdb-btn ppdb-btn-primary" href="{{ url('/register') }}">Daftar Sekarang</a>
+                            @if ($registrationClosed)
+                                <button class="ppdb-btn ppdb-btn-primary" type="button" disabled>Pendaftaran Ditutup</button>
+                            @else
+                                <a class="ppdb-btn ppdb-btn-primary" href="{{ url('/register') }}">Daftar Sekarang</a>
+                            @endif
                             <a class="ppdb-btn ppdb-btn-secondary" href="#persyaratan">Lihat Profil & Ketentuan</a>
                         </div>
+                        @if ($registrationClosed)
+                            <div class="ppdb-note" style="margin-top:14px; background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.2);">
+                                Pendaftaran PPDB {{ $periodName ?? 'periode aktif' }} telah ditutup sejak
+                                {{ optional($ppdbPeriod?->registration_close_date)->translatedFormat('d M Y') ?? 'tanggal yang ditentukan' }}.
+                                Informasi seleksi dan jadwal selanjutnya tersedia di halaman ini.
+                            </div>
+                        @endif
                         <div class="ppdb-metrics">
                             @foreach (($heroMetrics ?? []) as $metric)
                                 <div class="ppdb-metric">

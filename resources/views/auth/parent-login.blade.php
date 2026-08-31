@@ -244,22 +244,32 @@
                 </form>
 
                 @php
-                    $activePeriod = \App\Models\Period::query()->active()->latest('id')->first();
-
+                    $activePeriod = $activePeriod ?? \App\Models\Period::query()->active()->latest('id')->first();
+                    $registrationClosed = $registrationClosed ?? ($activePeriod?->isRegistrationClosed() ?? false);
                 @endphp
 
-                <div class="parent-auth-page__info">
-                    <div class="parent-auth-page__info-title">Bergabung Group Info</div>
-                    <div class="parent-auth-page__info-text">
-                        Bergabung dengan group info untuk mendapatkan username dan password dan info login pendaftaran.
+                @if ($registrationClosed)
+                    <div class="parent-auth-page__info">
+                        <div class="parent-auth-page__info-title">Pendaftaran PPDB ditutup</div>
+                        <div class="parent-auth-page__info-text">
+                            Pendaftaran {{ $activePeriod?->name ?? 'PPDB 2027/2028' }} telah ditutup sejak
+                            {{ optional($activePeriod?->registration_close_date)->translatedFormat('d M Y') ?? 'tanggal yang ditentukan' }}.
+                            Informasi lanjutan dapat dilihat melalui halaman PPDB atau kontak admin.
+                        </div>
                     </div>
-
+                @else
+                    <div class="parent-auth-page__info">
+                        <div class="parent-auth-page__info-title">Bergabung Group Info</div>
+                        <div class="parent-auth-page__info-text">
+                            Bergabung dengan group info untuk mendapatkan username dan password dan info login pendaftaran.
+                        </div>
 
                         <a href="https://chat.whatsapp.com/FAUOWIpZJSfHiz6JBsRTfB" target="_blank" rel="noopener"
                             class="parent-auth-page__info-link">
                             Gabung Group WA Info
                         </a>
-                </div>
+                    </div>
+                @endif
 
                 <hr class="parent-auth-page__divider">
 

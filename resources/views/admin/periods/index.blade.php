@@ -41,6 +41,12 @@
                                             s/d
                                             {{ optional($item->registration_close_date)->format('d M Y') ?? '-' }}
                                         </div>
+                                        @if ($item->registration_close_date)
+                                            <div class="small mt-2 {{ $item->isRegistrationClosed() ? 'text-danger' : 'text-warning' }}">
+                                                {{ $item->isRegistrationClosed() ? 'Pendaftaran ditutup' : 'Pendaftaran masih dibuka' }}
+                                                {{ $item->registration_close_date->translatedFormat('d M Y') }}
+                                            </div>
+                                        @endif
                                     </div>
                                     <span class="badge {{ $item->is_active ? 'bg-success' : 'bg-secondary' }}">
                                         {{ $item->is_active ? 'Aktif' : 'Nonaktif' }}

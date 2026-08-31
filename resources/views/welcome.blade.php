@@ -985,6 +985,13 @@
 </head>
 
 <body>
+    @php
+        $activePeriod = \App\Models\Period::query()->active()->latest('id')->first()
+            ?? \App\Models\Period::query()->latest('id')->first();
+        $registrationClosed = $activePeriod?->isRegistrationClosed() ?? false;
+        $registrationCloseLabel = optional($activePeriod?->registration_close_date)->translatedFormat('d M Y') ?? 'tanggal yang ditentukan';
+    @endphp
+
     @section('content')
 
     <!-- HERO -->
@@ -1003,10 +1010,21 @@
                     </p>
 
                     <div class="hero-actions">
-                        <a class="btn btn-primary" href="{{ url('register') }}">Daftar Santri Baru</a>
+                        @if ($registrationClosed)
+                            <a class="btn btn-primary disabled" href="#" tabindex="-1" aria-disabled="true">Pendaftaran Ditutup</a>
+                        @else
+                            <a class="btn btn-primary" href="{{ url('register') }}">Daftar Santri Baru</a>
+                        @endif
                         <a class="btn btn-ghost" href="{{ route('ppdb.info') }}">Menu PPDB</a>
                         <a class="btn btn-ghost" href="#kontak">Kontak</a>
                     </div>
+
+                    @if ($registrationClosed)
+                        <div class="alert alert-warning mt-3 mb-0" style="max-width: 560px; border-radius: 12px;">
+                            Pendaftaran PPDB {{ $activePeriod?->name ?? '2027/2028' }} ditutup sejak {{ $registrationCloseLabel }}.
+                            Silakan cek informasi terbaru di halaman PPDB atau hubungi admin.
+                        </div>
+                    @endif
 
                     <div class="hero-meta">
                         <span class="pill">NPSN 70034877</span>

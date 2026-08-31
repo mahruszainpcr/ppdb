@@ -57,9 +57,9 @@ class PsbWizardController extends Controller
             'continueUrl' => $continueUrl,
         ] = $this->registrationProgressSnapshot($registration);
 
-        // WA group berdasarkan gender, hanya tampil jika progress sudah 100%
+        // WA group berdasarkan gender, hanya tampil jika progress sudah 100% dan periode belum ditutup
         $waLink = null;
-        $showWaGroup = $progressPercent === 100;
+        $showWaGroup = $progressPercent === 100 && !($activePeriod?->isRegistrationClosed() ?? false);
         if ($showWaGroup) {
             if ($registration->gender === 'male') {
                 $waLink = $registration->period?->wa_group_ikhwan ?? $activePeriod?->wa_group_ikhwan;

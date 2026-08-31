@@ -44,4 +44,37 @@ class Period extends Model
     {
         return $query->where('is_active', true);
     }
+
+    public function isRegistrationOpen(): bool
+    {
+        $today = now()->startOfDay();
+
+        if ($this->registration_open_date && $today < $this->registration_open_date->startOfDay()) {
+            return false;
+        }
+
+        if ($this->registration_close_date && $today > $this->registration_close_date->endOfDay()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function isRegistrationClosed(): bool
+    {
+        return !$this->isRegistrationOpen();
+    }
+
+    public function registrationClosureMessage(): string
+    {
+        if ($this->registration_close_date && now()->greaterThan($this->registration_close_date->endOfDay())) {
+            return 'Pendaftaran PPDB ditutup sejak ' . $this->registration_close_date->translatedFormat('d M Y') . '. Informasi selanjutnya dapat dilihat di halaman informasi PPDB atau melalui kontak admin.';
+        }
+
+        if ($this->registration_open_date && now()->lt($this->registration_open_date->startOfDay())) {
+            return 'Pendaftaran PPDB belum dibuka. Pembukaan pendaftaran dijadwalkan pada ' . $this->registration_open_date->translatedFormat('d M Y') . '.';
+        }
+
+        return 'Pendaftaran PPDB untuk periode ini sedang dibuka.';
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Period;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,7 +44,13 @@ class ParentAuthController extends Controller
 
     public function showLogin()
     {
-        return view('auth.parent-login');
+        $activePeriod = Period::query()->active()->latest('id')->first()
+            ?? Period::query()->latest('id')->first();
+
+        return view('auth.parent-login', [
+            'activePeriod' => $activePeriod,
+            'registrationClosed' => $activePeriod?->isRegistrationClosed() ?? false,
+        ]);
     }
 
     public function login(Request $request)
