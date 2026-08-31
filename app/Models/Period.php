@@ -47,13 +47,13 @@ class Period extends Model
 
     public function isRegistrationOpen(): bool
     {
-        $today = now()->startOfDay();
+        $today = now()->timezone('Asia/Jakarta')->startOfDay();
 
-        if ($this->registration_open_date && $today < $this->registration_open_date->startOfDay()) {
+        if ($this->registration_open_date && $today < $this->registration_open_date->copy()->timezone('Asia/Jakarta')->startOfDay()) {
             return false;
         }
 
-        if ($this->registration_close_date && $today > $this->registration_close_date->endOfDay()) {
+        if ($this->registration_close_date && $today > $this->registration_close_date->copy()->timezone('Asia/Jakarta')->endOfDay()) {
             return false;
         }
 
@@ -67,11 +67,13 @@ class Period extends Model
 
     public function registrationClosureMessage(): string
     {
-        if ($this->registration_close_date && now()->greaterThan($this->registration_close_date->endOfDay())) {
+        $now = now()->timezone('Asia/Jakarta');
+
+        if ($this->registration_close_date && $now->greaterThan($this->registration_close_date->copy()->timezone('Asia/Jakarta')->endOfDay())) {
             return 'Pendaftaran PPDB ditutup sejak ' . $this->registration_close_date->translatedFormat('d M Y') . '. Informasi selanjutnya dapat dilihat di halaman informasi PPDB atau melalui kontak admin.';
         }
 
-        if ($this->registration_open_date && now()->lt($this->registration_open_date->startOfDay())) {
+        if ($this->registration_open_date && $now->lt($this->registration_open_date->copy()->timezone('Asia/Jakarta')->startOfDay())) {
             return 'Pendaftaran PPDB belum dibuka. Pembukaan pendaftaran dijadwalkan pada ' . $this->registration_open_date->translatedFormat('d M Y') . '.';
         }
 
