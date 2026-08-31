@@ -5,8 +5,6 @@
 @section('content')
     @php
         $scoreFields = [
-            'tahfidz_score' => 'Tahfidz',
-            'tajwid_score' => 'Tajwid',
             'arabic_score' => 'Bahasa Arab',
             'tpa_score' => 'TPA',
         ];
@@ -141,16 +139,14 @@
                             <th>Nama Santri</th>
                             <th>Jenjang</th>
                             <th>Kelompok</th>
-                            <th>Tahfidz</th>
-                            <th>Tajwid</th>
                             <th>Bahasa Arab</th>
                             <th>TPA</th>
                             <th>Wawancara</th>
                             <th>Soal 1</th>
                             <th>Soal 2</th>
                             <th>Soal 3</th>
-                            <th>Tahsin</th>
-                            <th>Rata-rata</th>
+                            <th>Status Tahsin</th>
+                            <th>Rata-rata Tes Lisan</th>
                             <th>Ranking</th>
                             <th class="text-end pe-3">Aksi</th>
                         </tr>
@@ -166,9 +162,8 @@
                                 <td class="fw-semibold">{{ $studentName }}</td>
                                 <td>{{ $levelLabels[$registration->education_level] ?? $registration->education_level }}</td>
                                 <td><span class="badge {{ $registration->gender === 'female' ? 'bg-warning text-dark' : 'bg-info' }}">{{ $registration->gender === 'female' ? 'Akhwat' : 'Ikhwan' }}</span></td>
-                                @foreach (['tahfidz_score', 'tajwid_score', 'arabic_score', 'tpa_score'] as $field)
-                                    <td><input type="number" name="assessments[{{ $registration->id }}][{{ $field }}]" class="form-control form-control-sm" min="0" max="100" step="0.01" value="{{ $registration->{$field} }}" placeholder="0-100" aria-label="{{ $field }}"></td>
-                                @endforeach
+                                <td><input type="number" name="assessments[{{ $registration->id }}][arabic_score]" class="form-control form-control-sm" min="0" max="100" step="0.01" value="{{ $registration->arabic_score }}" placeholder="0-100" aria-label="arabic_score"></td>
+                                <td><input type="number" name="assessments[{{ $registration->id }}][tpa_score]" class="form-control form-control-sm" min="0" max="100" step="0.01" value="{{ $registration->tpa_score }}" placeholder="0-100" aria-label="tpa_score"></td>
                                     <td>
                                         <select name="assessments[{{ $registration->id }}][interview_recommendation]" class="form-select form-select-sm" required>
                                             @foreach (['sangat_direkomendasikan' => 'Sangat Direkomendasikan', 'direkomendasikan' => 'Direkomendasikan', 'tidak_direkomendasikan' => 'Tidak Direkomendasikan'] as $key => $label)
@@ -176,9 +171,9 @@
                                             @endforeach
                                         </select>
                                     </td>
-                                    <td><textarea name="assessments[{{ $registration->id }}][oral_question_1]" class="form-control form-control-sm" rows="1" placeholder="Soal 1...">{{ $registration->oral_question_1 }}</textarea></td>
-                                    <td><textarea name="assessments[{{ $registration->id }}][oral_question_2]" class="form-control form-control-sm" rows="1" placeholder="Soal 2...">{{ $registration->oral_question_2 }}</textarea></td>
-                                    <td><textarea name="assessments[{{ $registration->id }}][oral_question_3]" class="form-control form-control-sm" rows="1" placeholder="Soal 3...">{{ $registration->oral_question_3 }}</textarea></td>
+                                    <td><input type="number" name="assessments[{{ $registration->id }}][oral_question_1]" class="form-control form-control-sm" min="0" max="100" value="{{ (int) ($registration->oral_question_1 ?? 0) }}" placeholder="0"></td>
+                                    <td><input type="number" name="assessments[{{ $registration->id }}][oral_question_2]" class="form-control form-control-sm" min="0" max="100" value="{{ (int) ($registration->oral_question_2 ?? 0) }}" placeholder="0"></td>
+                                    <td><input type="number" name="assessments[{{ $registration->id }}][oral_question_3]" class="form-control form-control-sm" min="0" max="100" value="{{ (int) ($registration->oral_question_3 ?? 0) }}" placeholder="0"></td>
                                     <td>
                                         <select name="assessments[{{ $registration->id }}][tahsin_status]" class="form-select form-select-sm">
                                             @foreach (['pending' => 'Pending', 'diterima' => 'Diterima', 'tidak_diterima' => 'Tidak Diterima'] as $key => $label)
@@ -187,14 +182,18 @@
                                         </select>
                                     </td>
                                     @php
-                                        $registrationAverage = $rankingByRegistration->has($registration->id)
-                                            ? collect(array_keys($scoreFields))->map(fn ($field) => $registration->{$field})->filter(fn ($value) => $value !== null && $value !== '')->map(fn ($value) => (float) $value)->avg()
-                                            : null;
+                                        $oralAverage = collect([
+                                            (int) ($registration->oral_question_1 ?? 0),
+                                            (int) ($registration->oral_question_2 ?? 0),
+                                            (int) ($registration->oral_question_3 ?? 0),
+                                        ])->avg();
                                         $registrationRank = $rankingByRegistration->get($registration->id);
                                     @endphp
-                                    <td class="fw-semibold text-success">{{ $registrationAverage !== null ? number_format($registrationAverage, 2, ',', '.') : '-' }}</td>
+                                    <td class="fw-semibold text-success">
+                                        <input type="text" class="form-control form-control-sm bg-light" value="{{ is_null($oralAverage) ? '-' : number_format((float) $oralAverage, 2, ',', '.') }}" readonly>
+                                    </td>
                                     <td>
-                                        @if ($registrationAverage !== null)
+                                        @if ($registrationRank)
                                             <span class="badge bg-success">#{{ $registrationRank }}</span>
                                         @else
                                             <span class="text-muted">-</span>

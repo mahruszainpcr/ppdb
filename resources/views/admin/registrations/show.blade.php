@@ -159,8 +159,8 @@
                     <div class="text-muted small mb-1">Penilaian Seleksi</div>
                     <div class="border-top mt-2 pt-2">
                         <div class="d-flex justify-content-between text-muted small">
-                            <span>Tahfidz / Tajwid</span>
-                            <span class="fw-semibold text-dark">{{ $registration->tahfidz_score ?? '-' }} / {{ $registration->tajwid_score ?? '-' }}</span>
+                            <span>Rata-rata Tes Lisan</span>
+                            <span class="fw-semibold text-dark">{{ $registration->tahfidz_score ?? '-' }}</span>
                         </div>
                         <div class="d-flex justify-content-between text-muted small mt-1">
                             <span>Bahasa Arab / TPA</span>
@@ -718,17 +718,17 @@
                             <div class="border rounded-4 p-3 mb-4 bg-light">
                                 <h6 class="mb-3">Tes Lisan</h6>
                                 <div class="row g-3">
-                                    <div class="col-12">
+                                    <div class="col-md-4">
                                         <label class="form-label fw-semibold">Soal 1</label>
-                                        <textarea name="oral_question_1" class="form-control" rows="2" placeholder="Jawaban soal 1...">{{ old('oral_question_1', $registration->oral_question_1) }}</textarea>
+                                        <input type="number" name="oral_question_1" class="form-control" min="0" max="100" value="{{ old('oral_question_1', $registration->oral_question_1 ?? 0) }}" placeholder="0">
                                     </div>
-                                    <div class="col-12">
+                                    <div class="col-md-4">
                                         <label class="form-label fw-semibold">Soal 2</label>
-                                        <textarea name="oral_question_2" class="form-control" rows="2" placeholder="Jawaban soal 2...">{{ old('oral_question_2', $registration->oral_question_2) }}</textarea>
+                                        <input type="number" name="oral_question_2" class="form-control" min="0" max="100" value="{{ old('oral_question_2', $registration->oral_question_2 ?? 0) }}" placeholder="0">
                                     </div>
-                                    <div class="col-12">
+                                    <div class="col-md-4">
                                         <label class="form-label fw-semibold">Soal 3</label>
-                                        <textarea name="oral_question_3" class="form-control" rows="2" placeholder="Jawaban soal 3...">{{ old('oral_question_3', $registration->oral_question_3) }}</textarea>
+                                        <input type="number" name="oral_question_3" class="form-control" min="0" max="100" value="{{ old('oral_question_3', $registration->oral_question_3 ?? 0) }}" placeholder="0">
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Status Tahsin</label>
@@ -749,18 +749,27 @@
                             <div class="border rounded-4 p-3 mb-4 bg-light">
                                 <h6 class="mb-3">Penilaian Seleksi</h6>
                                 <div class="row g-3">
-                                    @foreach ([
-                                        'tahfidz_score' => 'Tahfidz',
-                                        'tajwid_score' => 'Tajwid',
-                                        'arabic_score' => 'Bahasa Arab',
-                                        'tpa_score' => 'TPA',
-                                    ] as $field => $label)
-                                        <div class="col-md-3 col-6">
-                                            <label class="form-label fw-semibold">{{ $label }}</label>
-                                            <input type="number" name="{{ $field }}" class="form-control" min="0" max="100" step="0.01"
-                                                value="{{ old($field, $registration->{$field}) }}" placeholder="0 - 100">
-                                        </div>
-                                    @endforeach
+                                    @php
+                                        $oralAverage = collect([
+                                            (int) ($registration->oral_question_1 ?? 0),
+                                            (int) ($registration->oral_question_2 ?? 0),
+                                            (int) ($registration->oral_question_3 ?? 0),
+                                        ])->avg();
+                                    @endphp
+                                    <div class="col-md-4 col-6">
+                                        <label class="form-label fw-semibold">Bahasa Arab</label>
+                                        <input type="number" name="arabic_score" class="form-control" min="0" max="100" step="0.01"
+                                            value="{{ old('arabic_score', $registration->arabic_score) }}" placeholder="0 - 100">
+                                    </div>
+                                    <div class="col-md-4 col-6">
+                                        <label class="form-label fw-semibold">TPA</label>
+                                        <input type="number" name="tpa_score" class="form-control" min="0" max="100" step="0.01"
+                                            value="{{ old('tpa_score', $registration->tpa_score) }}" placeholder="0 - 100">
+                                    </div>
+                                    <div class="col-md-4 col-12">
+                                        <label class="form-label fw-semibold">Rata-rata Tes Lisan</label>
+                                        <input type="text" class="form-control" value="{{ number_format((float) $oralAverage, 2, ',', '.') }}" readonly>
+                                    </div>
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Wawancara</label>
                                         <select name="interview_recommendation" class="form-select" required>

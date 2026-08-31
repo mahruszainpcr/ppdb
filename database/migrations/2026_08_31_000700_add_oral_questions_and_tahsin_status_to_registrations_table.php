@@ -9,9 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('registrations', function (Blueprint $table) {
-            $table->text('oral_question_1')->nullable()->after('oral_exam_notes');
-            $table->text('oral_question_2')->nullable()->after('oral_question_1');
-            $table->text('oral_question_3')->nullable()->after('oral_question_2');
+            $table->unsignedTinyInteger('oral_question_1')->default(0)->after('oral_exam_notes');
+            $table->unsignedTinyInteger('oral_question_2')->default(0)->after('oral_question_1');
+            $table->unsignedTinyInteger('oral_question_3')->default(0)->after('oral_question_2');
             $table->enum('tahsin_status', ['diterima', 'tidak_diterima', 'pending'])
                 ->default('pending')
                 ->after('oral_question_3');

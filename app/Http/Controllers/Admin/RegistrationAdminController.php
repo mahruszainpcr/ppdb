@@ -67,13 +67,30 @@ class RegistrationAdminController extends Controller
                 'tidak_direkomendasikan',
             ])],
             'oral_exam_notes' => ['nullable', 'string', 'max:2000'],
-            'oral_question_1' => ['nullable', 'string', 'max:2000'],
-            'oral_question_2' => ['nullable', 'string', 'max:2000'],
-            'oral_question_3' => ['nullable', 'string', 'max:2000'],
+            'oral_question_1' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'oral_question_2' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'oral_question_3' => ['nullable', 'integer', 'min:0', 'max:100'],
             'tahsin_status' => ['nullable', Rule::in(['diterima', 'tidak_diterima', 'pending'])],
         ]);
 
-        $registration->update($data);
+        $oralAverage = collect([
+            $data['oral_question_1'] ?? 0,
+            $data['oral_question_2'] ?? 0,
+            $data['oral_question_3'] ?? 0,
+        ])->avg();
+
+        $registration->update([
+            'tahfidz_score' => $oralAverage,
+            'tajwid_score' => $oralAverage,
+            'arabic_score' => $data['arabic_score'] ?? null,
+            'tpa_score' => $data['tpa_score'] ?? null,
+            'interview_recommendation' => $data['interview_recommendation'],
+            'oral_exam_notes' => $data['oral_exam_notes'] ?? null,
+            'oral_question_1' => (int) ($data['oral_question_1'] ?? 0),
+            'oral_question_2' => (int) ($data['oral_question_2'] ?? 0),
+            'oral_question_3' => (int) ($data['oral_question_3'] ?? 0),
+            'tahsin_status' => $data['tahsin_status'] ?? 'pending',
+        ]);
 
         return back()->with('success', 'Nilai seleksi ' . $registration->registration_no . ' berhasil disimpan.');
     }
@@ -92,24 +109,30 @@ class RegistrationAdminController extends Controller
                 'tidak_direkomendasikan',
             ])],
             'assessments.*.oral_exam_notes' => ['nullable', 'string', 'max:2000'],
-            'assessments.*.oral_question_1' => ['nullable', 'string', 'max:2000'],
-            'assessments.*.oral_question_2' => ['nullable', 'string', 'max:2000'],
-            'assessments.*.oral_question_3' => ['nullable', 'string', 'max:2000'],
+            'assessments.*.oral_question_1' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'assessments.*.oral_question_2' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'assessments.*.oral_question_3' => ['nullable', 'integer', 'min:0', 'max:100'],
             'assessments.*.tahsin_status' => ['nullable', Rule::in(['diterima', 'tidak_diterima', 'pending'])],
         ]);
 
         DB::transaction(function () use ($data) {
             foreach ($data['assessments'] as $registrationId => $assessment) {
+                $oralAverage = collect([
+                    $assessment['oral_question_1'] ?? 0,
+                    $assessment['oral_question_2'] ?? 0,
+                    $assessment['oral_question_3'] ?? 0,
+                ])->avg();
+
                 Registration::query()->whereKey($registrationId)->update([
-                    'tahfidz_score' => $assessment['tahfidz_score'] ?? null,
-                    'tajwid_score' => $assessment['tajwid_score'] ?? null,
+                    'tahfidz_score' => $oralAverage,
+                    'tajwid_score' => $oralAverage,
                     'arabic_score' => $assessment['arabic_score'] ?? null,
                     'tpa_score' => $assessment['tpa_score'] ?? null,
                     'interview_recommendation' => $assessment['interview_recommendation'],
                     'oral_exam_notes' => $assessment['oral_exam_notes'] ?? null,
-                    'oral_question_1' => $assessment['oral_question_1'] ?? null,
-                    'oral_question_2' => $assessment['oral_question_2'] ?? null,
-                    'oral_question_3' => $assessment['oral_question_3'] ?? null,
+                    'oral_question_1' => (int) ($assessment['oral_question_1'] ?? 0),
+                    'oral_question_2' => (int) ($assessment['oral_question_2'] ?? 0),
+                    'oral_question_3' => (int) ($assessment['oral_question_3'] ?? 0),
                     'tahsin_status' => $assessment['tahsin_status'] ?? 'pending',
                 ]);
             }
@@ -1359,12 +1382,10 @@ class RegistrationAdminController extends Controller
             'graduation_status' => ['required', Rule::in(['pending', 'lulus', 'tidak_lulus', 'cadangan'])],
             'admin_note' => ['nullable', 'string', 'max:2000'],
             'oral_exam_notes' => ['nullable', 'string', 'max:2000'],
-            'oral_question_1' => ['nullable', 'string', 'max:2000'],
-            'oral_question_2' => ['nullable', 'string', 'max:2000'],
-            'oral_question_3' => ['nullable', 'string', 'max:2000'],
+            'oral_question_1' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'oral_question_2' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'oral_question_3' => ['nullable', 'integer', 'min:0', 'max:100'],
             'tahsin_status' => ['nullable', Rule::in(['diterima', 'tidak_diterima', 'pending'])],
-            'tahfidz_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'tajwid_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'arabic_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'tpa_score' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'interview_recommendation' => ['required', Rule::in([
@@ -1374,19 +1395,25 @@ class RegistrationAdminController extends Controller
             ])],
         ]);
 
+        $oralAverage = collect([
+            $data['oral_question_1'] ?? 0,
+            $data['oral_question_2'] ?? 0,
+            $data['oral_question_3'] ?? 0,
+        ])->avg();
+
         $registration->update([
             'graduation_status' => $data['graduation_status'],
             'admin_note' => $data['admin_note'] ?? null,
             'oral_exam_notes' => $data['oral_exam_notes'] ?? null,
-            'oral_question_1' => $data['oral_question_1'] ?? null,
-            'oral_question_2' => $data['oral_question_2'] ?? null,
-            'oral_question_3' => $data['oral_question_3'] ?? null,
+            'oral_question_1' => (int) ($data['oral_question_1'] ?? 0),
+            'oral_question_2' => (int) ($data['oral_question_2'] ?? 0),
+            'oral_question_3' => (int) ($data['oral_question_3'] ?? 0),
             'tahsin_status' => $data['tahsin_status'] ?? 'pending',
-            'tahfidz_score' => $data['tahfidz_score'] ?? null,
-            'tajwid_score' => $data['tajwid_score'] ?? null,
             'arabic_score' => $data['arabic_score'] ?? null,
             'tpa_score' => $data['tpa_score'] ?? null,
             'interview_recommendation' => $data['interview_recommendation'],
+            'tahfidz_score' => $oralAverage,
+            'tajwid_score' => $oralAverage,
         ]);
 
         // (opsional) jika mau otomatis update status dokumen/verifikasi

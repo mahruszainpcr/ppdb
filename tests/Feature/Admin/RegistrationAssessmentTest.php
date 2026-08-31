@@ -30,25 +30,21 @@ class RegistrationAssessmentTest extends TestCase
         $response = $this->actingAs($admin)->post(route('admin.registrations.assessments.save'), [
             'assessments' => [
                 $first->id => [
-                    'tahfidz_score' => 80,
-                    'tajwid_score' => 82,
                     'arabic_score' => 78,
                     'tpa_score' => 85,
                     'interview_recommendation' => 'sangat_direkomendasikan',
-                    'oral_question_1' => 'Soal 1 jawaban benar',
-                    'oral_question_2' => 'Soal 2 jawaban benar',
-                    'oral_question_3' => 'Soal 3 jawaban benar',
+                    'oral_question_1' => 90,
+                    'oral_question_2' => 85,
+                    'oral_question_3' => 80,
                     'tahsin_status' => 'diterima',
                 ],
                 $second->id => [
-                    'tahfidz_score' => 70,
-                    'tajwid_score' => 72,
                     'arabic_score' => 75,
                     'tpa_score' => 77,
                     'interview_recommendation' => 'direkomendasikan',
-                    'oral_question_1' => 'Jawaban kurang tepat',
-                    'oral_question_2' => 'Soal 2 masih perlu latihan',
-                    'oral_question_3' => 'Soal 3 belum sempurna',
+                    'oral_question_1' => 70,
+                    'oral_question_2' => 60,
+                    'oral_question_3' => 65,
                     'tahsin_status' => 'tidak_diterima',
                 ],
             ],
@@ -57,11 +53,13 @@ class RegistrationAssessmentTest extends TestCase
         $response->assertRedirect();
         $this->assertDatabaseHas('registrations', [
             'id' => $first->id,
-            'tahfidz_score' => 80,
-            'tajwid_score' => 82,
+            'tahfidz_score' => 85.00,
+            'tajwid_score' => 85.00,
             'interview_recommendation' => 'sangat_direkomendasikan',
             'tahsin_status' => 'diterima',
-            'oral_question_1' => 'Soal 1 jawaban benar',
+            'oral_question_1' => 90,
+            'oral_question_2' => 85,
+            'oral_question_3' => 80,
         ]);
         $this->assertDatabaseHas('registrations', [
             'id' => $second->id,
@@ -69,7 +67,9 @@ class RegistrationAssessmentTest extends TestCase
             'tpa_score' => 77,
             'interview_recommendation' => 'direkomendasikan',
             'tahsin_status' => 'tidak_diterima',
-            'oral_question_3' => 'Soal 3 belum sempurna',
+            'oral_question_3' => 65,
+            'tahfidz_score' => 65.00,
+            'tajwid_score' => 65.00,
         ]);
     }
 }
