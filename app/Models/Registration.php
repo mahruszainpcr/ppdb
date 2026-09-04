@@ -84,6 +84,60 @@ class Registration extends Model
         return $this->hasMany(EventAttendance::class);
     }
 
+    public function audits(): HasMany
+    {
+        return $this->hasMany(RegistrationAudit::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::updated(function (Registration $registration): void {
+            if (!auth()->check()) {
+                return;
+            }
+
+            $changes = $registration->getChanges();
+            unset($changes['updated_at']);
+
+            if ($changes === []) {
+                return;
+            }
+
+            $assessmentFields = [
+                'tahfidz_score',
+                'tajwid_score',
+                'arabic_score',
+                'tpa_score',
+                'interview_recommendation',
+                'oral_exam_notes',
+                'oral_question_1',
+                'oral_question_2',
+                'oral_question_3',
+                'tahsin_status',
+                'graduation_status',
+                'admin_note',
+            ];
+            $action = array_intersect(array_keys($changes), $assessmentFields) !== []
+                ? 'assessment_updated'
+                : 'registration_updated';
+
+            $original = $registration->getOriginal();
+            $changeLog = [];
+            foreach ($changes as $field => $newValue) {
+                $changeLog[$field] = [
+                    'old' => $original[$field] ?? null,
+                    'new' => $newValue,
+                ];
+            }
+
+            $registration->audits()->create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'changes' => $changeLog,
+            ]);
+        });
+    }
+
     /* ===================== HELPERS ===================== */
 
     public function documentByType(string $type): ?Document

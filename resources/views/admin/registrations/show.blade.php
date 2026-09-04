@@ -19,9 +19,120 @@
         'SKTM' => 'Surat Kurang Mampu (Beasiswa)',
         'GOOD_BEHAVIOR' => 'Surat Keterangan Berkelakuan Baik',
     ];
+
+    $educationLabel = match ($registration->education_level) {
+        'SMP_NEW' => 'SMP Baru',
+        'SMA_NEW' => 'SMA Baru',
+        'SMA_OLD' => 'SMA Lanjutan (Santri Lama)',
+        default => 'Jenjang belum dipilih',
+    };
+    $registrationStatusLabel = match ($registration->status) {
+        'draft' => 'Draft',
+        'submitted' => 'Sudah Dikirim',
+        'verified' => 'Terverifikasi',
+        'revision_requested' => 'Perlu Perbaikan',
+        default => ucfirst(str_replace('_', ' ', $registration->status ?? '-')),
+    };
+    $graduationLabel = match ($registration->graduation_status) {
+        'lulus' => 'Lulus',
+        'tidak_lulus' => 'Tidak Lulus',
+        'cadangan' => 'Cadangan',
+        default => 'Menunggu Penilaian',
+    };
+    $graduationClass = match ($registration->graduation_status) {
+        'lulus' => 'is-success',
+        'tidak_lulus' => 'is-danger',
+        'cadangan' => 'is-warning',
+        default => 'is-info',
+    };
+    $studentName = $sp?->full_name ?? $continuation?->full_name ?? 'Nama santri belum tersedia';
+    $documentTotal = $registration->documents->count();
+    $documentUploaded = $registration->documents->whereNotNull('file_path')->count();
+    $documentPercent = $documentTotal ? intval(($documentUploaded / $documentTotal) * 100) : 0;
+    $auditFieldLabels = [
+        'graduation_status' => 'Status kelulusan',
+        'admin_note' => 'Catatan admin',
+        'oral_question_1' => 'Nilai lisan soal 1',
+        'oral_question_2' => 'Nilai lisan soal 2',
+        'oral_question_3' => 'Nilai lisan soal 3',
+        'oral_exam_notes' => 'Catatan tes lisan',
+        'tahsin_status' => 'Status tahsin',
+        'tahfidz_score' => 'Nilai tahfidz',
+        'tajwid_score' => 'Nilai tajwid',
+        'arabic_score' => 'Nilai Bahasa Arab',
+        'tpa_score' => 'Nilai TPA',
+        'interview_recommendation' => 'Rekomendasi wawancara',
+        'funding_type' => 'Jenis pembiayaan',
+        'education_level' => 'Jenjang pendidikan',
+        'gender' => 'Jenis kelamin',
+        'status' => 'Status pendaftaran',
+    ];
 @endphp
 
+@push('styles')
+    <style>
+        .registration-detail-page {
+            --scan-ink: #16352a;
+            --scan-muted: #6b7f75;
+            --scan-line: #dce9e1;
+            --scan-gold: #c9a24d;
+        }
+
+        .registration-hero {
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+            border-radius: 18px;
+            background: linear-gradient(120deg, #103c2c 0%, #176044 60%, #287b58 100%);
+            box-shadow: 0 16px 32px rgba(16, 60, 44, .16);
+        }
+
+        .registration-hero::after {
+            content: '';
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            right: -70px;
+            top: -110px;
+            border: 1px solid rgba(255, 255, 255, .17);
+            border-radius: 50%;
+            box-shadow: 0 0 0 24px rgba(255, 255, 255, .04), 0 0 0 48px rgba(255, 255, 255, .03);
+        }
+
+        .registration-hero-content { position: relative; z-index: 1; }
+        .registration-kicker { color: #f5d98f; font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+        .registration-hero h1 { max-width: 760px; font-size: clamp(1.7rem, 3vw, 2.5rem); letter-spacing: 0; }
+        .registration-number { color: rgba(255, 255, 255, .82); font-size: .9rem; }
+        .registration-actions .btn { border-radius: 9px; }
+        .registration-summary { margin-top: -22px; position: relative; z-index: 2; }
+        .scan-summary-card { height: 100%; border: 1px solid var(--scan-line); border-radius: 14px; background: #fff; box-shadow: 0 8px 22px rgba(22, 53, 42, .06); }
+        .scan-summary-card .card-body { padding: 1.15rem; }
+        .scan-summary-label { color: var(--scan-muted); font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+        .scan-summary-value { color: var(--scan-ink); font-size: 1.08rem; font-weight: 700; line-height: 1.35; }
+        .scan-status { display: inline-flex; align-items: center; gap: .45rem; padding: .38rem .65rem; border-radius: 999px; font-size: .78rem; font-weight: 700; }
+        .scan-status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+        .scan-status.is-success { color: #167345; background: #e7f6ed; }
+        .scan-status.is-danger { color: #b42318; background: #fff0ef; }
+        .scan-status.is-warning { color: #8a6100; background: #fff7dc; }
+        .scan-status.is-info { color: #17627a; background: #e8f5fa; }
+        .scan-progress { height: 7px; background: #edf3ef; }
+        .scan-progress .progress-bar { background: linear-gradient(90deg, #1c7a50, #c9a24d); }
+        .registration-detail-page .trezo-card { border-radius: 14px; }
+        .audit-item { position: relative; padding-left: 1.4rem; border-left: 2px solid #dce9e1; }
+        .audit-item::before { content: ''; position: absolute; width: 9px; height: 9px; left: -5px; top: .35rem; border-radius: 50%; background: #1c7a50; box-shadow: 0 0 0 4px #e7f6ed; }
+        .audit-item + .audit-item { margin-top: 1.15rem; }
+        .audit-change { color: #53685d; font-size: .8rem; }
+        @media (max-width: 575.98px) {
+            .registration-hero { border-radius: 12px; }
+            .registration-summary { margin-top: -10px; }
+            .registration-actions { width: 100%; }
+            .registration-actions .btn { flex: 1 1 auto; }
+        }
+    </style>
+@endpush
+
 @section('content')
+    <div class="registration-detail-page">
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show">
             {{ session('success') }}
@@ -29,52 +140,76 @@
         </div>
     @endif
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h4 class="mb-0">Detail Pendaftar</h4>
-            <div class="text-muted">
-                No: <span class="fw-semibold">{{ $registration->registration_no }}</span>
-                <span class="mx-2">•</span>
-                Status: <span class="badge bg-secondary">{{ $registration->status }}</span>
-                <span class="mx-2">•</span>
-                @php
-                    $gs = $registration->graduation_status;
-                    $label =
-                        [
-                            'pending' => 'Pending',
-                            'lulus' => 'Lulus',
-                            'tidak_lulus' => 'Tidak Lulus',
-                            'cadangan' => 'Cadangan',
-                        ][$gs] ?? $gs;
-
-                    $badgeClass = match ($gs) {
-                        'lulus' => 'bg-success',
-                        'tidak_lulus' => 'bg-danger',
-                        'cadangan' => 'bg-warning text-dark',
-                        default => 'bg-info',
-                    };
-                @endphp
-
-                Kelulusan:
-                <button type="button" class="badge {{ $badgeClass }} border-0" style="cursor:pointer"
-                    data-bs-toggle="modal" data-bs-target="#modalKelulusanNote">
-                    {{ $label }}<span class="ms-1">🛈</span>
-                </button>
-
+    <div class="registration-hero p-4 p-lg-5 mb-4">
+        <div class="registration-hero-content d-flex flex-wrap justify-content-between align-items-end gap-4">
+            <div>
+                <div class="registration-kicker mb-2">Hasil Scan Pendaftaran</div>
+                <h1 class="mb-2">{{ $studentName }}</h1>
+                <div class="registration-number">Nomor pendaftaran <strong>{{ $registration->registration_no }}</strong></div>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <span class="badge bg-light text-success">{{ $educationLabel }}</span>
+                    <span class="badge bg-light text-success">Pembiayaan {{ $registration->funding_type_label }}</span>
+                    <span class="badge bg-light text-success">{{ $registration->gender_label }}</span>
+                </div>
+            </div>
+            <div class="registration-actions d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.registrations.index') }}" class="btn btn-light btn-sm text-success">Kembali</a>
+                <a href="{{ route('admin.registrations.proof.pdf', $registration) }}" class="btn btn-outline-light btn-sm">Download PDF</a>
+                <a href="{{ route('admin.registrations.edit', $registration) }}" class="btn btn-warning btn-sm">Edit Data</a>
             </div>
         </div>
+    </div>
+
+    <div class="row g-3 registration-summary mb-4">
+        <div class="col-md-4">
+            <div class="scan-summary-card">
+                <div class="card-body">
+                    <div class="scan-summary-label mb-2">Status pendaftaran</div>
+                    <div class="scan-summary-value mb-2">{{ $registrationStatusLabel }}</div>
+                    <div class="small text-muted">Akun wali: {{ $registration->user->name ?? '-' }}</div>
+                    <div class="small text-muted">{{ $registration->user->phone ?? 'Nomor telepon belum ada' }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="scan-summary-card">
+                <div class="card-body">
+                    <div class="scan-summary-label mb-2">Hasil seleksi</div>
+                    <button type="button" class="scan-status {{ $graduationClass }} border-0" data-bs-toggle="modal" data-bs-target="#modalKelulusanNote">
+                        {{ $graduationLabel }}
+                    </button>
+                    <div class="small text-muted mt-2">Klik status untuk melihat dan memperbarui penilaian.</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="scan-summary-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="scan-summary-label">Kelengkapan berkas</div>
+                        <strong class="text-success">{{ $documentPercent }}%</strong>
+                    </div>
+                    <div class="progress scan-progress mb-2">
+                        <div class="progress-bar" role="progressbar" style="width: {{ $documentPercent }}%" aria-valuenow="{{ $documentPercent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="small text-muted">{{ $documentUploaded }} dari {{ $documentTotal }} dokumen sudah diunggah</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-1">Informasi Pendaftar</h4>
+            <div class="text-muted small">Periksa detail berikut sebelum melakukan verifikasi atau penilaian.</div>
+        </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.registrations.index') }}" class="btn btn-outline-light btn-sm">Kembali</a>
-            <a href="{{ route('admin.registrations.proof.pdf', $registration) }}" class="btn btn-outline-success btn-sm">
-                Download PDF
-            </a>
-            <a href="{{ route('admin.registrations.edit', $registration) }}" class="btn btn-primary btn-sm">Edit</a>
             @if (auth()->user()?->role === 'admin')
                 <form method="POST" action="{{ route('admin.registrations.destroy', $registration) }}"
                     onsubmit="return confirm('Yakin hapus data pendaftaran ini?')">
                     @csrf
                     @method('DELETE')
-                    <button class="btn btn-outline-danger btn-sm">Hapus</button>
+                    <button class="btn btn-outline-danger btn-sm">Hapus Data</button>
                 </form>
             @endif
 
@@ -83,96 +218,6 @@
                 @csrf
                 <button class="btn btn-outline-light btn-sm">Logout</button>
             </form>
-        </div>
-    </div>
-
-    {{-- Summary Cards --}}
-    <div class="row g-3 mb-3">
-        <div class="col-lg-4">
-            <div class="card trezo-card">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Nama Santri</div>
-                    <div class="fs-6 fw-semibold">{{ $sp?->full_name ?? $continuation?->full_name ?? '-' }}</div>
-                    <hr class="opacity-25">
-                    <div class="d-flex justify-content-between">
-                        <div class="text-muted small">Jenjang</div>
-                        <div class="fw-semibold">{{ $registration->education_level }}</div>
-                    </div>
-                    <div class="d-flex justify-content-between mt-1">
-                        <div class="text-muted small">Pembiayaan</div>
-                        <div class="fw-semibold text-capitalize">{{ $registration->funding_type }}</div>
-                    </div>
-                    <div class="d-flex justify-content-between mt-1">
-                        <div class="text-muted small">Gender</div>
-                        <div class="fw-semibold">{{ $registration->gender ?? '-' }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card trezo-card">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Akun Wali</div>
-                    <div class="fw-semibold">{{ $registration->user->name ?? '-' }}</div>
-                    <div class="text-muted">{{ $registration->user->phone ?? '-' }}</div>
-                    <hr class="opacity-25">
-                    <div class="text-muted small mb-1">Periode/Gelombang</div>
-                    <div class="fw-semibold">{{ $registration->period?->name ?? '-' }}</div>
-                    <div class="text-muted small">Gelombang: {{ $registration->period?->wave ?? '-' }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card trezo-card">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Kelengkapan Dokumen</div>
-                    @php
-                        $total = $registration->documents->count();
-                        $uploaded = $registration->documents->whereNotNull('file_path')->count();
-                        $pct = $total ? intval(($uploaded / $total) * 100) : 0;
-                    @endphp
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="fw-semibold">{{ $uploaded }} / {{ $total }} terunggah</div>
-                        <div class="text-muted small">{{ $pct }}%</div>
-                    </div>
-                    <div class="progress mt-2" style="height:10px;">
-                        <div class="progress-bar" role="progressbar" style="width: {{ $pct }}%"></div>
-                    </div>
-
-                    <hr class="opacity-25">
-
-                    <div class="text-muted small mb-1">Pernyataan</div>
-                    <div class="d-flex justify-content-between">
-                        <div class="text-muted small">Bersedia Mengabdi</div>
-                        <div class="fw-semibold">{{ $st?->willing_to_serve ? 'IYA' : 'TIDAK / BELUM' }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card trezo-card h-100">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Penilaian Seleksi</div>
-                    <div class="border-top mt-2 pt-2">
-                        <div class="d-flex justify-content-between text-muted small">
-                            <span>Rata-rata Tes Lisan</span>
-                            <span class="fw-semibold text-dark">{{ $registration->tahfidz_score ?? '-' }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between text-muted small mt-1">
-                            <span>Bahasa Arab / TPA</span>
-                            <span class="fw-semibold text-dark">{{ $registration->arabic_score ?? '-' }} / {{ $registration->tpa_score ?? '-' }}</span>
-                        </div>
-                        <div class="text-muted small mt-1">Wawancara: <span class="fw-semibold text-dark">{{ str_replace('_', ' ', ucfirst($registration->interview_recommendation ?? 'belum dinilai')) }}</span></div>
-                    </div>
-                    @if ($registration->oral_exam_notes)
-                        <div class="border-top mt-2 pt-2 text-muted small">{{ $registration->oral_exam_notes }}</div>
-                    @endif
-                </div>
-            </div>
         </div>
     </div>
 
@@ -226,6 +271,40 @@
             </div>
         </div>
     @endif
+
+    <div class="card trezo-card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div>
+                    <h5 class="mb-1">Riwayat Aktivitas</h5>
+                    <div class="text-muted small">Catatan siapa yang mengisi nilai atau memperbarui pendaftaran ini.</div>
+                </div>
+                <span class="badge bg-light text-success">{{ $registration->audits->count() }} aktivitas</span>
+            </div>
+
+            @forelse ($registration->audits as $audit)
+                @php
+                    $auditAction = $audit->action === 'assessment_updated' ? 'Memperbarui nilai / hasil seleksi' : 'Memperbarui data pendaftaran';
+                @endphp
+                <div class="audit-item">
+                    <div class="d-flex flex-wrap justify-content-between gap-2">
+                        <div class="fw-semibold">{{ $auditAction }}</div>
+                        <div class="text-muted small">{{ $audit->created_at?->format('d M Y, H:i') }}</div>
+                    </div>
+                    <div class="text-muted small mb-2">Oleh {{ $audit->user?->name ?? 'User tidak diketahui' }}</div>
+                    @if ($audit->changes)
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach ($audit->changes as $field => $change)
+                                <span class="audit-change">{{ $auditFieldLabels[$field] ?? str_replace('_', ' ', ucfirst($field)) }}: <strong>{{ is_scalar($change['new'] ?? null) ? ($change['new'] ?? '-') : '-' }}</strong></span>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <div class="text-muted small py-2">Belum ada aktivitas perubahan yang tercatat.</div>
+            @endforelse
+        </div>
+    </div>
 
     {{-- Tabs --}}
     <div class="card trezo-card">
@@ -292,7 +371,7 @@
 
                                         <div class="col-md-6">
                                             <div class="text-muted small">Jenis Kelamin</div>
-                                            <div class="fw-semibold">{{ $registration->gender ?? '-' }}</div>
+                                            <div class="fw-semibold">{{ $registration->gender_label }}</div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="text-muted small">Status Anak</div>
@@ -837,6 +916,7 @@
         </div>
     </div>
 
+    </div>
 @endsection
 
 @push('scripts')

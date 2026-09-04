@@ -123,7 +123,12 @@ class RegistrationAdminController extends Controller
                     $assessment['oral_question_3'] ?? 0,
                 ])->avg();
 
-                Registration::query()->whereKey($registrationId)->update([
+                $registration = Registration::query()->find($registrationId);
+                if (!$registration) {
+                    continue;
+                }
+
+                $registration->update([
                     'tahfidz_score' => $oralAverage,
                     'tajwid_score' => $oralAverage,
                     'arabic_score' => $assessment['arabic_score'] ?? null,
@@ -693,6 +698,7 @@ class RegistrationAdminController extends Controller
             'statement',
             'santriContinuation',
             'documents' => fn($q) => $q->orderBy('type'),
+            'audits' => fn($q) => $q->with('user')->latest(),
         ]);
 
         return view('admin.registrations.show', compact('registration'));
@@ -903,6 +909,10 @@ class RegistrationAdminController extends Controller
             }
         });
 
+        $this->recordRegistrationAudit($registration, 'registration_updated', [
+            'section' => ['old' => null, 'new' => 'Program dan dokumen'],
+        ]);
+
         if ($registration->education_level === 'SMA_OLD') {
             return redirect()
                 ->route('admin.registrations.continuation.edit', $registration)
@@ -983,6 +993,10 @@ class RegistrationAdminController extends Controller
             ['registration_id' => $registration->id],
             $validated
         );
+
+        $this->recordRegistrationAudit($registration, 'registration_updated', [
+            'section' => ['old' => null, 'new' => 'Data santri'],
+        ]);
 
         return redirect()
             ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 2])
@@ -1071,6 +1085,10 @@ class RegistrationAdminController extends Controller
                 $statementData
             );
         });
+
+        $this->recordRegistrationAudit($registration, 'registration_updated', [
+            'section' => ['old' => null, 'new' => 'Orang tua/wali dan pernyataan'],
+        ]);
 
         return redirect()
             ->route('admin.registrations.edit', ['registration' => $registration, 'step' => 3])
@@ -1230,6 +1248,10 @@ class RegistrationAdminController extends Controller
             ]);
         });
 
+        $this->recordRegistrationAudit($registration, 'registration_updated', [
+            'section' => ['old' => null, 'new' => 'Formulir lanjutan santri'],
+        ]);
+
         return redirect()
             ->route('admin.registrations.show', $registration)
             ->with('success', 'Formulir lanjutan santri berhasil diperbarui.');
@@ -1259,6 +1281,17 @@ class RegistrationAdminController extends Controller
         }
 
         return '';
+    }
+
+    private function recordRegistrationAudit(Registration $registration, string $action, array $changes): void
+    {
+        if (auth()->check()) {
+            $registration->audits()->create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'changes' => $changes,
+            ]);
+        }
     }
 
     private function adminWizardViewData(Registration $registration, int $step): array
