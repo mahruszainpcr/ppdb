@@ -2,21 +2,44 @@
 
 @section('title', 'Input Nilai Seleksi')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.bootstrap5.min.css">
+    <style>
+        .assessment-group { border: 1px solid var(--trezo-border); border-radius: 14px; overflow: hidden; }
+        .assessment-group + .assessment-group { margin-top: 1.25rem; }
+        .assessment-group-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; background: #f6faf7; border-bottom: 1px solid var(--trezo-border); }
+        .assessment-group-header h5 { margin: 0; font-size: 1rem; }
+        .assessment-group-header small { color: #6b7f75; }
+        .assessment-table th { white-space: nowrap; }
+        .assessment-table td { vertical-align: middle; }
+        .assessment-table .form-control, .assessment-table .form-select { min-width: 82px; }
+        .dataTables_wrapper { padding: 1rem 1.25rem; }
+        .dataTables_wrapper .row { align-items: center; gap: .5rem 0; }
+        @media (max-width: 767.98px) {
+            .assessment-group-header { align-items: flex-start; flex-direction: column; }
+            .dataTables_wrapper { padding: .75rem; }
+        }
+    </style>
+@endpush
+
 @section('content')
     @php
         $scoreFields = [
+            'oral_question_1' => 'Soal 1',
+            'oral_question_2' => 'Soal 2',
+            'oral_question_3' => 'Soal 3',
             'arabic_score' => 'Bahasa Arab',
             'tpa_score' => 'TPA',
         ];
         $scoreAverages = collect($scoreFields)->mapWithKeys(function ($label, $field) use ($registrations) {
-            $values = $registrations->pluck($field)->filter(fn ($value) => $value !== null && $value !== '')->map(fn ($value) => (float) $value);
+            $values = $registrations->pluck($field)->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)->map(fn ($value) => (float) $value);
             return [$field => ['label' => $label, 'average' => $values->avg(), 'count' => $values->count()]];
         });
         $rankingByRegistration = $registrations
             ->mapWithKeys(function ($registration) use ($scoreFields) {
                 $scores = collect(array_keys($scoreFields))
                     ->map(fn ($field) => $registration->{$field})
-                    ->filter(fn ($value) => $value !== null && $value !== '')
+                    ->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)
                     ->map(fn ($value) => (float) $value);
 
                 return [$registration->id => $scores->count() ? $scores->avg() : null];
@@ -25,7 +48,42 @@
             ->keys()
             ->values()
             ->mapWithKeys(fn ($registrationId, $position) => [$registrationId => $position + 1]);
-        $allScores = $registrations->flatMap(fn ($registration) => collect(array_keys($scoreFields))->map(fn ($field) => $registration->{$field})->filter(fn ($value) => $value !== null && $value !== '')->map(fn ($value) => (float) $value));
+        $allScores = $registrations->flatMap(fn ($registration) => collect(array_keys($scoreFields))->map(fn ($field) => $registration->{$field})->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)->map(fn ($value) => (float) $value));
+        $assessmentGroups = [
+            ['key' => 'ikhwan-smp', 'label' => 'Ikhwan - SMP', 'gender' => 'male', 'levels' => ['SMP_NEW']],
+            ['key' => 'ikhwan-sma', 'label' => 'Ikhwan - SMA', 'gender' => 'male', 'levels' => ['SMA_NEW', 'SMA_OLD']],
+            ['key' => 'akhwat-smp', 'label' => 'Akhwat - SMP', 'gender' => 'female', 'levels' => ['SMP_NEW']],
+            ['key' => 'akhwat-sma', 'label' => 'Akhwat - SMA', 'gender' => 'female', 'levels' => ['SMA_NEW', 'SMA_OLD']],
+        ];
+        $assessmentGroups = collect($assessmentGroups)->map(function (array $group) use ($registrations, $scoreFields) {
+            $items = $registrations
+                ->filter(fn ($registration) => ($registration->gender === $group['gender']) && in_array($registration->education_level, $group['levels'], true))
+                ->map(function ($registration) use ($scoreFields) {
+                    $scores = collect(array_keys($scoreFields))
+                        ->map(fn ($field) => $registration->{$field})
+                        ->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)
+                        ->map(fn ($value) => (float) $value);
+
+                    $registration->ranking_average = $scores->isNotEmpty() ? round((float) $scores->avg(), 2) : null;
+                    return $registration;
+                })
+                ->sortByDesc(fn ($registration) => $registration->ranking_average ?? -1)
+                ->values();
+
+            $previousAverage = null;
+            $rank = 0;
+            $items = $items->map(function ($registration, int $index) use (&$previousAverage, &$rank) {
+                if ($index === 0 || $previousAverage !== $registration->ranking_average) {
+                    $rank = $index + 1;
+                    $previousAverage = $registration->ranking_average;
+                }
+                $registration->ranking_position = $rank;
+                return $registration;
+            });
+
+            $group['registrations'] = $items;
+            return $group;
+        });
     @endphp
     @if (session('success'))
         <div class="alert alert-success border-0 rounded-3">{{ session('success') }}</div>
@@ -127,95 +185,78 @@
         </div>
     </div>
 
-    <div class="card trezo-card">
-        <div class="card-body p-0">
-            <form method="POST" action="{{ route('admin.registrations.assessments.save') }}">
-                @csrf
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="min-width: 1480px">
-                    <thead>
-                        <tr>
-                            <th class="ps-3">No. Pendaftar</th>
-                            <th>Nama Santri</th>
-                            <th>Jenjang</th>
-                            <th>Kelompok</th>
-                            <th>Bahasa Arab</th>
-                            <th>TPA</th>
-                            <th>Wawancara</th>
-                            <th>Soal 1</th>
-                            <th>Soal 2</th>
-                            <th>Soal 3</th>
-                            <th>Status Tahsin</th>
-                            <th>Rata-rata Tes Lisan</th>
-                            <th>Ranking</th>
-                            <th class="text-end pe-3">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($registrations as $registration)
-                            @php
-                                $studentName = $registration->studentProfile?->full_name ?? $registration->santriContinuation?->full_name ?? '-';
-                                $levelLabels = ['SMP_NEW' => 'SMP Baru', 'SMA_NEW' => 'SMA Baru', 'SMA_OLD' => 'SMA Lanjutan'];
-                            @endphp
+    <form method="POST" action="{{ route('admin.registrations.assessments.save') }}" id="assessment-form">
+        @csrf
+        @foreach ($assessmentGroups as $group)
+            <section class="assessment-group bg-white" data-group="{{ $group['key'] }}">
+                <div class="assessment-group-header">
+                    <div>
+                        <h5>{{ $group['label'] }}</h5>
+                        <small>{{ $group['registrations']->count() }} pendaftar, diurutkan berdasarkan ranking nilai</small>
+                    </div>
+                    <span class="badge bg-light text-success">Ranking {{ $group['label'] }}</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 assessment-table" id="table-{{ $group['key'] }}" style="min-width: 1480px">
+                        <thead>
                             <tr>
-                                <td class="ps-3"><a href="{{ route('admin.registrations.show', $registration) }}" class="fw-semibold">{{ $registration->registration_no }}</a></td>
-                                <td class="fw-semibold">{{ $studentName }}</td>
-                                <td>{{ $levelLabels[$registration->education_level] ?? $registration->education_level }}</td>
-                                <td><span class="badge {{ $registration->gender === 'female' ? 'bg-warning text-dark' : 'bg-info' }}">{{ $registration->gender === 'female' ? 'Akhwat' : 'Ikhwan' }}</span></td>
-                                <td><input type="number" name="assessments[{{ $registration->id }}][arabic_score]" class="form-control form-control-sm" min="0" max="100" step="0.01" value="{{ $registration->arabic_score }}" placeholder="0-100" aria-label="arabic_score"></td>
-                                <td><input type="number" name="assessments[{{ $registration->id }}][tpa_score]" class="form-control form-control-sm" min="0" max="100" step="0.01" value="{{ $registration->tpa_score }}" placeholder="0-100" aria-label="tpa_score"></td>
-                                    <td>
-                                        <select name="assessments[{{ $registration->id }}][interview_recommendation]" class="form-select form-select-sm" required>
-                                            @foreach (['sangat_direkomendasikan' => 'Sangat Direkomendasikan', 'direkomendasikan' => 'Direkomendasikan', 'tidak_direkomendasikan' => 'Tidak Direkomendasikan'] as $key => $label)
-                                                <option value="{{ $key }}" @selected(($registration->interview_recommendation ?? 'direkomendasikan') === $key)>{{ $label }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td><input type="number" name="assessments[{{ $registration->id }}][oral_question_1]" class="form-control form-control-sm" min="0" max="100" value="{{ (int) ($registration->oral_question_1 ?? 0) }}" placeholder="0"></td>
-                                    <td><input type="number" name="assessments[{{ $registration->id }}][oral_question_2]" class="form-control form-control-sm" min="0" max="100" value="{{ (int) ($registration->oral_question_2 ?? 0) }}" placeholder="0"></td>
-                                    <td><input type="number" name="assessments[{{ $registration->id }}][oral_question_3]" class="form-control form-control-sm" min="0" max="100" value="{{ (int) ($registration->oral_question_3 ?? 0) }}" placeholder="0"></td>
-                                    <td>
-                                        <select name="assessments[{{ $registration->id }}][tahsin_status]" class="form-select form-select-sm">
-                                            @foreach (['pending' => 'Pending', 'diterima' => 'Diterima', 'tidak_diterima' => 'Tidak Diterima'] as $key => $label)
-                                                <option value="{{ $key }}" @selected(($registration->tahsin_status ?? 'pending') === $key)>{{ $label }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    @php
-                                        $oralAverage = collect([
-                                            (int) ($registration->oral_question_1 ?? 0),
-                                            (int) ($registration->oral_question_2 ?? 0),
-                                            (int) ($registration->oral_question_3 ?? 0),
-                                        ])->avg();
-                                        $registrationRank = $rankingByRegistration->get($registration->id);
-                                    @endphp
-                                    <td class="fw-semibold text-success">
-                                        <input type="text" class="form-control form-control-sm bg-light" value="{{ is_null($oralAverage) ? '-' : number_format((float) $oralAverage, 2, ',', '.') }}" readonly>
-                                    </td>
-                                    <td>
-                                        @if ($registrationRank)
-                                            <span class="badge bg-success">#{{ $registrationRank }}</span>
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-end pe-3">
-                                        <a href="{{ route('admin.registrations.show', $registration) }}" class="btn btn-sm btn-outline-primary">
-                                            Detail
-                                        </a>
-                                    </td>
+                                <th>Ranking</th><th>No. Pendaftar</th><th>Nama Santri</th><th>Bahasa Arab</th><th>TPA</th>
+                                <th>Wawancara</th><th>Soal 1</th><th>Soal 2</th><th>Soal 3</th><th>Status Tahsin</th>
+                                <th>Rata-rata</th><th>Aksi</th>
                             </tr>
-                        @empty
-                            <tr><td colspan="13" class="text-center text-muted py-5">Tidak ada data pendaftar sesuai filter.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            <div class="d-flex justify-content-between align-items-center gap-2 p-3 border-top">
-                <span class="text-muted small">{{ $registrations->count() }} pendaftar ditampilkan. Perubahan pada semua baris akan disimpan sekaligus.</span>
-                <button class="btn btn-primary" type="submit"><i class="material-symbols-outlined">save</i> Simpan Semua Nilai</button>
-            </div>
-            </form>
+                        </thead>
+                        <tbody>
+                            @foreach ($group['registrations'] as $registration)
+                                @php $studentName = $registration->studentProfile?->full_name ?? $registration->santriContinuation?->full_name ?? '-'; @endphp
+                                <tr>
+                                    <td data-order="{{ $registration->ranking_position }}"><span class="badge bg-success">#{{ $registration->ranking_position }}</span></td>
+                                    <td><a href="{{ route('admin.registrations.show', $registration) }}" class="fw-semibold">{{ $registration->registration_no }}</a></td>
+                                    <td class="fw-semibold">{{ $studentName }}</td>
+                                    <td><input type="number" name="assessments[{{ $registration->id }}][arabic_score]" class="form-control form-control-sm" min="0" max="100" step="0.01" value="{{ $registration->arabic_score }}" placeholder="0-100"></td>
+                                    <td><input type="number" name="assessments[{{ $registration->id }}][tpa_score]" class="form-control form-control-sm" min="0" max="100" step="0.01" value="{{ $registration->tpa_score }}" placeholder="0-100"></td>
+                                    <td><select name="assessments[{{ $registration->id }}][interview_recommendation]" class="form-select form-select-sm" required>@foreach (['sangat_direkomendasikan' => 'Sangat Direkomendasikan', 'direkomendasikan' => 'Direkomendasikan', 'tidak_direkomendasikan' => 'Tidak Direkomendasikan'] as $key => $label)<option value="{{ $key }}" @selected(($registration->interview_recommendation ?? 'direkomendasikan') === $key)>{{ $label }}</option>@endforeach</select></td>
+                                    <td><input type="number" name="assessments[{{ $registration->id }}][oral_question_1]" class="form-control form-control-sm" min="0" max="100" value="{{ $registration->oral_question_1 ?? 0 }}" placeholder="0"></td>
+                                    <td><input type="number" name="assessments[{{ $registration->id }}][oral_question_2]" class="form-control form-control-sm" min="0" max="100" value="{{ $registration->oral_question_2 ?? 0 }}" placeholder="0"></td>
+                                    <td><input type="number" name="assessments[{{ $registration->id }}][oral_question_3]" class="form-control form-control-sm" min="0" max="100" value="{{ $registration->oral_question_3 ?? 0 }}" placeholder="0"></td>
+                                    <td><select name="assessments[{{ $registration->id }}][tahsin_status]" class="form-select form-select-sm">@foreach (['pending' => 'Pending', 'diterima' => 'Diterima', 'tidak_diterima' => 'Tidak Diterima'] as $key => $label)<option value="{{ $key }}" @selected(($registration->tahsin_status ?? 'pending') === $key)>{{ $label }}</option>@endforeach</select></td>
+                                    <td class="fw-semibold text-success" data-order="{{ $registration->ranking_average ?? -1 }}">{{ $registration->ranking_average === null ? '-' : number_format($registration->ranking_average, 2, ',', '.') }}</td>
+                                    <td><a href="{{ route('admin.registrations.show', $registration) }}" class="btn btn-sm btn-outline-primary">Detail</a></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        @endforeach
+        <div class="d-flex justify-content-between align-items-center gap-2 p-3 border-top">
+            <span class="text-muted small">{{ $registrations->count() }} pendaftar ditampilkan. Perubahan pada semua baris akan disimpan sekaligus.</span>
+            <button class="btn btn-primary" type="submit"><i class="material-symbols-outlined">save</i> Simpan Semua Nilai</button>
         </div>
-    </div>
+    </form>
 @endsection
+
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.assessment-table').forEach(function (table) {
+                new DataTable(table, {
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']],
+                    order: [[0, 'asc']],
+                    columnDefs: [{ targets: [11], orderable: false, searchable: false }],
+                    language: {
+                        search: 'Cari:',
+                        lengthMenu: 'Tampilkan _MENU_',
+                        info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ pendaftar',
+                        infoEmpty: 'Belum ada pendaftar',
+                        zeroRecords: 'Pendaftar tidak ditemukan',
+                        paginate: { first: 'Awal', last: 'Akhir', next: 'Berikutnya', previous: 'Sebelumnya' }
+                    }
+                });
+            });
+        });
+    </script>
+@endpush

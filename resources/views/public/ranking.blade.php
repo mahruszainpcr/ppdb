@@ -75,7 +75,7 @@
         <div class="container">
             <div class="eyebrow">Hasil seleksi PPDB</div>
             <h1>Ranking Peserta PPDB</h1>
-            <p>Ranking seluruh pendaftar dengan lima nilai seleksi yang sudah lengkap. Daftar disusun terpisah untuk Ikhwan dan Akhwat.</p>
+            <p>Ranking seluruh pendaftar berdasarkan nilai seleksi yang sudah tersedia. Daftar disusun terpisah untuk Ikhwan dan Akhwat.</p>
         </div>
     </header>
 
@@ -83,16 +83,16 @@
         <div class="container">
             <section class="ranking-panel" aria-labelledby="ranking-title">
                 <div class="panel-head">
-                    <div><h2 id="ranking-title">Daftar Ranking Nilai</h2><p>Hanya pendaftar dengan nilai Soal 1, 2, 3, TPA, dan Bahasa Arab yang lengkap.</p></div>
+                    <div><h2 id="ranking-title">Daftar Ranking Nilai</h2><p>Nilai kosong atau 0 tidak dihitung dalam rata-rata.</p></div>
                     <div class="period">Semua pendaftar</div>
                 </div>
                 @if ($rankingIkhwan->isEmpty() && $rankingAkhwat->isEmpty())
-                    <div class="empty">Belum ada pendaftar dengan lima nilai seleksi yang lengkap.</div>
+                    <div class="empty">Belum ada data pendaftar.</div>
                 @else
                     @foreach ([['key' => 'ikhwan', 'label' => 'Ikhwan', 'items' => $rankingIkhwan], ['key' => 'akhwat', 'label' => 'Akhwat', 'items' => $rankingAkhwat]] as $group)
                         <div class="group-heading">{{ $group['label'] }} <span>{{ $group['items']->count() }} peserta</span></div>
                         @if ($group['items']->isEmpty())
-                            <div class="empty group-empty">Belum ada pendaftar {{ strtolower($group['label']) }} dengan nilai lengkap.</div>
+                            <div class="empty group-empty">Belum ada pendaftar {{ strtolower($group['label']) }}.</div>
                         @else
                             <div style="overflow-x:auto">
                                 <table>
