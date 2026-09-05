@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\NewsPost;
 use App\Models\Period;
+use App\Models\Registration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -83,6 +84,42 @@ class LandingController extends Controller
             'timelineItems',
             'brochure'
         ));
+    }
+
+    public function ranking()
+    {
+        $period = Period::query()->active()->latest('id')->first()
+            ?? Period::query()->latest('id')->first();
+
+        $registrations = Registration::query()
+            ->with(['studentProfile', 'santriContinuation', 'eventAttendances'])
+            ->whereHas('eventAttendances')
+            ->when($period, fn ($query) => $query->where('period_id', $period->id))
+            ->get()
+            ->map(function (Registration $registration) {
+                return [
+                    'name' => $registration->studentProfile?->full_name
+                        ?? $registration->santriContinuation?->full_name
+                        ?? 'Nama belum tersedia',
+                    'school' => $registration->studentProfile?->school_origin
+                        ?? 'Ma’had Darussalam',
+                    'gender' => $registration->gender,
+                ];
+            })
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+
+        $buildRanking = static function ($items) {
+            return $items->values()->map(function (array $item, int $index) {
+                $item['rank'] = $index + 1;
+                return $item;
+            });
+        };
+
+        $rankingIkhwan = $buildRanking($registrations->where('gender', 'male'));
+        $rankingAkhwat = $buildRanking($registrations->where('gender', 'female'));
+
+        return view('public.ranking', compact('rankingIkhwan', 'rankingAkhwat', 'period'));
     }
 
     private function buildTimelineItems(?Period $ppdbPeriod, array $settings, callable $dateLabel): array

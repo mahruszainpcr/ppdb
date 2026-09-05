@@ -14,6 +14,12 @@
             'cadangan' => ['CADANGAN', 'warning'],
         ];
         [$gradLabel, $gradColor] = $gradMap[$registration->graduation_status] ?? ['-', 'secondary'];
+        $oralScores = collect([
+            $registration->oral_question_1,
+            $registration->oral_question_2,
+            $registration->oral_question_3,
+        ])->map(fn ($score) => $score === null ? null : (float) $score);
+        $oralAverage = $oralScores->filter(fn ($score) => $score !== null)->avg();
     @endphp
 
     <div class="row g-3">
@@ -50,6 +56,20 @@
                     <a href="{{ route('psb.wizard', ['step' => 2, 'registration' => $registration->id]) }}" class="btn btn-outline-light btn-sm">Cek Orang Tua</a>
                     <a href="{{ route('psb.wizard', ['step' => 3, 'registration' => $registration->id]) }}" class="btn btn-outline-light btn-sm">Cek
                         Dokumen</a>
+                </div>
+            </div>
+
+            <div class="card trezo-card mt-3">
+                <div class="card-body">
+                    <h6 class="mb-1">Nilai Seleksi</h6>
+                    <div class="text-muted small mb-3">Informasi nilai hanya dapat dilihat oleh wali pendaftar.</div>
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3"><div class="text-muted small">Tes Lisan</div><div class="fw-semibold">{{ $oralAverage === null ? '-' : number_format($oralAverage, 2, ',', '.') }}</div></div>
+                        <div class="col-6 col-md-3"><div class="text-muted small">Tahfidz</div><div class="fw-semibold">{{ $registration->tahfidz_score ?? '-' }}</div></div>
+                        <div class="col-6 col-md-3"><div class="text-muted small">Bahasa Arab</div><div class="fw-semibold">{{ $registration->arabic_score ?? '-' }}</div></div>
+                        <div class="col-6 col-md-3"><div class="text-muted small">TPA</div><div class="fw-semibold">{{ $registration->tpa_score ?? '-' }}</div></div>
+                        <div class="col-12"><div class="text-muted small">Rekomendasi Wawancara</div><div class="fw-semibold">{{ str_replace('_', ' ', ucfirst($registration->interview_recommendation ?? 'Belum dinilai')) }}</div></div>
+                    </div>
                 </div>
             </div>
         </div>

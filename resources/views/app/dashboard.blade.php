@@ -31,6 +31,8 @@
                 <div class="text-end">
                     <div class="text-muted small mb-1">Progress Pengisian</div>
                     <div class="fw-bold fs-4">{{ $progressPercent }}%</div>
+                    <a href="{{ route('psb.result', ['registration' => $registration->id]) }}"
+                        class="btn btn-outline-success btn-sm mt-2">Lihat Nilai & Hasil</a>
                     <a href="{{ $continueUrl }}"
                         class="btn btn-primary btn-sm mt-2">
                         Lanjutkan Pengisian
@@ -178,6 +180,10 @@
                                     <a href="{{ $item['continue_url'] }}"
                                         class="btn btn-primary btn-sm">
                                         Lanjutkan
+                                    </a>
+                                    <a href="{{ route('psb.result', ['registration' => $item['id']]) }}"
+                                        class="btn btn-outline-success btn-sm">
+                                        Nilai & Hasil
                                     </a>
                                     @if ($item['can_show_qr'])
                                         <a href="{{ $item['qr_page_url'] }}" class="btn btn-outline-dark btn-sm">

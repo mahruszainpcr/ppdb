@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Artisan;
 Route::get('/psb', fn() => view('public.psb.index'));
 Route::get('/psb/syarat', fn() => view('public.psb.syarat'));
 Route::get('/ppdb', [LandingController::class, 'ppdbInfo'])->name('ppdb.info');
+Route::get('/ranking', [LandingController::class, 'ranking'])->name('ranking.index');
 Route::get('/absensi', [GuestAttendanceController::class, 'index'])->name('attendance.index');
 Route::get('/absensi/{event:slug}', [GuestAttendanceController::class, 'show'])->name('attendance.event');
 Route::post('/absensi/{event:slug}/lookup', [GuestAttendanceController::class, 'lookup'])->name('attendance.lookup');

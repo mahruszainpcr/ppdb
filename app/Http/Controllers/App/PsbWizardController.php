@@ -263,11 +263,12 @@ class PsbWizardController extends Controller
     {
         $activePeriod = \App\Models\Period::query()->active()->latest('id')->first();
 
-        $registration = \App\Models\Registration::query()
+        $registrationQuery = \App\Models\Registration::query()
             ->where('user_id', $request->user()->id)
-            ->latest('id')
             ->with(['period', 'documents', 'studentProfile', 'parentProfile', 'statement', 'santriContinuation'])
-            ->first();
+            ->when($request->filled('registration'), fn ($query) => $query->whereKey((int) $request->query('registration')));
+
+        $registration = $registrationQuery->latest('id')->first();
 
         if (!$registration) {
             return redirect()->route('psb.wizard', ['step' => 1]);
