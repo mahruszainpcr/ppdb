@@ -110,20 +110,13 @@ class LandingController extends Controller
                     'average' => $scores->isNotEmpty() ? round((float) $scores->avg(), 2) : null,
                 ];
             })
+            ->filter(fn (array $item) => $item['average'] !== null && $item['average'] > 0)
             ->sortByDesc(fn (array $item) => $item['average'] ?? -1)
             ->values();
 
         $buildRanking = static function ($items) {
-            $rank = 0;
-            $previousAverage = null;
-
-            return $items->values()->map(function (array $item, int $index) use (&$rank, &$previousAverage) {
-                if ($index === 0 || $previousAverage !== $item['average']) {
-                    $rank = $index + 1;
-                    $previousAverage = $item['average'];
-                }
-
-                $item['rank'] = $rank;
+            return $items->values()->map(function (array $item, int $index) {
+                $item['rank'] = $index + 1;
                 return $item;
             });
         };

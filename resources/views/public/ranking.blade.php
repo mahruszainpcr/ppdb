@@ -53,6 +53,9 @@
         td:first-child, th:first-child { width: 92px; }
         .rank { display: inline-grid; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: var(--green); background: var(--soft); font-weight: 800; }
         .rank.top { color: #76580d; background: #fff5d6; }
+        .ranking-top-five { background: #fff8df; }
+        .ranking-top-five td { border-top-color: #f1e2ad; }
+        .direct-pass { display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; padding: 4px 8px; border-radius: 999px; color: #76580d; background: #fff1b8; font-size: .68rem; font-weight: 700; }
         .student { color: var(--ink); font-weight: 700; }
         .school { color: var(--muted); }
         .empty { padding: 56px 24px; color: var(--muted); text-align: center; }
@@ -83,9 +86,10 @@
         <div class="container">
             <section class="ranking-panel" aria-labelledby="ranking-title">
                 <div class="panel-head">
-                    <div><h2 id="ranking-title">Daftar Ranking Nilai</h2><p>Nilai kosong atau 0 tidak dihitung dalam rata-rata.</p></div>
+                    <div><h2 id="ranking-title">Daftar Ranking Nilai</h2><p>Peserta dengan rata-rata 0 atau tanpa nilai tidak ditampilkan.</p></div>
                     <div class="period">Semua pendaftar</div>
                 </div>
+                <div class="direct-pass mx-3 mt-3 mb-1">5 besar setiap kelompok: Lolos langsung tanpa ujian PPDB</div>
                 @if ($rankingIkhwan->isEmpty() && $rankingAkhwat->isEmpty())
                     <div class="empty">Belum ada data pendaftar.</div>
                 @else
@@ -99,9 +103,14 @@
                                     <thead><tr><th>Peringkat</th><th>Nama Santri</th><th>Asal Sekolah</th></tr></thead>
                                     <tbody>
                                         @foreach ($group['items'] as $item)
-                                            <tr>
+                                            <tr class="{{ $item['rank'] <= 5 ? 'ranking-top-five' : '' }}">
                                                 <td><span class="rank {{ $item['rank'] <= 3 ? 'top' : '' }}">{{ $item['rank'] }}</span></td>
-                                                <td class="student">{{ $item['name'] }}</td>
+                                                <td class="student">
+                                                    {{ $item['name'] }}
+                                                    @if ($item['rank'] <= 5)
+                                                        <div class="direct-pass">Lolos langsung tanpa ujian PPDB</div>
+                                                    @endif
+                                                </td>
                                                 <td class="school">{{ $item['school'] }}</td>
                                             </tr>
                                         @endforeach
