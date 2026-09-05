@@ -18,8 +18,8 @@
             $registration->oral_question_1,
             $registration->oral_question_2,
             $registration->oral_question_3,
-        ])->map(fn ($score) => $score === null ? null : (float) $score);
-        $oralAverage = $oralScores->filter(fn ($score) => $score !== null)->avg();
+        ])->map(fn ($score) => $score === null || $score === '' ? 0.0 : (float) $score);
+        $oralAverage = $oralScores->sum() / 3;
     @endphp
 
     <div class="row g-3">

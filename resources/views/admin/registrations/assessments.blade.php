@@ -32,30 +32,31 @@
             'tpa_score' => 'TPA',
         ];
         $scoreAverages = collect($scoreFields)->mapWithKeys(function ($label, $field) use ($registrations) {
-            $values = $registrations->pluck($field)->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)->map(fn ($value) => (float) $value);
+            $values = $registrations->pluck($field)->filter(fn ($value) => $value !== null && $value !== '')->map(fn ($value) => (float) $value);
             return [$field => ['label' => $label, 'average' => $values->avg(), 'count' => $values->count()]];
         });
         $rankingAverages = $registrations
             ->mapWithKeys(function ($registration) use ($scoreFields) {
                 $scores = collect(array_keys($scoreFields))
                     ->map(fn ($field) => $registration->{$field})
-                    ->map(fn ($value) => $value === null || $value === '' ? null : (float) $value);
-                $hasCompleteScores = $scores->count() === 5 && $scores->every(fn ($score) => $score !== null && $score > 0);
+                    ->map(fn ($value) => $value === null || $value === '' ? 0.0 : (float) $value);
 
-                return [$registration->id => $hasCompleteScores ? round((float) $scores->sum() / 5, 2) : null];
+                return [$registration->id => round((float) $scores->sum() / 5, 2)];
             })
             ->sortByDesc(fn ($average) => $average ?? -1);
         $rankingByRegistration = [];
         $rankingPosition = 0;
         foreach ($rankingAverages as $registrationId => $average) {
-            $rankingByRegistration[$registrationId] = $average === null ? null : ++$rankingPosition;
+            $rankingByRegistration[$registrationId] = $average > 0 ? ++$rankingPosition : null;
         }
-        $allScores = $registrations->flatMap(fn ($registration) => collect(array_keys($scoreFields))->map(fn ($field) => $registration->{$field})->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)->map(fn ($value) => (float) $value));
+        $allScores = $registrations->flatMap(fn ($registration) => collect(array_keys($scoreFields))->map(fn ($field) => $registration->{$field})->filter(fn ($value) => $value !== null && $value !== '')->map(fn ($value) => (float) $value));
         $assessmentGroups = [
             ['key' => 'ikhwan-smp', 'label' => 'Ikhwan - SMP', 'gender' => 'male', 'levels' => ['SMP_NEW']],
             ['key' => 'ikhwan-sma', 'label' => 'Ikhwan - SMA', 'gender' => 'male', 'levels' => ['SMA_NEW', 'SMA_OLD']],
             ['key' => 'akhwat-smp', 'label' => 'Akhwat - SMP', 'gender' => 'female', 'levels' => ['SMP_NEW']],
             ['key' => 'akhwat-sma', 'label' => 'Akhwat - SMA', 'gender' => 'female', 'levels' => ['SMA_NEW', 'SMA_OLD']],
+            ['key' => 'belum-smp', 'label' => 'Belum Ditentukan - SMP', 'gender' => null, 'levels' => ['SMP_NEW']],
+            ['key' => 'belum-sma', 'label' => 'Belum Ditentukan - SMA', 'gender' => null, 'levels' => ['SMA_NEW', 'SMA_OLD']],
         ];
         $assessmentGroups = collect($assessmentGroups)->map(function (array $group) use ($registrations, $scoreFields) {
             $items = $registrations
@@ -63,10 +64,9 @@
                 ->map(function ($registration) use ($scoreFields) {
                     $scores = collect(array_keys($scoreFields))
                         ->map(fn ($field) => $registration->{$field})
-                        ->map(fn ($value) => $value === null || $value === '' ? null : (float) $value);
-                    $hasCompleteScores = $scores->count() === 5 && $scores->every(fn ($score) => $score !== null && $score > 0);
+                        ->map(fn ($value) => $value === null || $value === '' ? 0.0 : (float) $value);
 
-                    $registration->ranking_average = $hasCompleteScores ? round((float) $scores->sum() / 5, 2) : null;
+                    $registration->ranking_average = round((float) $scores->sum() / 5, 2);
                     return $registration;
                 })
                 ->sortByDesc(fn ($registration) => $registration->ranking_average ?? -1)
@@ -74,7 +74,7 @@
 
             $rank = 0;
             $items = $items->map(function ($registration) use (&$rank) {
-                $registration->ranking_position = $registration->ranking_average === null ? null : ++$rank;
+                $registration->ranking_position = $registration->ranking_average > 0 ? ++$rank : null;
                 return $registration;
             });
 

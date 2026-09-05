@@ -98,8 +98,7 @@ class LandingController extends Controller
                     $registration->oral_question_3,
                     $registration->tpa_score,
                     $registration->arabic_score,
-                ])->map(fn ($score) => $score === null || $score === '' ? null : (float) $score);
-                $hasCompleteScores = $scores->count() === 5 && $scores->every(fn ($score) => $score !== null && $score > 0);
+                ])->map(fn ($score) => $score === null || $score === '' ? 0.0 : (float) $score);
 
                 return [
                     'name' => $registration->studentProfile?->full_name
@@ -107,8 +106,8 @@ class LandingController extends Controller
                         ?? 'Nama belum tersedia',
                     'school' => $registration->studentProfile?->school_origin
                         ?? 'Ma’had Darussalam',
-                    'gender' => $registration->gender === 'female' ? 'female' : 'male',
-                    'average' => $hasCompleteScores ? round((float) $scores->sum() / 5, 2) : null,
+                    'gender' => $registration->gender,
+                    'average' => round((float) $scores->sum() / 5, 2),
                 ];
             })
             ->filter(fn (array $item) => $item['average'] !== null && $item['average'] > 0)
@@ -124,8 +123,9 @@ class LandingController extends Controller
 
         $rankingIkhwan = $buildRanking($registrations->where('gender', 'male'));
         $rankingAkhwat = $buildRanking($registrations->where('gender', 'female'));
+        $rankingUnknown = $buildRanking($registrations->filter(fn (array $item) => $item['gender'] === null));
 
-        return view('public.ranking', compact('rankingIkhwan', 'rankingAkhwat'));
+        return view('public.ranking', compact('rankingIkhwan', 'rankingAkhwat', 'rankingUnknown'));
     }
 
     private function buildTimelineItems(?Period $ppdbPeriod, array $settings, callable $dateLabel): array

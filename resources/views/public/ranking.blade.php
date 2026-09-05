@@ -86,14 +86,14 @@
         <div class="container">
             <section class="ranking-panel" aria-labelledby="ranking-title">
                 <div class="panel-head">
-                    <div><h2 id="ranking-title">Daftar Ranking Nilai</h2><p>Hanya peserta dengan lima nilai lengkap dan lebih dari 0 yang diberi ranking.</p></div>
+                    <div><h2 id="ranking-title">Daftar Ranking Nilai</h2></div>
                     <div class="period">Semua pendaftar</div>
                 </div>
                 <div class="direct-pass mx-3 mt-3 mb-1">5 besar setiap kelompok: Lolos langsung tanpa ujian Try Out PPDB</div>
-                @if ($rankingIkhwan->isEmpty() && $rankingAkhwat->isEmpty())
+                @if ($rankingIkhwan->isEmpty() && $rankingAkhwat->isEmpty() && $rankingUnknown->isEmpty())
                     <div class="empty">Belum ada data pendaftar.</div>
                 @else
-                    @foreach ([['key' => 'ikhwan', 'label' => 'Ikhwan', 'items' => $rankingIkhwan], ['key' => 'akhwat', 'label' => 'Akhwat', 'items' => $rankingAkhwat]] as $group)
+                    @foreach ([['key' => 'ikhwan', 'label' => 'Ikhwan', 'items' => $rankingIkhwan], ['key' => 'akhwat', 'label' => 'Akhwat', 'items' => $rankingAkhwat], ['key' => 'unknown', 'label' => 'Gender Belum Ditentukan', 'items' => $rankingUnknown]] as $group)
                         <div class="group-heading">{{ $group['label'] }} <span>{{ $group['items']->count() }} peserta</span></div>
                         @if ($group['items']->isEmpty())
                             <div class="empty group-empty">Belum ada pendaftar {{ strtolower($group['label']) }}.</div>
