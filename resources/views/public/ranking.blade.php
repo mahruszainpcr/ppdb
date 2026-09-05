@@ -75,7 +75,7 @@
         <div class="container">
             <div class="eyebrow">Hasil seleksi PPDB</div>
             <h1>Ranking Peserta PPDB</h1>
-            <p>Daftar peserta yang sudah tercatat hadir pada kegiatan PPDB periode berjalan. Ranking disusun terpisah untuk Ikhwan dan Akhwat.</p>
+            <p>Ranking seluruh pendaftar dengan lima nilai seleksi yang sudah lengkap. Daftar disusun terpisah untuk Ikhwan dan Akhwat.</p>
         </div>
     </header>
 
@@ -83,16 +83,16 @@
         <div class="container">
             <section class="ranking-panel" aria-labelledby="ranking-title">
                 <div class="panel-head">
-                    <div><h2 id="ranking-title">Daftar Ranking Kehadiran</h2><p>Hanya peserta yang sudah melakukan absensi yang ditampilkan.</p></div>
-                    <div class="period">{{ $period?->name ?? 'Periode aktif' }}</div>
+                    <div><h2 id="ranking-title">Daftar Ranking Nilai</h2><p>Hanya pendaftar dengan nilai Soal 1, 2, 3, TPA, dan Bahasa Arab yang lengkap.</p></div>
+                    <div class="period">Semua pendaftar</div>
                 </div>
                 @if ($rankingIkhwan->isEmpty() && $rankingAkhwat->isEmpty())
-                    <div class="empty">Ranking belum tersedia untuk periode ini.</div>
+                    <div class="empty">Belum ada pendaftar dengan lima nilai seleksi yang lengkap.</div>
                 @else
                     @foreach ([['key' => 'ikhwan', 'label' => 'Ikhwan', 'items' => $rankingIkhwan], ['key' => 'akhwat', 'label' => 'Akhwat', 'items' => $rankingAkhwat]] as $group)
                         <div class="group-heading">{{ $group['label'] }} <span>{{ $group['items']->count() }} peserta</span></div>
                         @if ($group['items']->isEmpty())
-                            <div class="empty group-empty">Belum ada peserta {{ strtolower($group['label']) }} yang tercatat hadir.</div>
+                            <div class="empty group-empty">Belum ada pendaftar {{ strtolower($group['label']) }} dengan nilai lengkap.</div>
                         @else
                             <div style="overflow-x:auto">
                                 <table>
@@ -112,7 +112,7 @@
                     @endforeach
                 @endif
             </section>
-            <p class="note">Ranking ini hanya menunjukkan daftar peserta yang sudah tercatat hadir. Informasi nilai dan hasil seleksi hanya dapat dilihat oleh wali melalui menu orang tua.</p>
+            <p class="note">Ranking diurutkan berdasarkan rata-rata Soal 1, Soal 2, Soal 3, TPA, dan Bahasa Arab. Nilai tetap tidak ditampilkan di halaman publik; rincian nilai dan hasil seleksi hanya dapat dilihat oleh wali.</p>
         </div>
     </main>
     <x-landing-footer />

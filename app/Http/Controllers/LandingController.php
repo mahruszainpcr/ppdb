@@ -88,15 +88,28 @@ class LandingController extends Controller
 
     public function ranking()
     {
-        $period = Period::query()->active()->latest('id')->first()
-            ?? Period::query()->latest('id')->first();
-
         $registrations = Registration::query()
-            ->with(['studentProfile', 'santriContinuation', 'eventAttendances'])
-            ->whereHas('eventAttendances')
-            ->when($period, fn ($query) => $query->where('period_id', $period->id))
+            ->with(['studentProfile', 'santriContinuation'])
+            ->whereNotNull('oral_question_1')
+            ->where('oral_question_1', '>', 0)
+            ->whereNotNull('oral_question_2')
+            ->where('oral_question_2', '>', 0)
+            ->whereNotNull('oral_question_3')
+            ->where('oral_question_3', '>', 0)
+            ->whereNotNull('tpa_score')
+            ->where('tpa_score', '>', 0)
+            ->whereNotNull('arabic_score')
+            ->where('arabic_score', '>', 0)
             ->get()
             ->map(function (Registration $registration) {
+                $average = collect([
+                    $registration->oral_question_1,
+                    $registration->oral_question_2,
+                    $registration->oral_question_3,
+                    $registration->tpa_score,
+                    $registration->arabic_score,
+                ])->avg();
+
                 return [
                     'name' => $registration->studentProfile?->full_name
                         ?? $registration->santriContinuation?->full_name
@@ -104,14 +117,23 @@ class LandingController extends Controller
                     'school' => $registration->studentProfile?->school_origin
                         ?? 'Ma’had Darussalam',
                     'gender' => $registration->gender,
+                    'average' => round((float) $average, 2),
                 ];
             })
-            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->sortByDesc('average')
             ->values();
 
         $buildRanking = static function ($items) {
-            return $items->values()->map(function (array $item, int $index) {
-                $item['rank'] = $index + 1;
+            $rank = 0;
+            $previousAverage = null;
+
+            return $items->values()->map(function (array $item, int $index) use (&$rank, &$previousAverage) {
+                if ($previousAverage !== $item['average']) {
+                    $rank = $index + 1;
+                    $previousAverage = $item['average'];
+                }
+
+                $item['rank'] = $rank;
                 return $item;
             });
         };
@@ -119,7 +141,7 @@ class LandingController extends Controller
         $rankingIkhwan = $buildRanking($registrations->where('gender', 'male'));
         $rankingAkhwat = $buildRanking($registrations->where('gender', 'female'));
 
-        return view('public.ranking', compact('rankingIkhwan', 'rankingAkhwat', 'period'));
+        return view('public.ranking', compact('rankingIkhwan', 'rankingAkhwat'));
     }
 
     private function buildTimelineItems(?Period $ppdbPeriod, array $settings, callable $dateLabel): array
