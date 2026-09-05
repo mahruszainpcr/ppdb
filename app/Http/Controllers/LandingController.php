@@ -98,7 +98,8 @@ class LandingController extends Controller
                     $registration->oral_question_3,
                     $registration->tpa_score,
                     $registration->arabic_score,
-                ])->filter(fn ($score) => $score !== null && $score !== '' && (float) $score > 0);
+                ])->map(fn ($score) => $score === null || $score === '' ? null : (float) $score);
+                $hasCompleteScores = $scores->count() === 5 && $scores->every(fn ($score) => $score !== null && $score > 0);
 
                 return [
                     'name' => $registration->studentProfile?->full_name
@@ -107,7 +108,7 @@ class LandingController extends Controller
                     'school' => $registration->studentProfile?->school_origin
                         ?? 'Ma’had Darussalam',
                     'gender' => $registration->gender === 'female' ? 'female' : 'male',
-                    'average' => $scores->isNotEmpty() ? round((float) $scores->avg(), 2) : null,
+                    'average' => $hasCompleteScores ? round((float) $scores->sum() / 5, 2) : null,
                 ];
             })
             ->filter(fn (array $item) => $item['average'] !== null && $item['average'] > 0)

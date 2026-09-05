@@ -35,19 +35,21 @@
             $values = $registrations->pluck($field)->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)->map(fn ($value) => (float) $value);
             return [$field => ['label' => $label, 'average' => $values->avg(), 'count' => $values->count()]];
         });
-        $rankingByRegistration = $registrations
+        $rankingAverages = $registrations
             ->mapWithKeys(function ($registration) use ($scoreFields) {
                 $scores = collect(array_keys($scoreFields))
                     ->map(fn ($field) => $registration->{$field})
-                    ->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)
-                    ->map(fn ($value) => (float) $value);
+                    ->map(fn ($value) => $value === null || $value === '' ? null : (float) $value);
+                $hasCompleteScores = $scores->count() === 5 && $scores->every(fn ($score) => $score !== null && $score > 0);
 
-                return [$registration->id => $scores->count() ? $scores->avg() : null];
+                return [$registration->id => $hasCompleteScores ? round((float) $scores->sum() / 5, 2) : null];
             })
-            ->sortByDesc(fn ($average) => $average ?? -1)
-            ->keys()
-            ->values()
-            ->mapWithKeys(fn ($registrationId, $position) => [$registrationId => $position + 1]);
+            ->sortByDesc(fn ($average) => $average ?? -1);
+        $rankingByRegistration = [];
+        $rankingPosition = 0;
+        foreach ($rankingAverages as $registrationId => $average) {
+            $rankingByRegistration[$registrationId] = $average === null ? null : ++$rankingPosition;
+        }
         $allScores = $registrations->flatMap(fn ($registration) => collect(array_keys($scoreFields))->map(fn ($field) => $registration->{$field})->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)->map(fn ($value) => (float) $value));
         $assessmentGroups = [
             ['key' => 'ikhwan-smp', 'label' => 'Ikhwan - SMP', 'gender' => 'male', 'levels' => ['SMP_NEW']],
@@ -61,23 +63,18 @@
                 ->map(function ($registration) use ($scoreFields) {
                     $scores = collect(array_keys($scoreFields))
                         ->map(fn ($field) => $registration->{$field})
-                        ->filter(fn ($value) => $value !== null && $value !== '' && (float) $value > 0)
-                        ->map(fn ($value) => (float) $value);
+                        ->map(fn ($value) => $value === null || $value === '' ? null : (float) $value);
+                    $hasCompleteScores = $scores->count() === 5 && $scores->every(fn ($score) => $score !== null && $score > 0);
 
-                    $registration->ranking_average = $scores->isNotEmpty() ? round((float) $scores->avg(), 2) : null;
+                    $registration->ranking_average = $hasCompleteScores ? round((float) $scores->sum() / 5, 2) : null;
                     return $registration;
                 })
                 ->sortByDesc(fn ($registration) => $registration->ranking_average ?? -1)
                 ->values();
 
-            $previousAverage = null;
             $rank = 0;
-            $items = $items->map(function ($registration, int $index) use (&$previousAverage, &$rank) {
-                if ($index === 0 || $previousAverage !== $registration->ranking_average) {
-                    $rank = $index + 1;
-                    $previousAverage = $registration->ranking_average;
-                }
-                $registration->ranking_position = $rank;
+            $items = $items->map(function ($registration) use (&$rank) {
+                $registration->ranking_position = $registration->ranking_average === null ? null : ++$rank;
                 return $registration;
             });
 
@@ -209,7 +206,13 @@
                             @foreach ($group['registrations'] as $registration)
                                 @php $studentName = $registration->studentProfile?->full_name ?? $registration->santriContinuation?->full_name ?? '-'; @endphp
                                 <tr>
-                                    <td data-order="{{ $registration->ranking_position }}"><span class="badge bg-success">#{{ $registration->ranking_position }}</span></td>
+                                    <td data-order="{{ $registration->ranking_position ?? 999999 }}">
+                                        @if ($registration->ranking_position)
+                                            <span class="badge bg-success">#{{ $registration->ranking_position }}</span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
                                     <td><a href="{{ route('admin.registrations.show', $registration) }}" class="fw-semibold">{{ $registration->registration_no }}</a></td>
                                     <td class="fw-semibold">{{ $studentName }}</td>
                                     <td><input type="number" name="assessments[{{ $registration->id }}][arabic_score]" class="form-control form-control-sm" min="0" max="100" step="0.01" value="{{ $registration->arabic_score }}" placeholder="0-100"></td>

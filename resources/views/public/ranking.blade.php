@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ranking Santri | Ma'had Darussalam Al-Islami</title>
-    <meta name="description" content="Daftar ranking peserta yang sudah tercatat hadir pada kegiatan PPDB Ma'had Darussalam Al-Islami.">
+    <meta name="description" content="Daftar ranking peserta yang sudah tercatat hadir pada kegiatan Try Out PPDB Ma'had Darussalam Al-Islami.">
     <link rel="icon" href="https://mahaddarussalampalas.ponpes.id/logo.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,8 +76,8 @@
 
     <header class="hero">
         <div class="container">
-            <div class="eyebrow">Hasil seleksi PPDB</div>
-            <h1>Ranking Peserta PPDB</h1>
+            <div class="eyebrow">Hasil seleksi Try Out PPDB</div>
+            <h1>Ranking Peserta Try Out PPDB</h1>
             <p>Ranking seluruh pendaftar berdasarkan nilai seleksi yang sudah tersedia. Daftar disusun terpisah untuk Ikhwan dan Akhwat.</p>
         </div>
     </header>
@@ -86,10 +86,10 @@
         <div class="container">
             <section class="ranking-panel" aria-labelledby="ranking-title">
                 <div class="panel-head">
-                    <div><h2 id="ranking-title">Daftar Ranking Nilai</h2><p>Peserta dengan rata-rata 0 atau tanpa nilai tidak ditampilkan.</p></div>
+                    <div><h2 id="ranking-title">Daftar Ranking Nilai</h2><p>Hanya peserta dengan lima nilai lengkap dan lebih dari 0 yang diberi ranking.</p></div>
                     <div class="period">Semua pendaftar</div>
                 </div>
-                <div class="direct-pass mx-3 mt-3 mb-1">5 besar setiap kelompok: Lolos langsung tanpa ujian PPDB</div>
+                <div class="direct-pass mx-3 mt-3 mb-1">5 besar setiap kelompok: Lolos langsung tanpa ujian Try Out PPDB</div>
                 @if ($rankingIkhwan->isEmpty() && $rankingAkhwat->isEmpty())
                     <div class="empty">Belum ada data pendaftar.</div>
                 @else
@@ -108,7 +108,7 @@
                                                 <td class="student">
                                                     {{ $item['name'] }}
                                                     @if ($item['rank'] <= 5)
-                                                        <div class="direct-pass">Lolos langsung tanpa ujian PPDB</div>
+                                                        <div class="direct-pass">Lolos langsung tanpa ujian Try Out PPDB</div>
                                                     @endif
                                                 </td>
                                                 <td class="school">{{ $item['school'] }}</td>

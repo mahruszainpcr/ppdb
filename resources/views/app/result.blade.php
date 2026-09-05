@@ -64,11 +64,20 @@
                     <h6 class="mb-1">Nilai Seleksi</h6>
                     <div class="text-muted small mb-3">Informasi nilai hanya dapat dilihat oleh wali pendaftar.</div>
                     <div class="row g-3">
+                        <div class="col-6 col-md-3"><div class="text-muted small">Soal 1</div><div class="fw-semibold">{{ $registration->oral_question_1 ?? '-' }}</div></div>
+                        <div class="col-6 col-md-3"><div class="text-muted small">Soal 2</div><div class="fw-semibold">{{ $registration->oral_question_2 ?? '-' }}</div></div>
+                        <div class="col-6 col-md-3"><div class="text-muted small">Soal 3</div><div class="fw-semibold">{{ $registration->oral_question_3 ?? '-' }}</div></div>
                         <div class="col-6 col-md-3"><div class="text-muted small">Tes Lisan</div><div class="fw-semibold">{{ $oralAverage === null ? '-' : number_format($oralAverage, 2, ',', '.') }}</div></div>
                         <div class="col-6 col-md-3"><div class="text-muted small">Tahfidz</div><div class="fw-semibold">{{ $registration->tahfidz_score ?? '-' }}</div></div>
                         <div class="col-6 col-md-3"><div class="text-muted small">Bahasa Arab</div><div class="fw-semibold">{{ $registration->arabic_score ?? '-' }}</div></div>
                         <div class="col-6 col-md-3"><div class="text-muted small">TPA</div><div class="fw-semibold">{{ $registration->tpa_score ?? '-' }}</div></div>
                         <div class="col-12"><div class="text-muted small">Rekomendasi Wawancara</div><div class="fw-semibold">{{ str_replace('_', ' ', ucfirst($registration->interview_recommendation ?? 'Belum dinilai')) }}</div></div>
+                        <div class="col-12">
+                            <div class="text-muted small">Komentar / Catatan Tes Lisan</div>
+                            <div class="border rounded-3 bg-light p-3 mt-1" style="white-space: pre-line;">
+                                {{ $registration->oral_exam_notes ?: 'Belum ada catatan tes lisan.' }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
