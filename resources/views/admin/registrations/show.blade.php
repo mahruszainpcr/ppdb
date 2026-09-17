@@ -39,6 +39,14 @@
         'cadangan' => 'Cadangan',
         default => 'Menunggu Penilaian',
     };
+    if ($registration->graduation_status === 'lulus') {
+        $graduationLabel = match ($registration->admission_decision) {
+            'regular' => 'Lulus Reguler',
+            'takhosus' => 'Lulus Takhosus',
+            'scholarship' => 'Lulus Beasiswa',
+            default => $graduationLabel,
+        };
+    }
     $graduationClass = match ($registration->graduation_status) {
         'lulus' => 'is-success',
         'tidak_lulus' => 'is-danger',
@@ -50,6 +58,11 @@
     $documentUploaded = $registration->documents->whereNotNull('file_path')->count();
     $documentPercent = $documentTotal ? intval(($documentUploaded / $documentTotal) * 100) : 0;
     $auditFieldLabels = [
+        'admission_decision' => 'Keputusan kelulusan PPDB',
+        'question_1_grade' => 'Tahsin lisan soal 1',
+        'question_2_grade' => 'Tahsin lisan soal 2',
+        'question_3_grade' => 'Tahsin lisan soal 3',
+        'notes' => 'Catatan ujian tahsin',
         'graduation_status' => 'Status kelulusan',
         'admin_note' => 'Catatan admin',
         'oral_question_1' => 'Nilai lisan soal 1',
@@ -103,7 +116,20 @@
         .registration-kicker { color: #f5d98f; font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
         .registration-hero h1 { max-width: 760px; font-size: clamp(1.7rem, 3vw, 2.5rem); letter-spacing: 0; }
         .registration-number { color: rgba(255, 255, 255, .82); font-size: .9rem; }
-        .registration-actions .btn { border-radius: 9px; }
+        .registration-actions { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 20px; width: 100%; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, .18); }
+        .registration-action-group { display: flex; flex-direction: column; gap: 8px; }
+        .registration-action-label { color: rgba(255, 255, 255, .72); font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+        .registration-action-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+        .registration-actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 10px 14px; border-radius: 9px; font-size: .82rem; font-weight: 600; line-height: 1.3; transition: background .15s, border-color .15s; }
+        .registration-actions .btn i { font-size: 18px; line-height: 1; }
+        .registration-actions .action-back { margin-right: auto; color: #fff; border: 1px solid transparent; background: transparent; }
+        .registration-actions .action-back:hover { background: rgba(255, 255, 255, .12); }
+        .registration-actions .action-data { color: #fff; border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .06); }
+        .registration-actions .action-data:hover { color: #fff; background: rgba(255, 255, 255, .16); border-color: #fff; }
+        .registration-actions .action-assessment { color: #173f2e; background: #f2d58a; border: 1px solid #f2d58a; }
+        .registration-actions .action-assessment:hover { color: #173f2e; background: #ffe6a7; border-color: #ffe6a7; }
+        .registration-actions .btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+        .registration-action-group + .registration-action-group { border-left: 1px solid rgba(255, 255, 255, .18); padding-left: 20px; }
         .registration-summary { margin-top: -22px; position: relative; z-index: 2; }
         .scan-summary-card { height: 100%; border: 1px solid var(--scan-line); border-radius: 14px; background: #fff; box-shadow: 0 8px 22px rgba(22, 53, 42, .06); }
         .scan-summary-card .card-body { padding: 1.15rem; }
@@ -125,14 +151,20 @@
         @media (max-width: 575.98px) {
             .registration-hero { border-radius: 12px; }
             .registration-summary { margin-top: -10px; }
-            .registration-actions { width: 100%; }
-            .registration-actions .btn { flex: 1 1 auto; }
+            .registration-actions { gap: 16px; }
+            .registration-action-group { width: 100%; }
+            .registration-action-group + .registration-action-group { border-left: 0; padding-left: 0; }
+            .registration-action-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .registration-actions .btn { padding: 10px; }
         }
     </style>
 @endpush
 
 @section('content')
     <div class="registration-detail-page">
+    @if ($errors->any())
+        <div class="alert alert-danger">{{ $errors->first() }}</div>
+    @endif
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show">
             {{ session('success') }}
@@ -144,22 +176,48 @@
         <div class="registration-hero-content d-flex flex-wrap justify-content-between align-items-end gap-4">
             <div>
                 <div class="registration-kicker mb-2">Hasil Scan Pendaftaran</div>
-                <h1 class="mb-2">{{ $studentName }}</h1>
+                <h1 class="registration-kicker mb-2">{{ $studentName }}</h1>
                 <div class="registration-number">Nomor pendaftaran <strong>{{ $registration->registration_no }}</strong></div>
                 <div class="d-flex flex-wrap gap-2 mt-3">
-                    <span class="badge bg-light text-success">{{ $educationLabel }}</span>
-                    <span class="badge bg-light text-success">Pembiayaan {{ $registration->funding_type_label }}</span>
-                    <span class="badge bg-light text-success">{{ $registration->gender_label }}</span>
+                    <span class="badge bg-success text-white">{{ $educationLabel }}</span>
+                    <span class="badge bg-success text-white">Pembiayaan {{ $registration->funding_type_label }}</span>
+                    <span class="badge bg-success text-white">{{ $registration->gender_label }}</span>
                 </div>
             </div>
-            <div class="registration-actions d-flex flex-wrap gap-2">
-                <a href="{{ route('admin.registrations.index') }}" class="btn btn-light btn-sm text-success">Kembali</a>
-                <a href="{{ route('admin.registrations.proof.pdf', $registration) }}" class="btn btn-outline-light btn-sm">Download PDF</a>
-                <a href="{{ route('admin.registrations.edit', $registration) }}" class="btn btn-warning btn-sm">Edit Data</a>
+            <div class="registration-actions" aria-label="Aksi santri">
+                <a href="{{ route('admin.registrations.index') }}" class="btn action-back"><i class="ri-arrow-left-line" aria-hidden="true"></i><span>Kembali</span></a>
+                <div class="registration-action-group" role="group" aria-label="Data Santri">
+                    <span class="registration-action-label">Data Santri</span>
+                    <div class="registration-action-buttons">
+                        <a href="{{ route('admin.registrations.proof.pdf', $registration) }}" class="btn action-data"><i class="ri-file-pdf-line" aria-hidden="true"></i><span>Download PDF</span></a>
+                        <a href="{{ route('admin.registrations.edit', $registration) }}" class="btn action-data"><i class="ri-edit-line" aria-hidden="true"></i><span>Edit Data</span></a>
+                    </div>
+                </div>
+                @if (in_array(auth()->user()->role, ['admin', 'ustadz'], true))
+                    <div class="registration-action-group" role="group" aria-label="Penilaian">
+                        <span class="registration-action-label">Penilaian</span>
+                        <div class="registration-action-buttons">
+                            <button type="button" class="btn action-assessment" data-bs-toggle="modal" data-bs-target="#modalUjianTahsin"><i class="ri-mic-line" aria-hidden="true"></i><span>Input Ujian Tahsin</span></button>
+                            <a href="{{ route('admin.interviews.edit', $registration) }}" class="btn action-assessment"><i class="ri-chat-check-line" aria-hidden="true"></i><span>Input Wawancara</span></a>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 
+    @if ($registration->interview)
+        <div class="card trezo-card mb-4"><div class="card-body">
+            <h5>Hasil Wawancara</h5>
+            <span class="fw-semibold">{{ $registration->interview->recommendation_label }}</span>
+            <span class="ms-2">Nilai akhir: {{ $registration->interview->total_score ?? '-' }} (bonus +{{ $registration->interview->bonus_points }})</span>
+            @if ($registration->interview->has_relative)
+                <span class="badge bg-info text-dark ms-2">Ada saudara di Darussalam</span>
+                <div class="small mt-2">{{ $registration->interview->relative_details }}</div>
+            @endif
+            @foreach ($registration->interview->disqualification_reasons ?? [] as $reason)<div class="text-danger small mt-1">{{ $reason }}</div>@endforeach
+        </div></div>
+    @endif
     <div class="row g-3 registration-summary mb-4">
         <div class="col-md-4">
             <div class="scan-summary-card">
@@ -213,11 +271,6 @@
                 </form>
             @endif
 
-            {{-- optional: tombol logout --}}
-            <form method="POST" action="{{ route('admin.logout') }}">
-                @csrf
-                <button class="btn btn-outline-light btn-sm">Logout</button>
-            </form>
         </div>
     </div>
 
@@ -284,7 +337,14 @@
 
             @forelse ($registration->audits as $audit)
                 @php
-                    $auditAction = $audit->action === 'assessment_updated' ? 'Memperbarui nilai / hasil seleksi' : 'Memperbarui data pendaftaran';
+                    $auditAction = match ($audit->action) {
+                        'oral_exam_created' => 'Mengisi ujian tahsin lisan',
+                        'interview_created' => 'Mengisi wawancara PPDB',
+                        'interview_updated' => 'Memperbarui wawancara PPDB',
+                        'oral_exam_updated' => 'Memperbarui ujian tahsin lisan',
+                        'assessment_updated' => 'Memperbarui nilai / hasil seleksi',
+                        default => 'Memperbarui data pendaftaran',
+                    };
                 @endphp
                 <div class="audit-item">
                     <div class="d-flex flex-wrap justify-content-between gap-2">
@@ -295,7 +355,12 @@
                     @if ($audit->changes)
                         <div class="d-flex flex-wrap gap-2">
                             @foreach ($audit->changes as $field => $change)
-                                <span class="audit-change">{{ $auditFieldLabels[$field] ?? str_replace('_', ' ', ucfirst($field)) }}: <strong>{{ is_scalar($change['new'] ?? null) ? ($change['new'] ?? '-') : '-' }}</strong></span>
+                                <span class="audit-change">{{ $auditFieldLabels[$field] ?? str_replace('_', ' ', ucfirst($field)) }}:
+                                    @if ($field === 'admission_decision' || in_array($audit->action, ['oral_exam_created', 'oral_exam_updated', 'interview_created', 'interview_updated'], true))
+                                        {{ is_scalar($change['old'] ?? null) ? $change['old'] : 'Belum diisi' }} &rarr;
+                                    @endif
+                                    <strong>{{ is_scalar($change['new'] ?? null) ? $change['new'] : '-' }}</strong>
+                                </span>
                             @endforeach
                         </div>
                     @endif
@@ -780,6 +845,64 @@
             </div> {{-- tab-content --}}
         </div>
     </div>
+    @if (in_array(auth()->user()->role, ['admin', 'ustadz'], true))
+        @php $oralExam = $registration->oralExam; @endphp
+        <div class="modal fade" id="modalUjianTahsin" tabindex="-1" aria-labelledby="modalUjianTahsinLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <form method="POST" action="{{ route('admin.oral-exams.save', $registration) }}" class="modal-content">
+                    @csrf
+                    <input type="hidden" name="exam_registration_id" value="{{ $registration->id }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalUjianTahsinLabel">Input Ujian Tahsin Lisan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="fw-semibold">{{ $studentName }}</div>
+                        <div class="text-muted mb-3">{{ $registration->registration_no }} · {{ $educationLabel }}</div>
+                        <p class="text-muted small">Pilih nilai A/B/C untuk setiap soal. Kosong berarti belum dinilai.</p>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead><tr><th scope="col">Soal 1</th><th scope="col">Soal 2</th><th scope="col">Soal 3</th></tr></thead>
+                                <tbody><tr>
+                                    @foreach ([1, 2, 3] as $number)
+                                        @php $field = 'question_' . $number . '_grade'; @endphp
+                                        <td>
+                                            <select name="{{ $field }}" class="form-select @error($field) is-invalid @enderror" aria-label="Nilai soal {{ $number }}">
+                                                <option value="">Belum dinilai</option>
+                                                @foreach (['A', 'B', 'C'] as $grade)
+                                                    <option value="{{ $grade }}" @selected(old($field, $oralExam?->{$field}) === $grade)>{{ $grade }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error($field)<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                        </td>
+                                    @endforeach
+                                </tr></tbody>
+                            </table>
+                        </div>
+                        <label for="tahsin-notes" class="form-label">Catatan Ujian Tahsin</label>
+                        <textarea id="tahsin-notes" name="notes" class="form-control @error('notes') is-invalid @enderror" rows="4" maxlength="2000" placeholder="Catatan bacaan, makhraj, atau tajwid santri">{{ old('notes', $oralExam?->notes) }}</textarea>
+                        @error('notes')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        @if ($oralExam)
+                            <div class="small text-muted mt-3">Terakhir disimpan oleh {{ $oralExam->examiner?->name ?? '-' }} pada {{ $oralExam->updated_at?->format('d/m/Y H:i') }}.</div>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Ujian Tahsin</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @if ($errors->any() && (string) old('exam_registration_id') === (string) $registration->id)
+            @push('scripts')
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalUjianTahsin')).show();
+                    });
+                </script>
+            @endpush
+        @endif
+    @endif
     <div class="modal fade" id="modalKelulusanNote" tabindex="-1" aria-labelledby="modalKelulusanNoteLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">

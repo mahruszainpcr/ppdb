@@ -121,8 +121,8 @@
     @if ($waLink)
         <div class="card trezo-card mb-3">
             <div class="card-body">
-                <h6 class="mb-1">Group Informasi</h6>
-                <div class="text-muted mb-2">Pendaftaran sudah 100% lengkap. Silakan bergabung ke grup sesuai gender
+                <h6 class="mb-1">Grup Informasi {{ $registration->studentProfile?->program_choice === 'takhosus' ? 'Takhosus' : "Ma'had" }}</h6>
+                <div class="text-muted mb-2">Pendaftaran sudah 100% lengkap. Silakan bergabung ke grup sesuai program dan gender
                     (Ikhwan/Akhwat).</div>
                 <a href="{{ $waLink }}" target="_blank" rel="noopener" class="btn btn-outline-success btn-sm">Gabung
                     Group WA</a>

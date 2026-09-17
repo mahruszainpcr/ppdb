@@ -18,6 +18,7 @@ class Registration extends Model
         'gender',             // male|female
         'status',             // draft|submitted|verified|revision_requested
         'graduation_status',  // pending|lulus|tidak_lulus|cadangan
+        'admission_decision',
         'admin_note',
         'oral_exam_notes',
         'oral_question_1',
@@ -40,6 +41,25 @@ class Registration extends Model
 
     /* ===================== RELATIONS ===================== */
 
+    public function save(array $options = [])
+    {
+        if ($this->isDirty('graduation_status') && !$this->isDirty('admission_decision')) {
+            $this->admission_decision = null;
+        }
+        if ($this->graduation_status !== 'lulus' || !$this->period_id ||
+            !$this->isDirty(['graduation_status', 'funding_type', 'gender', 'period_id', 'admission_decision'])) {
+            return parent::save($options);
+        }
+
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($options) {
+            $period = Period::query()->lockForUpdate()->findOrFail($this->period_id);
+            $program = $this->studentProfile()->value('program_choice');
+            \App\Services\AdmissionQuota::validate($period, $this, $program);
+
+            return parent::save($options);
+        });
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -54,6 +74,16 @@ class Registration extends Model
     public function studentProfile(): HasOne
     {
         return $this->hasOne(StudentProfile::class);
+    }
+
+    public function oralExam(): HasOne
+    {
+        return $this->hasOne(PpdbOralExam::class);
+    }
+
+    public function interview(): HasOne
+    {
+        return $this->hasOne(PpdbInterview::class);
     }
 
     // data orang tua 1-1
@@ -115,6 +145,7 @@ class Registration extends Model
                 'oral_question_3',
                 'tahsin_status',
                 'graduation_status',
+                'admission_decision',
                 'admin_note',
             ];
             $action = array_intersect(array_keys($changes), $assessmentFields) !== []
@@ -139,6 +170,24 @@ class Registration extends Model
     }
 
     /* ===================== HELPERS ===================== */
+
+    public function whatsappGroupLink(?Period $fallbackPeriod = null): ?string
+    {
+        $period = $this->period ?? $fallbackPeriod;
+        $gender = match ($this->gender) {
+            'male' => 'ikhwan',
+            'female' => 'akhwat',
+            default => null,
+        };
+        if (!$period || !$gender) {
+            return null;
+        }
+
+        $prefix = $this->studentProfile?->program_choice === 'takhosus'
+            ? 'wa_group_takhosus_' : 'wa_group_';
+
+        return $period->{$prefix . $gender} ?: null;
+    }
 
     public function documentByType(string $type): ?Document
     {

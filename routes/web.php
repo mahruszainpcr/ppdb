@@ -63,6 +63,11 @@ Route::prefix('admin')->group(function () {
     Route::middleware(['auth', 'role:admin,ustadz'])->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/ujian-ppdb', [\App\Http\Controllers\Admin\PpdbOralExamController::class, 'index'])->name('admin.oral-exams.index');
+        Route::post('/ujian-ppdb/{registration}/decision', [\App\Http\Controllers\Admin\PpdbOralExamController::class, 'decision'])->name('admin.oral-exams.decision');
+        Route::get('/registrations/{registration}/wawancara', [\App\Http\Controllers\Admin\PpdbInterviewController::class, 'edit'])->name('admin.interviews.edit');
+        Route::post('/registrations/{registration}/wawancara', [\App\Http\Controllers\Admin\PpdbInterviewController::class, 'save'])->name('admin.interviews.save');
+        Route::post('/ujian-ppdb/{registration}', [\App\Http\Controllers\Admin\PpdbOralExamController::class, 'save'])->name('admin.oral-exams.save');
 
         Route::get('/registrations', [RegistrationAdminController::class, 'index'])->name('admin.registrations.index');
         Route::get('/registrations/assessments', [RegistrationAdminController::class, 'assessments'])->name('admin.registrations.assessments');
@@ -78,7 +83,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/registrations/proofs/download', [RegistrationAdminController::class, 'downloadCompleteProofs'])->name('admin.registrations.proofs.download');
             Route::get('/registrations/qr-cards/print', [RegistrationAdminController::class, 'printQrCardsPdf'])->name('admin.registrations.qr-cards.print');
         });
-        Route::delete('/registrations/{registration}', [RegistrationAdminController::class, 'destroy'])->name('admin.registrations.destroy');
+        Route::delete('/registrations/{registration}', [RegistrationAdminController::class, 'destroy'])->middleware('role:admin')->name('admin.registrations.destroy');
         Route::get('/registrations/{registration}/proof-pdf', [RegistrationAdminController::class, 'downloadProofPdf'])->name('admin.registrations.proof.pdf');
         Route::get('/registrations/{registration}/continuation', [RegistrationAdminController::class, 'editContinuation'])->name('admin.registrations.continuation.edit');
         Route::post('/registrations/{registration}/continuation', [RegistrationAdminController::class, 'saveContinuation'])->name('admin.registrations.continuation.update');

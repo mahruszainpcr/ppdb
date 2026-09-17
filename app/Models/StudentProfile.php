@@ -48,6 +48,26 @@ class StudentProfile extends Model
         return $this->belongsTo(Registration::class);
     }
 
+    public function save(array $options = [])
+    {
+        if (!$this->isDirty('program_choice')) {
+            return parent::save($options);
+        }
+
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($options) {
+            $registration = $this->registration()->first();
+            if ($registration?->period_id) {
+                $period = Period::query()->lockForUpdate()->findOrFail($registration->period_id);
+                $registration->refresh();
+                if ($registration->graduation_status === 'lulus') {
+                    \App\Services\AdmissionQuota::validate($period, $registration, $this->program_choice);
+                }
+            }
+
+            return parent::save($options);
+        });
+    }
+
     public static function schoolOriginOptions(): Collection
     {
         return static::query()

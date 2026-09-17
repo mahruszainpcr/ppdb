@@ -75,6 +75,7 @@
     place: 'ri-map-pin-2-line',
     public: 'ri-global-line',
     qr_code_scanner: 'ri-qr-scan-2-line',
+    record_voice_over: 'ri-mic-line',
     real_estate_agent: 'ri-home-8-line',
     school: 'ri-school-line',
     search: 'ri-search-line',

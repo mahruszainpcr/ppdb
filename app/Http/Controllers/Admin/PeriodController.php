@@ -56,6 +56,11 @@ class PeriodController extends Controller
             'down_payment_deadline' => ['nullable', 'date'],
             'wa_group_ikhwan' => ['nullable', 'url', 'max:255'],
             'wa_group_akhwat' => ['nullable', 'url', 'max:255'],
+            'wa_group_takhosus_ikhwan' => ['nullable', 'url:http,https', 'max:255'],
+            'wa_group_takhosus_akhwat' => ['nullable', 'url:http,https', 'max:255'],
+            'scholarship_quota' => ['required', 'integer', 'min:0', 'max:100000'],
+            'takhosus_ikhwan_quota' => ['required', 'integer', 'min:0', 'max:100000'],
+            'takhosus_akhwat_quota' => ['required', 'integer', 'min:0', 'max:100000'],
             'admin_contact_1' => ['nullable', 'string', 'max:255'],
             'admin_contact_2' => ['nullable', 'string', 'max:255'],
             'information_note' => ['nullable', 'string', 'max:2000'],
@@ -84,6 +89,11 @@ class PeriodController extends Controller
             'down_payment_deadline' => $validated['down_payment_deadline'] ?? null,
             'wa_group_ikhwan' => $validated['wa_group_ikhwan'] ?? null,
             'wa_group_akhwat' => $validated['wa_group_akhwat'] ?? null,
+            'wa_group_takhosus_ikhwan' => $validated['wa_group_takhosus_ikhwan'] ?? null,
+            'wa_group_takhosus_akhwat' => $validated['wa_group_takhosus_akhwat'] ?? null,
+            'scholarship_quota' => $validated['scholarship_quota'],
+            'takhosus_ikhwan_quota' => $validated['takhosus_ikhwan_quota'],
+            'takhosus_akhwat_quota' => $validated['takhosus_akhwat_quota'],
             'admin_contact_1' => $validated['admin_contact_1'] ?? null,
             'admin_contact_2' => $validated['admin_contact_2'] ?? null,
             'information_note' => $validated['information_note'] ?? null,
@@ -91,7 +101,13 @@ class PeriodController extends Controller
             'payment_proof_note' => $validated['payment_proof_note'] ?? null,
             'payment_agreement_note' => $validated['payment_agreement_note'] ?? null,
         ]);
-        $period->save();
+        DB::transaction(function () use ($period) {
+            if ($period->exists) {
+                Period::query()->lockForUpdate()->findOrFail($period->id);
+                \App\Services\AdmissionQuota::validate($period);
+            }
+            $period->save();
+        });
 
         if ($period->is_active) {
             Period::query()

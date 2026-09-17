@@ -61,11 +61,7 @@ class PsbWizardController extends Controller
         $waLink = null;
         $showWaGroup = $progressPercent === 100 && !($activePeriod?->isRegistrationClosed() ?? false);
         if ($showWaGroup) {
-            if ($registration->gender === 'male') {
-                $waLink = $registration->period?->wa_group_ikhwan ?? $activePeriod?->wa_group_ikhwan;
-            } elseif ($registration->gender === 'female') {
-                $waLink = $registration->period?->wa_group_akhwat ?? $activePeriod?->wa_group_akhwat;
-            }
+            $waLink = $registration->whatsappGroupLink($activePeriod);
         }
 
         // Missing docs list (untuk alert)

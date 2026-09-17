@@ -131,14 +131,37 @@
                                 value="{{ old('down_payment_deadline', optional($period?->down_payment_deadline)->format('Y-m-d')) }}">
                         </div>
 
+                        <div class="col-12">
+                            <h6 class="mb-1">Ketentuan Beasiswa dan Takhosus</h6>
+                            <div class="form-text">Kuota santri lulus per periode. Beasiswa dihitung gabungan ikhwan dan akhwat, termasuk peserta takhosus. Isi 0 untuk menutup kuota.</div>
+                        </div>
+                        @foreach (['scholarship_quota' => ['Beasiswa (total ikhwan dan akhwat)', 10], 'takhosus_ikhwan_quota' => ['Takhosus Ikhwan', 6], 'takhosus_akhwat_quota' => ['Takhosus Akhwat', 3]] as $field => [$label, $default])
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ $field }}">{{ $label }}</label>
+                                <input type="number" id="{{ $field }}" name="{{ $field }}" class="form-control" min="0" max="100000" required
+                                    value="{{ old($field, $period?->{$field} ?? $default) }}">
+                                @error($field)<div class="text-danger small">{{ $message }}</div>@enderror
+                            </div>
+                        @endforeach
+                        <div class="col-12">
+                            <h6 class="mb-1">Grup WhatsApp</h6>
+                            <div class="form-text">Santri yang memilih takhosus mendapatkan grup khusus sesuai gender. Isi link grup takhosus agar dapat ditampilkan di dashboard wali.</div>
+                        </div>
+                        @foreach (['wa_group_takhosus_ikhwan' => 'Link Grup WA Takhosus Ikhwan', 'wa_group_takhosus_akhwat' => 'Link Grup WA Takhosus Akhwat'] as $field => $label)
+                            <div class="col-md-6">
+                                <label class="form-label" for="{{ $field }}">{{ $label }}</label>
+                                <input type="url" id="{{ $field }}" name="{{ $field }}" class="form-control" value="{{ old($field, $period?->{$field} ?? '') }}" placeholder="https://chat.whatsapp.com/...">
+                                @error($field)<div class="text-danger small">{{ $message }}</div>@enderror
+                            </div>
+                        @endforeach
                         <div class="col-md-6">
-                            <label class="form-label">Link Grup WA Ikhwan</label>
+                            <label class="form-label">Link Grup WA Ikhwan (Non-Takhosus)</label>
                             <input name="wa_group_ikhwan" class="form-control" type="url"
                                 value="{{ old('wa_group_ikhwan', $period?->wa_group_ikhwan ?? '') }}"
                                 placeholder="https://chat.whatsapp.com/...">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Link Grup WA Akhwat</label>
+                            <label class="form-label">Link Grup WA Akhwat (Non-Takhosus)</label>
                             <input name="wa_group_akhwat" class="form-control" type="url"
                                 value="{{ old('wa_group_akhwat', $period?->wa_group_akhwat ?? '') }}"
                                 placeholder="https://chat.whatsapp.com/...">

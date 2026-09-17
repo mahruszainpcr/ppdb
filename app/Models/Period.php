@@ -18,6 +18,11 @@ class Period extends Model
         'down_payment_deadline',
         'wa_group_ikhwan',
         'wa_group_akhwat',
+        'wa_group_takhosus_ikhwan',
+        'wa_group_takhosus_akhwat',
+        'scholarship_quota',
+        'takhosus_ikhwan_quota',
+        'takhosus_akhwat_quota',
         'admin_contact_1',
         'admin_contact_2',
         'information_note',
@@ -27,6 +32,9 @@ class Period extends Model
     ];
 
     protected $casts = [
+        'scholarship_quota' => 'integer',
+        'takhosus_ikhwan_quota' => 'integer',
+        'takhosus_akhwat_quota' => 'integer',
         'is_active' => 'boolean',
         'registration_open_date' => 'date',
         'registration_close_date' => 'date',

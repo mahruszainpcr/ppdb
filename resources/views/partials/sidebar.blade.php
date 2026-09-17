@@ -4,7 +4,7 @@
 <div class="sidebar-area">
     <div class="logo position-relative sidebar-top">
         <a href="{{ url('/') }}" class="brand-top">
-            <img src="https://mahaddarussalampalas.ponpes.id/logo.png" alt="logo-icon" class="brand-logo">
+            <img src="{{ asset('logo.png') }}" alt="Logo Ma'had Darussalam Al-Islami" class="brand-logo" width="44" height="44">
             <div class="brand-text">
                 <strong>Ma'had Darussalam Al-Islami</strong>
                 <span>Palas • Rumbai</span>
@@ -69,6 +69,12 @@
                         class="menu-link {{ Request::is('admin/registrations/assessments') ? 'active' : '' }}">
                         <span class="material-symbols-outlined menu-icon">edit_document</span>
                         <span class="title">Input Nilai Seleksi</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.oral-exams.index') }}" class="menu-link {{ Request::is('admin/ujian-ppdb*') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined menu-icon">record_voice_over</span>
+                        <span class="title">Ujian PPDB</span>
                     </a>
                 </li>
                 <li class="menu-item">

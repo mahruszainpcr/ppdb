@@ -298,7 +298,7 @@ class RegistrationAdminController extends Controller
 
     public function data(Request $request)
     {
-        $baseQuery = Registration::query()->with(['user', 'studentProfile', 'parentProfile', 'statement', 'documents', 'santriContinuation']);
+        $baseQuery = Registration::query()->with(['user', 'studentProfile', 'parentProfile', 'statement', 'documents', 'santriContinuation', 'interview']);
         $recordsTotal = (clone $baseQuery)->count();
 
         $search = $request->input('search');
@@ -339,6 +339,9 @@ class RegistrationAdminController extends Controller
 
         $data = $registrations->values()->map(function (Registration $r, int $index) use ($start, $canDelete) {
             $studentName = e(optional($r->studentProfile)->full_name ?? optional($r->santriContinuation)->full_name ?? '-');
+            if ($r->interview?->has_relative) {
+                $studentName .= '<div><span class="badge bg-info text-dark">Ada saudara di Darussalam</span></div>';
+            }
             $detailUrl = route('admin.registrations.show', $r);
             $oralExamUrl = $detailUrl . '?open=oral-exam#modalKelulusanNote';
             $editUrl = route('admin.registrations.edit', $r);
@@ -699,6 +702,8 @@ class RegistrationAdminController extends Controller
             'santriContinuation',
             'documents' => fn($q) => $q->orderBy('type'),
             'audits' => fn($q) => $q->with('user')->latest(),
+            'oralExam.examiner',
+            'interview.examiner',
         ]);
 
         return view('admin.registrations.show', compact('registration'));

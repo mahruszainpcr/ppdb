@@ -34,10 +34,16 @@
 
             .sidebar-desktop {
                 width: 280px;
+                flex: 0 0 280px;
+            }
+
+            .sidebar-desktop .sidebar-area {
+                width: 280px;
             }
 
             .content-wrapper {
-                flex: 1;
+                flex: 1 1 0%;
+                min-width: 0;
             }
 
             .navbar-mobile {
@@ -140,6 +146,8 @@
         .brand-logo {
             width: 44px;
             height: 44px;
+            flex: 0 0 44px;
+            object-fit: contain;
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -201,6 +209,9 @@
 
         .layout-menu .menu-link .menu-icon {
             color: rgba(255, 255, 255, 0.95);
+            flex: 0 0 24px;
+            width: 24px;
+            text-align: center;
         }
 
         .layout-menu .menu-link.menu-toggle::after {

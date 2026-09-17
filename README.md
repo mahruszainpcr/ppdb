@@ -57,3 +57,67 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Notes
+jumlah maksimal beasiswa 10 ikwan akhwat
+
+Jumlah takhosus maksimal 6 ikhwan dan 3 akhwat
+
+Santri yang milih takhosus perlu ada group sendiri
+
+Mereka yg takhosus bila tidak lulus bisa pindah mahad atau tidak pindah tergantung minat
+
+Nilai tahsin perlu ada ABC level
+
+
+Santri luar kota yg jauh bisa diberikan bonus nilai +5
+
+Santri yg ada saudara disini ada flaq khusus
+
+1. Anak
+   1. Siapa menyuruh masuk ke Darussalam -> keinginan sendiri B, Keinginan orang tua C, orang tua dan sendiri A
+   2. Apakah antum suka olahraga dan jenis olahraganya apa? -> bola,bulu tangkis, basket, bela diri A. Joging dan fitness B, tidak suka olahraga C
+   3. Siapa ustadz favorite? A jika ustadz manhaj salaf terkenal, B guru mereka, C ustadz yang non salaf somad, adi hidayat dll 
+   4. apa manhaj salaf? A. Bisa menjelaskan, B. Kurang bisa menjelaskan C. tidak bisa menjelaskan
+   5. Jumlah hafalan? A. 4 keatas, B. 1-3 , Kurang dari satu juz C
+   6. Pernah atau tidak memukul teman? A. Tidak Pernah, C. Pernah
+   7. Kalau ada teman kena bully apa Tindakan antum A. menolongnya, B. Membiarkannya, C, Ikut membully dan mengejek
+   8. Aoakah kamu pernah mengejek ke nama binatang,atau nama orang tua A. Tidak pernah, B. Jarang C. Sering
+   9. Apakah kamu suka main game. A. Tidak pernah dan tidak main HP, B. Kadang-kadang, C.Sering atau punya HP sendiri
+   10. Apakah ada saudar di darusslam A. Saudara kandung kakak/abang, B. Saudara deket atau keluarga C.Tidak ada
+2. Ayah 
+   0. Apakah ayah hadir mendampingi? A. hadir, B. tidak hadir izin syari/meninggal/cerai, c. tidak hadir karena kesibukan atau tanpa alasan. Kalau dia C otomatis tidak direkomendasikan
+   1. Penampilan Ayah? A. Memakai Jubah Gamis, B. Baju Nasional Kemaja/Batik, C. Kaos/Jeans
+   2. Apakah ayah berjenggot? A. Berjenggot B. Dicuku jenggotnya C. dicukur habis
+   3. Apakah Ayah sholat jamaah di masjid ? A. Insyaallah selalu, B. Kadang-kadang. C. Jarang atau tidak pernah
+   4. Siapa ustadz favorite? A jika ustadz manhaj salaf terkenal, B guru mereka, C ustadz yang non salaf somad, adi hidayat dll 
+   5. Apakah aya merokok atau vape? A. Tidak, C. Iya
+   6. Hafalan Ayah? Tahfiz dan Punya Hafalan, B. Masih ikut Tahsin, C.Belum ikut Tahsin
+   7. Apakah ayah suka music? A. tidak suka, Kadangkadang, tidak suka
+   8. Apakah ayah mendukng Ananda mondok di mahad? A. Sangat mendukung, B. Kurang Mendukung, C.TIdak mendukung
+   9. Kesanggupan biaya pembayaran tanggal 10 setiap bulannya untuk SPP dan Pembayaran yang lain sesuai dengan Waktu yang ditentukan ? A Sanggup B diusahakan C tidak sanggup
+   10. Apabila dikemudian hari terjadi kesulitan ekonomi apa yang di lakukan? a. diusahakan semaksimal mungkin untuk membayar,b. meminta keringan dari mahad b. memindahkan anak kesekolah lain, 
+3. Ibu
+   0. Apakah ayah hadir mendampingi? A. hadir, B. tidak hadir izin syari/meninggal/cerai, c. tidak hadir karena kesibukan atau tanpa alasan. Kalau dia C otomatis tidak direkomendasikan
+   1. Penampilan Ayah? A. Memakai Jubah Gamis, B. Baju Nasional Kemaja/Batik, C. Kaos/Jeans
+   2. Apakah ayah berjenggot? A. Berjenggot B. Dicuku jenggotnya C. dicukur habis
+   3. Apakah Ayah sholat jamaah di masjid ? A. Insyaallah selalu, B. Kadang-kadang. C. Jarang atau tidak pernah
+   4. Siapa ustadz favorite? A jika ustadz manhaj salaf terkenal, B guru mereka, C ustadz yang non salaf somad, adi hidayat dll  	
+   6. Hafalan Ayah? Tahfiz dan Punya Hafalan, B. Masih ikut Tahsin, C.Belum ikut Tahsin
+   7. Apakah ayah suka music? A. tidak suka, Kadangkadang, tidak suka
+   8. Apakah ayah mendukng Ananda mondok di mahad? A. Sangat mendukung, B. Kurang Mendukung, C.TIdak mendukung
+   9. Kesanggupan biaya pembayaran tanggal 10 setiap bulannya untuk SPP dan Pembayaran yang lain sesuai dengan Waktu yang ditentukan ? A Sanggup B diusahakan C tidak sanggup
+   10. Apabila dikemudian hari terjadi kesulitan ekonomi apa yang di lakukan? a. diusahakan semaksimal mungkin untuk membayar,b. meminta keringan dari mahad b. memindahkan anak kesekolah lain, 
+Catatan tambahan
+diatas 70 sangat di rekomendasikan dibawah 70 di rekomendasikan
+orang tua dan anak jika jawaban ustadz favorite C maka langsung tidak direkomendasikan salah satu dari orang tua atau anak
+
+Ikhwan dan akhwat beasiswa takhosus dan non takhosus
+
+
+uang masuk --> 4.5 juta takhosus, Mandiri 9.5 --> smp 6.5 sma 7.5
+uang seragam --> 1juta
+uang buku --> 750.000
+yang gelombang 2 --> 1.5 uang sarpras
+spp bulan juli 1,200 smp 1.300 sma
+
