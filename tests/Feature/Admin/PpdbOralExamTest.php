@@ -29,11 +29,11 @@ class PpdbOralExamTest extends TestCase
             $this->actingAs($user)->get($detail)->assertOk()->assertSee('Input Ujian Tahsin')
                 ->assertSee(route('admin.oral-exams.save', $registration), false);
             $this->from($detail)->post(route('admin.oral-exams.save', $registration), [
-                'question_1_grade' => 'A', 'question_2_grade' => 'B', 'question_3_grade' => 'C', 'notes' => 'Perbaiki makhraj.',
+                'question_1_grade' => '90.00', 'question_2_grade' => '80.50', 'question_3_grade' => '70.00', 'notes' => 'Perbaiki makhraj.',
             ])->assertRedirect($detail)->assertSessionHasNoErrors();
             $this->assertDatabaseHas('ppdb_oral_exams', [
-                'registration_id' => $registration->id, 'question_1_grade' => 'A',
-                'question_2_grade' => 'B', 'question_3_grade' => 'C', 'notes' => 'Perbaiki makhraj.', 'examiner_id' => $user->id,
+                'registration_id' => $registration->id, 'question_1_grade' => '90.00',
+                'question_2_grade' => '80.50', 'question_3_grade' => '70.00', 'notes' => 'Perbaiki makhraj.', 'examiner_id' => $user->id,
             ]);
             $this->get($detail)->assertOk()->assertSee('Perbaiki makhraj.');
         }
@@ -45,16 +45,16 @@ class PpdbOralExamTest extends TestCase
         $this->actingAs(User::factory()->create(['role' => 'ustadz']));
         $first = $this->registration();
         $second = $this->registration();
-        $data = ['question_1_grade' => 'A', 'question_2_grade' => 'B', 'question_3_grade' => 'C', 'notes' => 'Catatan'];
+        $data = ['question_1_grade' => '90.00', 'question_2_grade' => '80.50', 'question_3_grade' => '70.00', 'notes' => 'Catatan'];
         foreach ([$first, $second] as $registration) {
             $this->post(route('admin.oral-exams.save', $registration), $data)->assertSessionHasNoErrors();
         }
         $this->post(route('admin.oral-exams.save', $first), array_replace($data, [
-            'question_1_grade' => 'C', 'question_2_grade' => '', 'notes' => '',
+            'question_1_grade' => '70.00', 'question_2_grade' => '', 'notes' => '',
         ]))->assertSessionHasNoErrors();
         $this->assertDatabaseCount('ppdb_oral_exams', 2);
-        $this->assertSame('A', $second->oralExam->question_1_grade);
-        $this->assertSame('C', $first->oralExam->question_1_grade);
+        $this->assertSame('90.00', $second->oralExam->question_1_grade);
+        $this->assertSame('70.00', $first->oralExam->question_1_grade);
         $this->assertNull($first->oralExam->question_2_grade);
         $this->assertNull($first->oralExam->notes);
         $this->assertSame(0, $first->fresh()->oral_question_1);
@@ -65,7 +65,7 @@ class PpdbOralExamTest extends TestCase
         $this->actingAs(User::factory()->create(['role' => 'ustadz']));
         $registration = $this->registration();
         $url = route('admin.oral-exams.save', $registration);
-        $data = ['question_1_grade' => 'A', 'question_2_grade' => null, 'question_3_grade' => null, 'notes' => null];
+        $data = ['question_1_grade' => '90.00', 'question_2_grade' => null, 'question_3_grade' => null, 'notes' => null];
 
         $this->post($url, $data + ['tpa_score' => '85.50', 'arabic_score' => '90.25'])->assertSessionHasNoErrors();
         $this->assertSame('85.50', $registration->fresh()->tpa_score);
@@ -96,7 +96,7 @@ class PpdbOralExamTest extends TestCase
         $registration = $this->registration();
         foreach ([[-1, 101], [101, -1], ['invalid', 'invalid']] as [$tpa, $arabic]) {
             $this->post(route('admin.oral-exams.save', $registration), [
-                'question_1_grade' => 'A', 'question_2_grade' => null, 'question_3_grade' => null,
+                'question_1_grade' => '90.00', 'question_2_grade' => null, 'question_3_grade' => null,
                 'notes' => null, 'tpa_score' => $tpa, 'arabic_score' => $arabic,
             ])->assertSessionHasErrors(['tpa_score', 'arabic_score']);
         }
@@ -105,11 +105,35 @@ class PpdbOralExamTest extends TestCase
         $this->assertNull($registration->fresh()->arabic_score);
     }
 
+    public function test_numeric_scores_accept_boundaries_and_preserve_legacy_grades_until_replaced(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $registration = $this->registration();
+        $registration->oralExam()->create(['question_1_grade' => 'A', 'question_2_grade' => 'B', 'question_3_grade' => 'C']);
+        $url = route('admin.oral-exams.save', $registration);
+        $this->get(route('admin.oral-exams.index'))->assertOk()->assertSee('Nilai lama: A');
+        $this->post($url, ['question_1_grade' => '', 'question_2_grade' => '', 'question_3_grade' => '', 'notes' => null])->assertSessionHasNoErrors();
+        $this->assertSame('A', $registration->oralExam()->first()->question_1_grade);
+
+        $data = ['question_1_grade' => 0, 'question_2_grade' => 100, 'question_3_grade' => 85.25, 'notes' => null];
+        $this->post($url, $data)->assertSessionHasNoErrors();
+        $exam = $registration->oralExam()->first();
+        $this->assertSame('0.00', $exam->question_1_grade);
+        $this->assertSame('100.00', $exam->question_2_grade);
+        $this->assertSame('85.25', $exam->question_3_grade);
+        $auditCount = $registration->audits()->count();
+        $this->post($url, $data)->assertSessionHasNoErrors();
+        $this->assertSame($auditCount, $registration->audits()->count());
+        foreach (['A', -1, 101] as $invalid) {
+            $this->post($url, array_replace($data, ['question_1_grade' => $invalid]))->assertSessionHasErrors('question_1_grade');
+        }
+    }
+
     public function test_invalid_grades_and_long_notes_are_rejected(): void
     {
         $this->actingAs(User::factory()->create(['role' => 'admin']));
         $this->post(route('admin.oral-exams.save', $this->registration()), [
-            'question_1_grade' => 'D', 'question_2_grade' => 90, 'question_3_grade' => 'A', 'notes' => str_repeat('x', 2001),
+            'question_1_grade' => 'D', 'question_2_grade' => 101, 'question_3_grade' => '90.00', 'notes' => str_repeat('x', 2001),
         ])->assertSessionHasErrors(['question_1_grade', 'question_2_grade', 'notes']);
         $this->assertDatabaseCount('ppdb_oral_exams', 0);
     }
@@ -121,7 +145,7 @@ class PpdbOralExamTest extends TestCase
         $this->get(route('admin.registrations.show', $registration))->assertForbidden();
         $this->get(route('admin.oral-exams.index'))->assertForbidden();
         $this->post(route('admin.oral-exams.save', $registration), [
-            'question_1_grade' => 'A', 'question_2_grade' => 'A', 'question_3_grade' => 'A', 'notes' => null,
+            'question_1_grade' => '90.00', 'question_2_grade' => '90.00', 'question_3_grade' => '90.00', 'notes' => null,
         ])->assertForbidden();
         $this->assertDatabaseCount('ppdb_oral_exams', 0);
     }
@@ -132,23 +156,23 @@ class PpdbOralExamTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
         $ustadz = User::factory()->create(['role' => 'ustadz']);
         $url = route('admin.oral-exams.save', $registration);
-        $data = ['question_1_grade' => 'A', 'question_2_grade' => 'B', 'question_3_grade' => 'C', 'notes' => 'Catatan awal'];
+        $data = ['question_1_grade' => '90.00', 'question_2_grade' => '80.50', 'question_3_grade' => '70.00', 'notes' => 'Catatan awal'];
         $this->actingAs($admin)->post($url, $data)->assertSessionHasNoErrors();
         $created = $registration->audits()->sole();
         $this->assertSame('oral_exam_created', $created->action);
         $this->assertSame($admin->id, $created->user_id);
-        $this->assertSame(['old' => null, 'new' => 'A'], $created->changes['question_1_grade']);
+        $this->assertSame(['old' => null, 'new' => '90.00'], $created->changes['question_1_grade']);
 
         $this->actingAs($ustadz)->post($url, $data)->assertSessionHasNoErrors();
         $this->assertSame(1, $registration->audits()->count());
         $this->assertSame($admin->id, $registration->oralExam()->first()->examiner_id);
 
-        $this->post($url, array_replace($data, ['question_1_grade' => 'C', 'notes' => '']))->assertSessionHasNoErrors();
+        $this->post($url, array_replace($data, ['question_1_grade' => '70.00', 'notes' => '']))->assertSessionHasNoErrors();
         $updated = $registration->audits()->latest('id')->first();
         $this->assertSame('oral_exam_updated', $updated->action);
         $this->assertSame($ustadz->id, $updated->user_id);
         $this->assertSame([
-            'question_1_grade' => ['old' => 'A', 'new' => 'C'],
+            'question_1_grade' => ['old' => '90.00', 'new' => '70.00'],
             'notes' => ['old' => 'Catatan awal', 'new' => null],
         ], $updated->changes);
         $this->assertNotNull($updated->created_at);

@@ -859,7 +859,7 @@
                     <div class="modal-body">
                         <div class="fw-semibold">{{ $studentName }}</div>
                         <div class="text-muted mb-3">{{ $registration->registration_no }} · {{ $educationLabel }}</div>
-                        <p class="text-muted small">Pilih nilai A/B/C untuk setiap soal. Kosong berarti belum dinilai.</p>
+                        <p class="text-muted small">Isi nilai angka 0-100 untuk setiap soal. Kosong berarti belum dinilai, kecuali jika masih ada nilai huruf lama.</p>
                         <div class="table-responsive">
                             <table class="table align-middle">
                                 <thead><tr><th scope="col">Soal 1</th><th scope="col">Soal 2</th><th scope="col">Soal 3</th></tr></thead>
@@ -867,12 +867,11 @@
                                     @foreach ([1, 2, 3] as $number)
                                         @php $field = 'question_' . $number . '_grade'; @endphp
                                         <td>
-                                            <select name="{{ $field }}" class="form-select @error($field) is-invalid @enderror" aria-label="Nilai soal {{ $number }}">
-                                                <option value="">Belum dinilai</option>
-                                                @foreach (['A', 'B', 'C'] as $grade)
-                                                    <option value="{{ $grade }}" @selected(old($field, $oralExam?->{$field}) === $grade)>{{ $grade }}</option>
-                                                @endforeach
-                                            </select>
+                                            @php $gradeValue = old($field, $oralExam?->{$field}); @endphp
+                                            <input type="number" name="{{ $field }}" class="form-control @error($field) is-invalid @enderror" aria-label="Nilai soal {{ $number }}" min="0" max="100" step="0.01" placeholder="0 - 100" value="{{ is_numeric($gradeValue) ? $gradeValue : '' }}">
+                                            @if (in_array($oralExam?->{$field}, ['A', 'B', 'C'], true))
+                                                <div class="small text-muted mt-1">Nilai lama: {{ $oralExam->{$field} }}. Isi angka untuk mengganti; kosong mempertahankan nilai lama.</div>
+                                            @endif
                                             @error($field)<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </td>
                                     @endforeach

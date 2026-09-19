@@ -49,9 +49,9 @@ class PpdbOralExamController extends Controller
     public function save(Request $request, Registration $registration)
     {
         $data = $request->validate([
-            'question_1_grade' => ['present', 'nullable', Rule::in(['A', 'B', 'C'])],
-            'question_2_grade' => ['present', 'nullable', Rule::in(['A', 'B', 'C'])],
-            'question_3_grade' => ['present', 'nullable', Rule::in(['A', 'B', 'C'])],
+            'question_1_grade' => ['present', 'nullable', 'numeric', 'min:0', 'max:100'],
+            'question_2_grade' => ['present', 'nullable', 'numeric', 'min:0', 'max:100'],
+            'question_3_grade' => ['present', 'nullable', 'numeric', 'min:0', 'max:100'],
             'notes' => ['present', 'nullable', 'string', 'max:2000'],
             'tpa_score' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
             'arabic_score' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
@@ -66,6 +66,14 @@ class PpdbOralExamController extends Controller
             $isNew = !$exam->exists;
             $changes = [];
             foreach ($data as $field => $value) {
+                if (str_starts_with($field, 'question_') && $value === null && in_array($exam->{$field}, ['A', 'B', 'C'], true)) {
+                    unset($data[$field]);
+                    continue;
+                }
+                if (str_starts_with($field, 'question_') && $value !== null) {
+                    $value = number_format((float) $value, 2, '.', '');
+                    $data[$field] = $value;
+                }
                 $previous = $exam->{$field};
                 if ($isNew || $previous !== $value) {
                     $changes[$field] = ['old' => $previous, 'new' => $value];

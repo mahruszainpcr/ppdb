@@ -31,10 +31,10 @@
                         @php $field = 'question_' . $number . '_grade'; $value = $restoreInput ? old($field) : $exam?->{$field}; @endphp
                         <div>
                             <label class="form-label small" for="grade-{{ $registration->id }}-{{ $number }}">Soal {{ $number }}</label>
-                            <select id="grade-{{ $registration->id }}-{{ $number }}" name="{{ $field }}" class="form-select">
-                                <option value="">Belum</option>
-                                @foreach (['A', 'B', 'C'] as $grade)<option value="{{ $grade }}" @selected($value === $grade)>{{ $grade }}</option>@endforeach
-                            </select>
+                            <input type="number" id="grade-{{ $registration->id }}-{{ $number }}" name="{{ $field }}" class="form-control" min="0" max="100" step="0.01" placeholder="0 - 100" value="{{ is_numeric($value) ? $value : '' }}">
+                            @if (in_array($exam?->{$field}, ['A', 'B', 'C'], true))
+                                <div class="small text-muted mt-1">Nilai lama: {{ $exam->{$field} }}. Isi angka untuk mengganti; kosong mempertahankan nilai lama.</div>
+                            @endif
                         </div>
                     @endforeach
                 </div>
