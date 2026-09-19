@@ -53,10 +53,15 @@ class PpdbOralExamController extends Controller
             'question_2_grade' => ['present', 'nullable', Rule::in(['A', 'B', 'C'])],
             'question_3_grade' => ['present', 'nullable', Rule::in(['A', 'B', 'C'])],
             'notes' => ['present', 'nullable', 'string', 'max:2000'],
+            'tpa_score' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
+            'arabic_score' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
         ]);
 
         DB::transaction(function () use ($registration, $request, $data) {
-            Registration::query()->lockForUpdate()->findOrFail($registration->id);
+            $registration = Registration::query()->lockForUpdate()->findOrFail($registration->id);
+            $scores = array_intersect_key($data, array_flip(['tpa_score', 'arabic_score']));
+            $registration->fill($scores)->save();
+            $data = array_diff_key($data, $scores);
             $exam = $registration->oralExam()->firstOrNew();
             $isNew = !$exam->exists;
             $changes = [];
@@ -79,7 +84,7 @@ class PpdbOralExamController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Nilai tahsin lisan ' . $registration->registration_no . ' berhasil disimpan.');
+        return back()->with('success', 'Nilai ujian ' . $registration->registration_no . ' berhasil disimpan.');
     }
 
     public function decision(Request $request, Registration $registration)

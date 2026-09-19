@@ -879,6 +879,15 @@
                                 </tr></tbody>
                             </table>
                         </div>
+                        <div class="row g-3 mb-3">
+                            @foreach (['tpa_score' => 'Nilai TPA', 'arabic_score' => 'Nilai Bahasa Arab'] as $field => $label)
+                                <div class="col-sm-6">
+                                    <label for="tahsin-{{ $field }}" class="form-label">{{ $label }}</label>
+                                    <input type="number" id="tahsin-{{ $field }}" name="{{ $field }}" class="form-control @error($field) is-invalid @enderror" min="0" max="100" step="0.01" placeholder="0 - 100" value="{{ old($field, $registration->{$field}) }}">
+                                    @error($field)<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            @endforeach
+                        </div>
                         <label for="tahsin-notes" class="form-label">Catatan Ujian Tahsin</label>
                         <textarea id="tahsin-notes" name="notes" class="form-control @error('notes') is-invalid @enderror" rows="4" maxlength="2000" placeholder="Catatan bacaan, makhraj, atau tajwid santri">{{ old('notes', $oralExam?->notes) }}</textarea>
                         @error('notes')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -888,7 +897,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Ujian Tahsin</button>
+                        <button type="submit" class="btn btn-primary">Simpan Nilai Ujian</button>
                     </div>
                 </form>
             </div>

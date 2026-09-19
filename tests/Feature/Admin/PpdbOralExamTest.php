@@ -60,6 +60,51 @@ class PpdbOralExamTest extends TestCase
         $this->assertSame(0, $first->fresh()->oral_question_1);
     }
 
+    public function test_tpa_and_arabic_scores_are_saved_preserved_and_cleared(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'ustadz']));
+        $registration = $this->registration();
+        $url = route('admin.oral-exams.save', $registration);
+        $data = ['question_1_grade' => 'A', 'question_2_grade' => null, 'question_3_grade' => null, 'notes' => null];
+
+        $this->post($url, $data + ['tpa_score' => '85.50', 'arabic_score' => '90.25'])->assertSessionHasNoErrors();
+        $this->assertSame('85.50', $registration->fresh()->tpa_score);
+        $this->assertSame('90.25', $registration->fresh()->arabic_score);
+        $this->get(route('admin.oral-exams.index'))->assertOk()
+            ->assertSee('Nilai TPA')->assertSee('Nilai Bahasa Arab')->assertSee('value="85.50"', false);
+        $this->get(route('admin.registrations.show', $registration))->assertOk()
+            ->assertSee('id="tahsin-arabic_score"', false)->assertSee('value="90.25"', false);
+
+        $auditCount = $registration->audits()->count();
+        $this->post($url, $data + ['tpa_score' => '85.50', 'arabic_score' => '90.25'])->assertSessionHasNoErrors();
+        $this->assertSame($auditCount, $registration->audits()->count());
+        $this->post($url, $data)->assertSessionHasNoErrors();
+        $this->assertSame('85.50', $registration->fresh()->tpa_score);
+        $this->assertSame('90.25', $registration->fresh()->arabic_score);
+
+        $this->post($url, $data + ['tpa_score' => '0', 'arabic_score' => '100'])->assertSessionHasNoErrors();
+        $this->assertSame('0.00', $registration->fresh()->tpa_score);
+        $this->assertSame('100.00', $registration->fresh()->arabic_score);
+        $this->post($url, $data + ['tpa_score' => '', 'arabic_score' => ''])->assertSessionHasNoErrors();
+        $this->assertNull($registration->fresh()->tpa_score);
+        $this->assertNull($registration->fresh()->arabic_score);
+    }
+
+    public function test_invalid_tpa_and_arabic_scores_do_not_save_exam(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $registration = $this->registration();
+        foreach ([[-1, 101], [101, -1], ['invalid', 'invalid']] as [$tpa, $arabic]) {
+            $this->post(route('admin.oral-exams.save', $registration), [
+                'question_1_grade' => 'A', 'question_2_grade' => null, 'question_3_grade' => null,
+                'notes' => null, 'tpa_score' => $tpa, 'arabic_score' => $arabic,
+            ])->assertSessionHasErrors(['tpa_score', 'arabic_score']);
+        }
+        $this->assertDatabaseCount('ppdb_oral_exams', 0);
+        $this->assertNull($registration->fresh()->tpa_score);
+        $this->assertNull($registration->fresh()->arabic_score);
+    }
+
     public function test_invalid_grades_and_long_notes_are_rejected(): void
     {
         $this->actingAs(User::factory()->create(['role' => 'admin']));

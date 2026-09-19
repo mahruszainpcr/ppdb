@@ -38,10 +38,18 @@
                         </div>
                     @endforeach
                 </div>
+                <div class="row g-2 mt-2">
+                    @foreach (['tpa_score' => 'Nilai TPA', 'arabic_score' => 'Nilai Bahasa Arab'] as $field => $label)
+                        <div class="col-sm-6">
+                            <label class="form-label small" for="{{ $field }}-{{ $registration->id }}">{{ $label }}</label>
+                            <input type="number" id="{{ $field }}-{{ $registration->id }}" name="{{ $field }}" class="form-control" min="0" max="100" step="0.01" placeholder="0 - 100" value="{{ $restoreInput ? old($field) : $registration->{$field} }}">
+                        </div>
+                    @endforeach
+                </div>
                 <label class="form-label small mt-3" for="notes-{{ $registration->id }}">Catatan tahsin</label>
                 <textarea id="notes-{{ $registration->id }}" name="notes" class="form-control" rows="2" maxlength="2000" placeholder="Catatan bacaan santri">{{ $restoreInput ? old('notes') : $exam?->notes }}</textarea>
                 <div class="d-flex align-items-center justify-content-between gap-2 mt-3">
-                    <button class="btn btn-primary btn-sm">Simpan Tahsin</button>
+                    <button class="btn btn-primary btn-sm">Simpan Nilai Ujian</button>
                     <small class="text-muted">{{ $exam?->examiner?->name ?? 'Belum dinilai' }}<br>{{ $exam?->updated_at?->format('d/m/Y H:i') }}</small>
                 </div>
             </form>
