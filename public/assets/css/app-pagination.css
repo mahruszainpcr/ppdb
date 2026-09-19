@@ -1,0 +1,37 @@
+.app-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 18px 0;
+}
+.app-pagination-summary { margin: 0; font-size: 13px; color: #64748b; }
+.app-pagination .pagination { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; list-style: none; }
+.app-pagination .page-item .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    margin: 0;
+    padding: 6px 10px;
+    border: 1px solid #dce5df;
+    border-radius: 8px;
+    background: #fff;
+    color: #245c42;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+}
+.app-pagination .page-item.active .page-link { background: #245c42; border-color: #245c42; color: #fff; }
+.app-pagination .page-item.disabled .page-link { background: #f1f4f2; color: #9ba9a1; cursor: default; }
+.app-pagination .page-item:not(.disabled):not(.active) .page-link:hover { background: #edf5ef; border-color: #245c42; }
+.app-pagination .page-link:focus-visible { outline: 2px solid #245c42; outline-offset: 3px; box-shadow: none; }
+.app-pagination .pagination-chevron { display: block; width: 7px; height: 7px; border-top: 2px solid currentColor; border-right: 2px solid currentColor; flex: 0 0 7px; }
+.app-pagination .pagination-chevron.previous { transform: rotate(-135deg); margin-left: 3px; }
+.app-pagination .pagination-chevron.next { transform: rotate(45deg); margin-right: 3px; }
+@media (max-width: 575.98px) {
+    .app-pagination { flex-direction: column; align-items: flex-start; gap: 12px; }
+}

@@ -11,4 +11,5 @@
 <link rel="stylesheet" type="text/css" href="{{ url('/assets/css/jsvectormap.min.css') }}" />
 <link rel="stylesheet" type="text/css" href="{{ url('/assets/css/lightpick.css') }}" />
 <link rel="stylesheet" type="text/css" href="{{ url('/assets/scss/style.css') }}" />
+<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/app-pagination.css') }}" />
 <link rel="icon" type="image/png" href="https://mahaddarussalampalas.ponpes.id/logo.png">

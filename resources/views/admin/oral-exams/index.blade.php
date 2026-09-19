@@ -108,7 +108,9 @@
     @empty
         <div class="card card-body text-center text-muted py-5">Belum ada peserta yang sesuai filter.</div>
     @endforelse
-    <div class="mt-3">{{ $registrations->links() }}</div>
+    <div class="mt-3">
+        {{ $registrations->onEachSide(1)->links(view()->exists('pagination.admin') ? 'pagination.admin' : 'pagination::bootstrap-5') }}
+    </div>
     </div>
 @endsection
 
