@@ -234,7 +234,7 @@
                                     </td>
                                     <td>
                                         <div class="brand-name">Ma’had Darussalam Al-Islami<br></div>
-                                         <div class="student-name">Try Out PPDB Tahun Ajaran 2027/2028</div>
+                                         <div class="student-name">Ujian PPDB Tahun Ajaran 2027/2028</div>
                                     </td>
                                 </tr>
                             </table>
